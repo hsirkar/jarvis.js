@@ -16,11 +16,13 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@nlpjs/basic": "^4.4.0",
     "@tensorflow/tfjs-node": "^2.0.0",
     "brain.js": "^2.0.0-beta.1",
     "chalk": "^4.0.0",
     "compromise": "^13.2.0",
     "neuro.js": "^0.1.7",
+    "node-nlp": "^4.4.0",
     "ora": "^4.0.4"
   }
 }

@@ -40,14 +40,7 @@ function prompt() {
         spinner.start();
 
         // Convert utterance to intent using ML
-        manager.process('en', input)
-            .then(res => {
-                // Print out intent details
-                debug && log(JSON.stringify({ intent: res.intent, score: res.score }));
-
-                // Process the intent determined by ML
-                processIntent(res);
-            });
+        manager.process('en', input).then(res => handleIntent(res));
     });
 }
 
@@ -67,6 +60,37 @@ function log(message) {
     isSpinning && spinner.start();
 }
 
-function processIntent(res){
-    respond("Final answer.")
+// Handle the intent determined by ML
+function handleIntent(res){
+    // Print out intent details
+    debug && log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
+
+    skill = skills.find(skill => skill.doesHandleIntent(res.intent));
+
+    if(skill){
+        debug && log(`Handing intent through ${skill.name}...`);
+        skill.handleIntent(res);
+    }else{
+        debug && log(`No skill found.`)
+        respond("Oops, no skill can handle that intent.");
+    }
 }
+
+// Skills
+const PersonalitySkill = {
+    name: 'PersonalitySkill',
+    doesHandleIntent: intentName => {
+        domains = ['user', 'agent', 'greetings', 'appraisal', 'dialog'];
+
+        for(let domain of domains)
+            if(intentName.startsWith(domain))
+                return true;
+
+        return false;
+    },
+    handleIntent: res => {
+        respond(res.answer);
+    }
+};
+
+const skills = [ PersonalitySkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];

@@ -16,9 +16,10 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@nlpjs/basic": "^4.4.0",
     "aws-sdk": "^2.686.0",
     "chalk": "^4.0.0",
-    "node-nlp": "^4.4.0",
+    "moment": "^2.26.0",
     "ora": "^4.0.4",
     "speaker": "^0.5.1"
   }

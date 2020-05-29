@@ -1,8 +1,9 @@
 // Imports
 const readline = require('readline');
-const { NlpManager } = require('node-nlp');
+const { dockStart } = require('@nlpjs/basic');
 const chalk = require('chalk');
 const ora = require('ora');
+const moment = require('moment');
 
 const train = require('./train');
 const tts = require('./tts');
@@ -25,8 +26,13 @@ spinner.spinner = {
 };
 
 // NLP Engine
-const manager = new NlpManager({ languages: ['en'] });
-train(manager).then(() => respond('Jarvis has finished booting up.'));
+let nlp;
+(async() => {
+    nlp = (await dockStart({ use: ['Basic'] })).get('nlp');
+    nlp.addLanguage('en');
+    await train(nlp);
+    respond('Jarvis has finished booting up');
+})();
 
 // Terminal I/O
 const rl = readline.createInterface({
@@ -40,13 +46,14 @@ function prompt() {
         spinner.start();
 
         // Convert utterance to intent using ML
-        manager.process('en', input).then(res => handleIntent(res));
+        nlp.process('en', input).then(res => handleIntent(res));
     });
 }
 
 // Jarvis's final response
 function respond(message) {
     spinner.stop();
+    log(`Final response: ${message}`);
     console.log(chalk.cyan('J: ' + message + ''));
     enableTTS && tts.speak(message);
     prompt();
@@ -56,7 +63,7 @@ function respond(message) {
 function log(message) {
     isSpinning = spinner.isSpinning;
     isSpinning && spinner.stop();
-    console.log(chalk.gray(message));
+    console.log(chalk.gray(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
     isSpinning && spinner.start();
 }
 
@@ -93,4 +100,18 @@ const PersonalitySkill = {
     }
 };
 
-const skills = [ PersonalitySkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
+const DateTimeSkill = {
+    name: 'DateTimeSkill',
+    doesHandleIntent: intentName => {
+        return intentName.startsWith('datetime');
+    },
+    handleIntent: res => {
+        respond(
+            res.answer
+                .replace('%time%', moment().format('LT'))
+                .replace('%date%', moment().format('dddd, MMMM Do'))
+        );
+    }
+};
+
+const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];

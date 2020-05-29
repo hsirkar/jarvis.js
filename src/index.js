@@ -10,6 +10,7 @@ const tts = require('./tts');
 
 const PersonalitySkill = require('../skills/PersonalitySkill');
 const DateTimeSkill = require('../skills/DateTimeSkill');
+const InternetCheckSkill = require('../skills/InternetCheckSkill');
 
 // Settings
 const enableTTS = false;
@@ -88,4 +89,4 @@ function handleIntent(res){
 
 // const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
 
-const skills = [ PersonalitySkill, DateTimeSkill ];
+const skills = [ PersonalitySkill, DateTimeSkill, InternetCheckSkill ];

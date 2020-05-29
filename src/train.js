@@ -19,6 +19,9 @@ module.exports = async function trainnlp(nlp, skills) {
     });
 
     // Save master corpus object into disk cache
+    if(!fs.existsSync('./cache'))
+        fs.mkdirSync('./cache');
+
     fs.writeFileSync('./cache/corpus.json', JSON.stringify({
         name: 'corpus',
         locale: 'en-US',
@@ -33,5 +36,5 @@ module.exports = async function trainnlp(nlp, skills) {
     const hrend = process.hrtime(hrstart);
     console.info('Trained (hr): %ds %dms', hrend[0], hrend[1] / 1000000);
 
-    nlp.save('./cache/model.nlp');
+    nlp.save('./cache/model.nlp', true);
 };

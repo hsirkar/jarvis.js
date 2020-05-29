@@ -18,7 +18,11 @@
   "dependencies": {
     "@nlpjs/basic": "^4.4.0",
     "aws-sdk": "^2.686.0",
+    "axios": "^0.19.2",
     "chalk": "^4.0.0",
+    "ddg": "0.0.3",
+    "dotenv": "^8.2.0",
+    "knowledge-graph-js": "^1.4.0",
     "moment": "^2.26.0",
     "ora": "^4.0.4",
     "public-ip": "^4.0.1",

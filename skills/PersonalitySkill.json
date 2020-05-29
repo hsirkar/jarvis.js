@@ -881,14 +881,5 @@
             "I probably won't be able to give you the correct answer right away",
             "I'm not sure I'll have the best answer, but I'll try"
         ]
-    },
-    {
-        "intent": "None",
-        "utterances": [],
-        "answers": [
-            "Sorry, I don't understand",
-            "You'll have to rephrase that",
-            "I do not understand"
-        ]
     }
 ]

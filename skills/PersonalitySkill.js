@@ -1,7 +1,7 @@
 const PersonalitySkill = {
     name: 'PersonalitySkill',
     doesHandleIntent: intentName => {
-        for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog', 'None'])
+        for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog'])
             if(intentName.startsWith(domain))
                 return true;
 

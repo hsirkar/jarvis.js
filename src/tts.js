@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk');
 const Speaker = require('speaker');
 const Stream = require('stream');
-const { log } = require('./index');
+
+require('dotenv').config();
 
 // TTS Engine
 AWS.config.accessKeyId = process.env.ACCESS_KEY_ID;
@@ -14,7 +15,7 @@ function getSpeaker(){
 };
 
 function speak(text){
-    const options = { OutputFormat: 'pcm', Text: text, TextType: 'text', VoiceId: 'Matthew', Engine: 'neural' }
+    const options = { OutputFormat: 'pcm', Text: `<speak><prosody rate="115%">${text}</prosody></speak>`, TextType: 'ssml', VoiceId: 'Matthew', Engine: 'neural' }
     polly.synthesizeSpeech(options, (err, data) => {
         if(err)
             console.log(err, err.stack);

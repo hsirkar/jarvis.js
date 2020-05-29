@@ -1,0 +1,11 @@
+[
+    {
+        "intent": "None",
+        "utterances": [],
+        "answers": [
+            "Sorry, I don't understand",
+            "You'll have to rephrase that",
+            "I do not understand"
+        ]
+    }
+]

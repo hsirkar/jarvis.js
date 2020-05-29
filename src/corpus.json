@@ -877,6 +877,55 @@
         ]
       },
       {
+          "intent": "datetime.timeofday",
+          "utterances": [
+              "What time is it?",
+              "What is the time?",
+              "Time"
+          ],
+          "answers": [
+              "It's %time%",
+              "The time is %time%"
+          ]
+      },
+      {
+          "intent": "datetime.date",
+          "utterances": [
+              "What is today's date?",
+              "Date",
+              "Date today",
+              "What is the date?",
+              "What day is today?",
+              "What day of the week is it?"
+          ],
+          "answers": [
+              "Today is %date%",
+              "%date%"
+          ]
+      },
+      {
+          "intent": "datetime.year",
+          "utterances": [
+            "What year is it?",
+            "What is the current year?"
+          ],
+          "answers": [
+              "It's %year%",
+              "The current year is %year%"
+          ]
+      },
+      {
+          "intent": "datetime.month",
+          "utterances": [
+              "What month is it?",
+              "What is the current month?"
+          ],
+          "answers": [
+              "It's %month%",
+              "The current month is %month%"
+          ]
+      },
+      {
         "intent": "None",
         "utterances": [
           "I need advice",

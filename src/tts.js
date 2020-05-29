@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const Speaker = require('speaker');
 const Stream = require('stream');
+const { log } = require('./index');
 
 // TTS Engine
 AWS.config.accessKeyId = process.env.ACCESS_KEY_ID;

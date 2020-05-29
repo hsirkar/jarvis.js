@@ -70,7 +70,7 @@ function log(message) {
 // Handle the intent determined by ML
 function handleIntent(res){
     // Print out intent details
-    debug && log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
+    debug && log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score, answers: res.answers }));
 
     skill = skills.find(skill => skill.doesHandleIntent(res.intent));
 
@@ -87,9 +87,7 @@ function handleIntent(res){
 const PersonalitySkill = {
     name: 'PersonalitySkill',
     doesHandleIntent: intentName => {
-        domains = ['user', 'agent', 'greetings', 'appraisal', 'dialog'];
-
-        for(let domain of domains)
+        for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog', 'None'])
             if(intentName.startsWith(domain))
                 return true;
 
@@ -106,10 +104,13 @@ const DateTimeSkill = {
         return intentName.startsWith('datetime');
     },
     handleIntent: res => {
+        const date = moment();
         respond(
             res.answer
-                .replace('%time%', moment().format('LT'))
-                .replace('%date%', moment().format('dddd, MMMM Do'))
+                .replace('%time%', date.format('LT'))
+                .replace('%date%', date.format('dddd, MMMM Do'))
+                .replace('%month%', date.format('MMMM'))
+                .replace('%year%', date.format('YYYY'))
         );
     }
 };

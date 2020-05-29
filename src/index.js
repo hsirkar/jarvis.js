@@ -8,6 +8,9 @@ const moment = require('moment');
 const train = require('./train');
 const tts = require('./tts');
 
+const PersonalitySkill = require('../skills/PersonalitySkill');
+const DateTimeSkill = require('../skills/DateTimeSkill');
+
 // Settings
 const enableTTS = false;
 const debug = true;
@@ -30,7 +33,7 @@ let nlp;
 (async() => {
     nlp = (await dockStart({ use: ['Basic'] })).get('nlp');
     nlp.addLanguage('en');
-    await train(nlp);
+    await train(nlp, skills);
     respond('Jarvis has finished booting up');
 })();
 
@@ -76,43 +79,13 @@ function handleIntent(res){
 
     if(skill){
         debug && log(`Handing intent through ${skill.name}...`);
-        skill.handleIntent(res);
+        skill.handleIntent(res, respond);
     }else{
         debug && log(`No skill found.`)
         respond("Oops, no skill can handle that intent.");
     }
 }
 
-// Skills
-const PersonalitySkill = {
-    name: 'PersonalitySkill',
-    doesHandleIntent: intentName => {
-        for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog', 'None'])
-            if(intentName.startsWith(domain))
-                return true;
+// const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
 
-        return false;
-    },
-    handleIntent: res => {
-        respond(res.answer);
-    }
-};
-
-const DateTimeSkill = {
-    name: 'DateTimeSkill',
-    doesHandleIntent: intentName => {
-        return intentName.startsWith('datetime');
-    },
-    handleIntent: res => {
-        const date = moment();
-        respond(
-            res.answer
-                .replace('%time%', date.format('LT'))
-                .replace('%date%', date.format('dddd, MMMM Do'))
-                .replace('%month%', date.format('MMMM'))
-                .replace('%year%', date.format('YYYY'))
-        );
-    }
-};
-
-const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
+const skills = [ PersonalitySkill, DateTimeSkill ];

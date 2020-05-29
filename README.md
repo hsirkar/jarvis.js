@@ -1,1 +1,1 @@
-Private AI personal assistant based on Mycroft.
+Private AI personal assistant inspired by Mycroft.

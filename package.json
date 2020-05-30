@@ -20,6 +20,7 @@
     "aws-sdk": "^2.686.0",
     "axios": "^0.19.2",
     "chalk": "^4.0.0",
+    "cheerio": "^1.0.0-rc.3",
     "ddg": "0.0.3",
     "dotenv": "^8.2.0",
     "knowledge-graph-js": "^1.4.0",

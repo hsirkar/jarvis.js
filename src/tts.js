@@ -15,7 +15,7 @@ function getSpeaker(){
 };
 
 function speak(text){
-    const options = { OutputFormat: 'pcm', Text: `<speak><prosody rate="115%">${text}</prosody></speak>`, TextType: 'ssml', VoiceId: 'Matthew', Engine: 'neural' }
+    const options = { OutputFormat: 'pcm', Text: `<speak><prosody rate="110%">${text}</prosody></speak>`, TextType: 'ssml', VoiceId: 'Matthew', Engine: 'neural' }
     polly.synthesizeSpeech(options, (err, data) => {
         if(err)
             console.log(err, err.stack);

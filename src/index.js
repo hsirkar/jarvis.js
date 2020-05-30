@@ -11,7 +11,7 @@ const tts = require('./tts');
 const PersonalitySkill = require('../skills/PersonalitySkill');
 const DateTimeSkill = require('../skills/DateTimeSkill');
 const InternetCheckSkill = require('../skills/InternetCheckSkill');
-const DuckDuckGoSkill = require('../skills/DuckDuckGoSkill');
+const FallbackSkill = require('../skills/FallbackSkill');
 
 // Settings
 const enableTTS = true;
@@ -81,8 +81,8 @@ function handleIntent(res){
 
     if(skill){
         if(res.score < 0.70){
-            debug && log('Match score too low, using DuckDuckGoSkill as fallback...');
-            DuckDuckGoSkill.handleIntent(res, respond);
+            debug && log('Match score too low, using FallbackSkill as fallback...');
+            FallbackSkill.handleIntent(res, respond);
             // problem: duckduckgoskill still returns a random answer from original skill/intent
         }else{
             debug && log(`Handing intent through ${skill.name}...`);
@@ -96,4 +96,4 @@ function handleIntent(res){
 
 // const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
 
-const skills = [ PersonalitySkill, DateTimeSkill, InternetCheckSkill, DuckDuckGoSkill ];
+const skills = [ PersonalitySkill, DateTimeSkill, InternetCheckSkill, FallbackSkill ];

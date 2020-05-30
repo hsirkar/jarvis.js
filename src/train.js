@@ -35,6 +35,7 @@ module.exports = async function trainnlp(nlp, skills) {
     await nlp.train();
     const hrend = process.hrtime(hrstart);
     console.info('Trained (hr): %ds %dms', hrend[0], hrend[1] / 1000000);
+    console.log('\n');
 
     nlp.save('./cache/model.nlp', true);
 };

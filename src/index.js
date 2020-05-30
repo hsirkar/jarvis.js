@@ -13,7 +13,7 @@ const FallbackSkill = require('../skills/FallbackSkill');
 
 // Settings
 const enableTTS = true;
-const debug = true;
+const debug = false;
 
 // Clear console
 const blank = '\n'.repeat(process.stdout.rows)
@@ -55,14 +55,17 @@ function prompt() {
 
 // Jarvis's final response
 function respond(message) {
-    if(Array.isArray(message))
-        message = message[Math.floor(Math.random() * message.length)];
-    message = message.toString();
+    if(!!message){
+        if(Array.isArray(message))
+            message = message[Math.floor(Math.random() * message.length)];
+        message = message.toString();
 
+        spinner.stop();
+        log(`Final response: ${message}`);
+        console.log(chalk.cyan('J: ' + message + ''));
+        enableTTS && tts.speak(message);
+    }
     spinner.stop();
-    log(`Final response: ${message}`);
-    console.log(chalk.cyan('J: ' + message + ''));
-    enableTTS && tts.speak(message);
     prompt();
 }
 

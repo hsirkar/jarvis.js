@@ -7,7 +7,8 @@ const PersonalitySkill = {
 
         return false;
     },
-    handleIntent: (res, respond) => {
+    handleIntent: (res, respond, log) => {
+        log('I shall respond');
         respond(res.answer);
     }
 };

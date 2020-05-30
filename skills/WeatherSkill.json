@@ -1,0 +1,18 @@
+[
+    {
+        "intent": "weather.current",
+        "utterances": [
+            "what is the weather like?",
+            "weather",
+            "what is the current weather",
+            "how hot is it",
+            "how cold is it",
+            "is it raining",
+            "is it hot outside",
+            "it is cold outside"
+        ],
+        "answers": [
+            "You have reached the weather skill. This is still a work in progress:"
+        ]
+    }
+]

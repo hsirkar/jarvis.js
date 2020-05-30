@@ -8,11 +8,8 @@ const moment = require('moment');
 const train = require('./train');
 const tts = require('./tts');
 
-const PersonalitySkill = require('../skills/PersonalitySkill');
-const DateTimeSkill = require('../skills/DateTimeSkill');
-const InternetCheckSkill = require('../skills/InternetCheckSkill');
+const skills = require('../skills');
 const FallbackSkill = require('../skills/FallbackSkill');
-const JokeSkill = require('../skills/JokeSkill');
 
 // Settings
 const enableTTS = true;
@@ -58,6 +55,10 @@ function prompt() {
 
 // Jarvis's final response
 function respond(message) {
+    if(Array.isArray(message))
+        message = message[Math.floor(Math.random() * message.length)];
+    message = message.toString();
+
     spinner.stop();
     log(`Final response: ${message}`);
     console.log(chalk.cyan('J: ' + message + ''));
@@ -103,7 +104,3 @@ function handleIntent(res){
         respond("Oops, no skill can handle that intent.");
     }
 }
-
-// const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
-
-const skills = [ PersonalitySkill, DateTimeSkill, InternetCheckSkill, FallbackSkill, JokeSkill ];

@@ -69,7 +69,11 @@ const FallbackSkill = {
             log(`No results found`);
             
             // Admit defeat
-            respond('I do not understand');
+            respond([
+                'Sorry, I don\'t understand',
+                'You\'ll have to rephrase that',
+                'I do not understand'
+            ]);
         })();
     }
 }

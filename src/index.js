@@ -81,6 +81,12 @@ function handleIntent(res){
     // Print out intent details
     log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
 
+    if(res.utterance.startsWith('echo ')){
+        log('Echo command detected, skipping skills');
+        respond(res.utterance.replace('echo ', ''));
+        return;
+    }
+
     skill = skills.find(skill => skill.doesHandleIntent(res.intent));
 
     if(skill){

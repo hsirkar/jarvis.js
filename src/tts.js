@@ -14,7 +14,16 @@ function getSpeaker(){
     return new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
 };
 
+const map = {
+    'rakrish': 'ra-kreesh',
+    'Rakrish': 'Ra-kreesh'
+}
+
 function speak(text){
+    for(const elem in map){
+        text = text.replace(elem, map[elem]);
+    }
+
     const options = { OutputFormat: 'pcm', Text: `<speak><prosody rate="110%">${htmlEntities(text)}</prosody></speak>`, TextType: 'ssml', VoiceId: 'Matthew', Engine: 'neural' }
     polly.synthesizeSpeech(options, (err, data) => {
         if(err)

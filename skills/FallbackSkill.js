@@ -23,9 +23,9 @@ const FallbackSkill = {
         const { utterance } = res;
 
         (async () => {
+            // First query DDG
             log(`Searching DuckDuckGo...`);
             
-            // First query DDG
             try {
                 ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
 
@@ -37,22 +37,25 @@ const FallbackSkill = {
             } catch (err) { log(err, err.stack) }
 
             log(`No results found`);
+            
+            // Then query Google
             log(`Searching Google...`);
 
-            // Then query Google
             try {
                 google = await instance.get(`https://www.google.com/search?q=${utterance}`);
 
                 if (google && google.status === 200 && google.data && cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text()) {
-                    respond(cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text());
+                    answer = cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text();
+                    respond(answer + (answer.length < 70 ? ', according to Google' : ''));
                     return;
                 }
             } catch (err) { log(err, err.stack) }
 
             log(`No results found`);
+            
+            // Finally query WolframAlpha
             log(`Searching WolframAlpha...`);
 
-            // Finally query WolframAlpha
             try {
                 wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
 
@@ -62,8 +65,9 @@ const FallbackSkill = {
                 }
             } catch (err) { log(err, err.stack) }
 
-            // Admit defeat
             log(`No results found`);
+            
+            // Admit defeat
             respond('I do not understand');
         })();
     }

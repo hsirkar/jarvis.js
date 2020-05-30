@@ -117,3 +117,7 @@ dist
 
 # Jarvis cache
 cache/
+
+test.json
+test.js
+model.nlp

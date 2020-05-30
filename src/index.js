@@ -12,6 +12,7 @@ const PersonalitySkill = require('../skills/PersonalitySkill');
 const DateTimeSkill = require('../skills/DateTimeSkill');
 const InternetCheckSkill = require('../skills/InternetCheckSkill');
 const FallbackSkill = require('../skills/FallbackSkill');
+const JokeSkill = require('../skills/JokeSkill');
 
 // Settings
 const enableTTS = true;
@@ -78,7 +79,7 @@ function log(message) {
 // Handle the intent determined by ML
 function handleIntent(res){
     // Print out intent details
-    log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score, answers: res.answers }));
+    log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
 
     skill = skills.find(skill => skill.doesHandleIntent(res.intent));
 
@@ -99,4 +100,4 @@ function handleIntent(res){
 
 // const skills = [ PersonalitySkill, DateTimeSkill ]; //, WolframSkill, DuckDuckGoSkill, WikipediaSkill ];
 
-const skills = [ PersonalitySkill, DateTimeSkill, InternetCheckSkill, FallbackSkill ];
+const skills = [ PersonalitySkill, DateTimeSkill, InternetCheckSkill, FallbackSkill, JokeSkill ];

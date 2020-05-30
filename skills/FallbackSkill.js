@@ -30,8 +30,9 @@ const FallbackSkill = {
                 ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
 
                 if (ddg && ddg.status === 200 && ddg.data && ddg.data.AbstractText && ddg.data.AbstractSource) {
-                    arr = ddg.data.AbstractText.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
-                    respond(`According to ${ddg.data.AbstractSource}, ${arr[0]} ${arr[1] || ''}`)
+                    answer = cheerio.load(`<div>${ddg.data.AbstractText}</div>`)('div').text();
+                    arr = answer.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
+                    respond(`According to ${ddg.data.AbstractSource}, ${arr[0]} ${arr[1] || ''}`);
                     return;
                 }
             } catch (err) { log(err, err.stack) }

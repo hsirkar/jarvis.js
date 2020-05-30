@@ -19,35 +19,51 @@ const instance = axios.create({
 const FallbackSkill = {
     name: 'FallbackSkill',
     doesHandleIntent: intentName => intentName === 'None',
-    handleIntent: (res, respond) => {
+    handleIntent: (res, respond, log) => {
         const { utterance } = res;
 
         (async () => {
+            log(`Searching DuckDuckGo...`);
+            
             // First query DDG
-            ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
+            try {
+                ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
 
-            if (ddg && ddg.status === 200 && ddg.data && ddg.data.AbstractText && ddg.data.AbstractSource) {
-                respond(`According to ${ddg.data.AbstractSource}, ${ddg.data.AbstractText}`);
-                return;
-            }
+                if (ddg && ddg.status === 200 && ddg.data && ddg.data.AbstractText && ddg.data.AbstractSource) {
+                    arr = ddg.data.AbstractText.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
+                    respond(`According to ${ddg.data.AbstractSource}, ${arr[0]} ${arr[1] || ''}`)
+                    return;
+                }
+            } catch (err) { log(err, err.stack) }
+
+            log(`No results found`);
+            log(`Searching Google...`);
 
             // Then query Google
-            google = await instance.get(`https://www.google.com/search?q=${utterance}`);
+            try {
+                google = await instance.get(`https://www.google.com/search?q=${utterance}`);
 
-            if (google && google.status === 200 && google.data && cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text()) {
-                respond(cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text());
-                return;
-            }
+                if (google && google.status === 200 && google.data && cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text()) {
+                    respond(cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text());
+                    return;
+                }
+            } catch (err) { log(err, err.stack) }
+
+            log(`No results found`);
+            log(`Searching WolframAlpha...`);
 
             // Finally query WolframAlpha
-            wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
+            try {
+                wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
 
-            if (wolfram && wolfram.status === 200 && wolfram.data) {
-                respond(wolfram.data);
-                return;
-            }
+                if (wolfram && wolfram.status === 200 && wolfram.data) {
+                    respond(wolfram.data);
+                    return;
+                }
+            } catch (err) { log(err, err.stack) }
 
             // Admit defeat
+            log(`No results found`);
             respond('I do not understand');
         })();
     }

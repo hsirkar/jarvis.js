@@ -66,6 +66,9 @@ function respond(message) {
 
 // Debug messages
 function log(message) {
+    if(!debug)
+        return;
+
     isSpinning = spinner.isSpinning;
     isSpinning && spinner.stop();
     console.log(chalk.gray(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
@@ -75,21 +78,21 @@ function log(message) {
 // Handle the intent determined by ML
 function handleIntent(res){
     // Print out intent details
-    debug && log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score, answers: res.answers }));
+    log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score, answers: res.answers }));
 
     skill = skills.find(skill => skill.doesHandleIntent(res.intent));
 
     if(skill){
         if(res.score < 0.70){
-            debug && log('Match score too low, using FallbackSkill as fallback...');
-            FallbackSkill.handleIntent(res, respond);
+            log('Match score too low, using FallbackSkill as fallback...');
+            FallbackSkill.handleIntent(res, respond, log);
             // problem: duckduckgoskill still returns a random answer from original skill/intent
         }else{
-            debug && log(`Handing intent through ${skill.name}...`);
-            skill.handleIntent(res, respond);
+            log(`Handing intent through ${skill.name}...`);
+            skill.handleIntent(res, respond, log);
         }
     }else{
-        debug && log(`No skill found.`)
+        log(`No skill found.`)
         respond("Oops, no skill can handle that intent.");
     }
 }

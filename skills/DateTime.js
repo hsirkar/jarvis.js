@@ -1,7 +1,7 @@
 const moment = require('moment');
 
-const DateTimeSkill = {
-    name: 'DateTimeSkill',
+const DateTime = {
+    name: 'DateTime',
     doesHandleIntent: intentName => {
         return intentName.startsWith('datetime');
     },
@@ -17,4 +17,4 @@ const DateTimeSkill = {
     }
 };
 
-module.exports = DateTimeSkill;
+module.exports = DateTime;

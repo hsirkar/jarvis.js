@@ -9,7 +9,7 @@ const train = require('./train');
 const tts = require('./tts');
 
 const skills = require('../skills');
-const FallbackSkill = require('../skills/FallbackSkill');
+const Fallback = require('../skills/Fallback');
 
 // Settings
 const enableTTS = true;
@@ -95,8 +95,8 @@ function handleIntent(res){
 
     if(skill){
         if(res.score < 0.70){
-            log('Match score too low, using FallbackSkill as fallback...');
-            FallbackSkill.handleIntent(res, respond, log);
+            log('Match score too low, using Fallback...');
+            Fallback.handleIntent(res, respond, log);
             // problem: duckduckgoskill still returns a random answer from original skill/intent
         }else{
             log(`Handing intent through ${skill.name}...`);

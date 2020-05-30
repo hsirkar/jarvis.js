@@ -1,8 +1,8 @@
 module.exports = [
-    require('./DateTimeSkill'),
-    require('./FallbackSkill'),
-    require('./InternetCheckSkill'),
-    require('./JokeSkill'),
-    require('./PersonalitySkill'),
-    require('./WeatherSkill')
+    require('./DateTime'),
+    require('./Fallback'),
+    require('./InternetCheck'),
+    require('./Joke'),
+    require('./Personality'),
+    require('./Weather')
 ];

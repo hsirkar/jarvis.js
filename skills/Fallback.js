@@ -16,8 +16,8 @@ const instance = axios.create({
     }
 });
 
-const FallbackSkill = {
-    name: 'FallbackSkill',
+const Fallback = {
+    name: 'Fallback',
     doesHandleIntent: intentName => intentName === 'None',
     handleIntent: (res, respond, log) => {
         const { utterance } = res;
@@ -78,4 +78,4 @@ const FallbackSkill = {
     }
 }
 
-module.exports = FallbackSkill;
+module.exports = Fallback;

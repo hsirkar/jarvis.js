@@ -1,5 +1,5 @@
-const PersonalitySkill = {
-    name: 'PersonalitySkill',
+const Personality = {
+    name: 'Personality',
     doesHandleIntent: intentName => {
         for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog'])
             if(intentName.startsWith(domain))
@@ -13,4 +13,4 @@ const PersonalitySkill = {
     }
 };
 
-module.exports = PersonalitySkill;
+module.exports = Personality;

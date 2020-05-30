@@ -1,9 +1,9 @@
-const JokeSkill = {
-    name: 'JokeSkill',
+const Joke = {
+    name: 'Joke',
     doesHandleIntent: intentName => intentName.startsWith('joke'),
     handleIntent: (res, respond) => {
         respond(res.answer);
     }
 };
 
-module.exports = JokeSkill;
+module.exports = Joke;

@@ -2,8 +2,8 @@ const dns = require('dns');
 const os = require('os');
 const publicIp = require('public-ip');
 
-const InternetCheckSkill = {
-    name: 'InternetCheckSkill',
+const InternetCheck = {
+    name: 'InternetCheck',
     doesHandleIntent: intentName => {
         return intentName.startsWith('netcheck');
     },
@@ -39,4 +39,4 @@ const InternetCheckSkill = {
     }
 };
 
-module.exports = InternetCheckSkill;
+module.exports = InternetCheck;

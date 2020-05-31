@@ -1,23 +1,25 @@
 const axios = require('axios').default;
 const cheerio = require('cheerio');
-
 require('dotenv').config();
 
-const instance = axios.create({
-    method: 'get',
-    headers: {
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Encoding': 'gzip, deflate',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
-        'Dnt': '1',
-        'Referer': 'https://www.google.com',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0'
-    }
-});
+let instance;
 
 const Fallback = {
     name: 'Fallback',
+    init: () => {
+        instance = axios.create({
+            method: 'get',
+            headers: {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Connection': 'keep-alive',
+                'Dnt': '1',
+                'Referer': 'https://www.google.com',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0'
+            }
+        });
+    },
     doesHandleIntent: intentName => intentName === 'None',
     handleIntent: (res, respond, log) => {
         const { utterance } = res;

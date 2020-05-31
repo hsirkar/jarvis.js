@@ -2,17 +2,18 @@ const AWS = require('aws-sdk');
 const Speaker = require('speaker');
 const Stream = require('stream');
 
-require('dotenv').config();
+let polly;
 
-// TTS Engine
-AWS.config.accessKeyId = process.env.ACCESS_KEY_ID;
-AWS.config.secretAccessKey = process.env.SECRET_ACCESS_KEY;
-AWS.config.region = 'us-east-1';
-const polly = new AWS.Polly({ region: 'us-east-1' });
+function init() {
+    AWS.config.accessKeyId = process.env.ACCESS_KEY_ID;
+    AWS.config.secretAccessKey = process.env.SECRET_ACCESS_KEY;
+    AWS.config.region = 'us-east-1';
+    polly = new AWS.Polly({ region: 'us-east-1' });
+}
 
 function getSpeaker(){
     return new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
-};
+}
 
 const map = {
     'rakrish': 'ra-kreesh',
@@ -43,4 +44,4 @@ function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-module.exports = { speak };
+module.exports = { init, speak };

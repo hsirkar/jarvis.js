@@ -708,7 +708,13 @@
         "utterances": [
             "hello",
             "hi",
-            "howdy"
+            "howdy",
+            "hi there",
+            "hey jarvis",
+            "hey there",
+            "what's poppin",
+            "what's crackin",
+            "greetings"
         ],
         "answers": [
             "Hey there!",
@@ -723,7 +729,11 @@
             "how are you",
             "how are you doing",
             "what about your day",
-            "are you alright"
+            "are you alright",
+            "how's life",
+            "how's it going",
+            "how is it going",
+            "howdy"
         ],
         "answers": [
             "Feeling wonderful!",

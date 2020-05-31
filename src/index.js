@@ -11,9 +11,7 @@ const tts = require('./tts');
 const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
 
-// Settings
-const enableTTS = true;
-const debug = false;
+require('dotenv').config();
 
 // Clear console
 const blank = '\n'.repeat(process.stdout.rows)
@@ -28,12 +26,24 @@ spinner.spinner = {
     'frames': ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏']
 };
 
-// NLP Engine
+// Load skills
+skills.forEach(skill => {
+    if(!!skill.init)
+        skill.init(log);
+});
+log(`Finished loading skills`);
+
+// Load TTS
+tts.init();
+log(`Finished loading TTS`);
+
+// Load NLP engine
 let nlp;
 (async() => {
     nlp = (await dockStart({ use: ['Basic'] })).get('nlp');
     nlp.addLanguage('en');
-    await train(nlp, skills);
+    await train(nlp, skills, log);
+    log(`Finished loading NLP`);
     respond('Jarvis has finished booting up');
 })();
 
@@ -63,7 +73,7 @@ function respond(message) {
         spinner.stop();
         log(`Final response: ${message}`);
         console.log(chalk.cyan('J: ' + message + ''));
-        enableTTS && tts.speak(message);
+        process.env.ENABLE_TTS === '1' && tts.speak(message);
     }
     spinner.stop();
     prompt();
@@ -71,7 +81,7 @@ function respond(message) {
 
 // Debug messages
 function log(message) {
-    if(!debug)
+    if(process.env.DEBUG !== '1')
         return;
 
     isSpinning = spinner.isSpinning;

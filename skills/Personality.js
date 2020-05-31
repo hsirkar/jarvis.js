@@ -7,8 +7,7 @@ const Personality = {
 
         return false;
     },
-    handleIntent: (res, respond, log) => {
-        log('I shall respond');
+    handleIntent: (res, respond) => {
         respond(res.answer);
     }
 };

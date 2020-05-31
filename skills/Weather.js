@@ -30,7 +30,7 @@ const Weather = {
                 const res = await instance.get('http://ip-api.com/json');
 
                 if (res && res.status === 200 && res.data && res.data.city && res.data.regionName && res.data.countryCode) {
-                    city = `${res.data.city || ''}, ${res.data.regionName || ''}, ${res.data.countryCode || ''}`
+                    city = `${res.data.city || ''}, ${res.data.regionName || ''}`
                     lat = res.data.lat;
                     lon = res.data.lon;
                     log(`Host city set as ${city} at (${lat}, ${lon})`);
@@ -55,7 +55,7 @@ const Weather = {
                             .replace('%temp%', Math.round(current.feels_like))
                             .replace('%high%', Math.round(daily[0].temp.max))
                             .replace('%low%', Math.round(daily[0].temp.min))
-                            .replace('%dwind%', Math.round(daily[0].wind_speed))
+                            .replace('%ddesc%', daily[0].weather[0].description)
                     );
                     return;
                 } else {

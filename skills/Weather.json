@@ -12,7 +12,7 @@
             "it is cold outside"
         ],
         "answers": [
-            "The weather for %city% is %desc% at %temp% degrees, with winds at %wind% MPH. Over the next 24 hours, expect a high of %high% and low of %low% degrees, with wind averaging %dwind% MPH"
+            "The weather for %city% is %desc% and %temp% degrees, with winds at %wind% MPH. Today, expect a %ddesc% with a high of %high% and low of %low% degrees"
         ]
     }
 ]

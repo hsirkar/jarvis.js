@@ -7,6 +7,7 @@ const moment = require('moment');
 
 const train = require('./train');
 const tts = require('./tts');
+const stt = require('./stt');
 
 const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
@@ -14,10 +15,16 @@ const Fallback = require('../skills/Fallback');
 require('dotenv').config();
 
 // Clear console
-const blank = '\n'.repeat(process.stdout.rows)
-console.log(blank)
-readline.cursorTo(process.stdout, 0, 0)
-readline.clearScreenDown(process.stdout)
+const blank = '\n'.repeat(process.stdout.rows);
+console.log(blank);
+readline.cursorTo(process.stdout, 0, 0);
+readline.clearScreenDown(process.stdout);
+
+// Terminal I/O
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 // Load spinner
 const spinner = ora(chalk.gray('Processing...'));
@@ -44,20 +51,18 @@ let nlp;
     nlp.addLanguage('en');
     await train(nlp, skills, log);
     log(`Finished loading NLP`);
+
+    // Load STT
+    stt.init(log, spinner, nlp, handleIntent);
+    log(`Finished loading STT`);
+
     respond('Jarvis has finished booting up');
 })();
 
-// Terminal I/O
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
 // Ask the prompt.
 function prompt() {
-    rl.question('> ', input => {
+    rl.question('', input => {
         spinner.start();
-
         // Convert utterance to intent using ML
         nlp.process('en', input).then(res => handleIntent(res));
     });

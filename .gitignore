@@ -121,3 +121,5 @@ cache/
 test.json
 test.js
 model.nlp
+
+test/

@@ -24,4 +24,4 @@ function init(log, spinner, nlp, handleIntent) {
     client.init();
 }
 
-module.exports = { init };
+module.exports = { init, io };

@@ -82,6 +82,10 @@
         socket.on('connect', () => {
             console.log('socket.io connected!');
         });
+        socket.on('hotword', () => {
+            console.log('Hotword detected, activating mic...');
+            document.getElementById('start_button').click();
+        });
 
         // WebSpeech API
         var langs =
@@ -264,8 +268,6 @@
                     create_email = false;
                     createEmail();
                 }
-                console.log("Sending \"" + final_transcript + "\" ...");
-                socket.emit('final_transcript', final_transcript);
             };
 
             recognition.onresult = function (event) {
@@ -305,6 +307,12 @@
 
         var first_char = /\S/;
         function capitalize(s) {
+            // Send final transcript to server
+            if(final_transcript !== ""){
+                console.log("Sending utterance \"" + final_transcript + "\"...");
+                socket.emit('final_transcript', final_transcript);
+                document.getElementById('start_button').click();
+            }
             return s.replace(first_char, function (m) { return m.toUpperCase(); });
         }
 

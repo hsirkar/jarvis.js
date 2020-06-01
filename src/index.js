@@ -8,6 +8,7 @@ const moment = require('moment');
 const train = require('./train');
 const tts = require('./tts');
 const stt = require('./stt');
+const hotword = require('./hotword');
 
 const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
@@ -55,6 +56,10 @@ let nlp;
     // Load STT
     stt.init(log, spinner, nlp, handleIntent);
     log(`Finished loading STT`);
+    
+    // Load wakeword detector
+    hotword.init(log, stt);
+    log(`Finished loading hotword detector`);
 
     respond('Jarvis has finished booting up');
 })();

@@ -354,6 +354,7 @@
                 recognition.stop();
                 return;
             }
+            new Audio('/acknowledge.mp3').play();
             final_transcript = '';
             recognition.lang = select_dialect.value;
             recognition.start();

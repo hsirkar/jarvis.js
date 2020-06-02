@@ -4,5 +4,6 @@ module.exports = [
     require('./InternetCheck'),
     require('./Joke'),
     require('./Personality'),
-    require('./Weather')
+    require('./Weather'),
+    require('./Echo'),
 ];

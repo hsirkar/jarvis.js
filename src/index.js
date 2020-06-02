@@ -69,7 +69,7 @@ function prompt() {
     rl.question('', input => {
         spinner.start();
         // Convert utterance to intent using ML
-        nlp.process('en', input).then(res => handleIntent(res));
+        nlp.process('en', input.toLowerCase()).then(res => handleIntent(res));
     });
 }
 
@@ -104,26 +104,27 @@ function log(message) {
 function handleIntent(res){
     // Print out intent details
     log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
+        
+    // Stealer - ignore NLP result
+    let stealer = skills.find(skill => skill.willStealIntent && skill.willStealIntent(res.utterance));
+    stealer && log(`Intent stolen by ${stealer.name}`);
 
-    if(res.utterance.startsWith('echo ')){
-        log('Echo command detected, skipping skills');
-        respond(res.utterance.replace('echo ', ''));
+    // If no stealer, find skill that handles intent determined by NLP
+    let matched = stealer || skills.find(skill => skill.doesHandleIntent(res.intent));
+    
+    // Auto fallback if match score less than threshold
+    if(!stealer && res.score < 0.70){
+        log(`Match score too low, using Fallback...`);
+        Fallback.handleIntent(res, respond, log);
         return;
     }
 
-    skill = skills.find(skill => skill.doesHandleIntent(res.intent));
-
-    if(skill){
-        if(res.score < 0.70){
-            log('Match score too low, using Fallback...');
-            Fallback.handleIntent(res, respond, log);
-            // problem: duckduckgoskill still returns a random answer from original skill/intent
-        }else{
-            log(`Handing intent through ${skill.name}...`);
-            skill.handleIntent(res, respond, log);
-        }
-    }else{
-        log(`No skill found.`)
-        respond("Oops, no skill can handle that intent.");
+    if(!matched){
+        log(`No skill found to handle that intent`);
+        respond('Oops, no skill can handle that intent');
+        return;
     }
+
+    log(`Handling intent through ${matched.name}`);
+    matched.handleIntent(res, respond, log);
 }

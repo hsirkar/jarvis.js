@@ -11,7 +11,7 @@ function init(log, spinner, nlp, handleIntent) {
             log(`Message received from STT client: ${message}`);
             
             spinner.start();
-            nlp.process('en', message).then(res => handleIntent(res));
+            nlp.process('en', message.toLowerCase()).then(res => handleIntent(res));
         });
 
         client.on('disconnect', () => {

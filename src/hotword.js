@@ -22,7 +22,7 @@ function init(log, stt) {
     micInstance.start();
 
     bb = new BumbleBee();
-    bb.addHotword('bumblebee');
+    bb.addHotword('grasshopper');
 
     bb.on('hotword', hotword => {
         log(`Hotword detected: ${hotword}, alerting STT client...`);

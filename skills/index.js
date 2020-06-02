@@ -6,4 +6,5 @@ module.exports = [
     require('./Personality'),
     require('./Weather'),
     require('./Echo'),
+    require('./Spotify'),
 ];

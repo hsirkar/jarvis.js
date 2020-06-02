@@ -1,5 +1,5 @@
-const Echo = {
-    name: 'Echo',
+const Spotify = {
+    name: 'Spotify',
     willStealIntent: utterance => utterance.startsWith('play '),
     doesHandleIntent: () => false,
     handleIntent: (res, respond) => {
@@ -7,4 +7,4 @@ const Echo = {
     }
 };
 
-module.exports = Echo;
+module.exports = Spotify;

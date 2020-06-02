@@ -10,10 +10,10 @@ module.exports = async function trainnlp(nlp, skills) {
     // Combine individual corpuses into one large master corpus object
     data = [];
     skills.forEach(skill => {
-        if(!fs.existsSync(`./skills/${skill.name}.json`))
+        if(!fs.existsSync(`./corpus/${skill.name}.json`))
             return [];
 
-        corpus = fs.readFileSync(`./skills/${skill.name}.json`);
+        corpus = fs.readFileSync(`./corpus/${skill.name}.json`);
         arr = JSON.parse(corpus);
         data = data.concat(arr);
     });

@@ -1,6 +1,8 @@
 const AWS = require('aws-sdk');
 const Speaker = require('speaker');
 const Stream = require('stream');
+const sha1 = require('sha1');
+const fs = require('fs');
 
 let ttsEngine;
 let polly;
@@ -43,6 +45,17 @@ function speakPolly(text, cb){
         text = text.replace(elem, map[elem]);
     }
 
+    // Play from cache
+    if(fs.existsSync('cache/polly/' + sha1(text))){
+        let readStream = new fs.createReadStream('cache/polly/' + sha1(text));
+        let speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
+        readStream.on('open', function(){
+            readStream.pipe(speaker);
+            speaker.on('close', () => cb());
+        });
+        return;
+    }
+
     const options = {
         OutputFormat: 'pcm',
         Text: `<speak><prosody rate="110%">${htmlEntities(text)}</prosody></speak>`,
@@ -58,6 +71,10 @@ function speakPolly(text, cb){
             if(data.AudioStream instanceof Buffer) {
                 let bufferStream = new Stream.PassThrough();
                 bufferStream.end(data.AudioStream);
+
+                // Save to cache
+                let fileStream = fs.WriteStream('cache/polly/' + sha1(text));
+                bufferStream.pipe(fileStream);
 
                 (async() => {
                     let speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });

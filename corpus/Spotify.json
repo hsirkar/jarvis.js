@@ -1,0 +1,57 @@
+[
+    {
+        "intent": "spotify.pause",
+        "utterances": [
+            "stop the music",
+            "stop",
+            "pause",
+            "pause spotify",
+            "pause the music"
+        ],
+        "answers": []
+    },
+    {
+        "intent": "spotify.next",
+        "utterances": [
+            "next song",
+            "next",
+            "skip",
+            "skip this one"
+        ],
+        "answers": []
+    },
+    {
+        "intent": "spotify.previous",
+        "utterances": [
+            "previous song",
+            "go back",
+            "previous"
+        ],
+        "answers": []
+    },
+    {
+        "intent": "spotify.resume",
+        "utterances": [
+            "play",
+            "resume"
+        ],
+        "answers": []
+    },
+    {
+        "intent": "spotify.replay",
+        "utterances": [
+            "replay the song",
+            "replay"
+        ],
+        "answers": []
+    },
+    {
+        "intent": "spotify.current",
+        "utterances": [
+            "what song is this",
+            "what's this song",
+            "what is this song called"
+        ],
+        "answers": []
+    }
+]

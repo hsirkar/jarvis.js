@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node .",
-    "clear": "rm -rf cache && rm -rf model.nlp"
+    "clear": "rm -rf cache/model.nlp && rm -rf cache/corpus.json && rm -rf model.nlp"
   },
   "keywords": [
     "AI",

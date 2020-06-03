@@ -4,16 +4,31 @@ const axios = require('axios').default;
 let spotifyApi;
 let axiosInstance;
 
-function handleError(err) {
-    if (err && err.response && err.response.data && err.response.data.error && err.response.data.error.reason && err.response.data.error.reason === 'NO_ACTIVE_DEVICE') {
-        respond('There are no active devices to play on');
-        return;
-    }
-    if (err.response && err.response.data)
-        console.log(err.response.data)
-    else
-        console.log(err, err.stack);
-    respond('There was an error with your request');
+function refreshToken(res, response, log) {
+    log('Refreshing access token...')
+    spotifyApi.refreshAccessToken()
+        .then(data => {
+            log('New access token: ' + data.body['access_token']);
+
+            const newAT = data.body['access_token'];
+            const oldAT = spotifyApi.getAccessToken();
+
+            log('Setting new access token...');
+            spotifyApi.setAccessToken(newAT);
+
+            axiosInstance = axios.create({
+                baseURL: 'https://api.spotify.com',
+                headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
+            });
+
+            log('Saving it to env...');
+            let env = require('fs').readFileSync('.env', 'utf-8');
+            env = env.replace(oldAT, newAT);
+            require('fs').writeFileSync('.env', env);
+
+            log('Rehanding the intent');
+            Spotify.handleIntent(res, response, log);
+        });
 }
 
 function getDesc(track) {
@@ -54,15 +69,14 @@ const Spotify = {
     willStealIntent: utterance => utterance.startsWith('play '),
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
     handleIntent: (res, respond, log) => {
-        // Find and play a song
-        if(res.utterance.startsWith('play ')) {
-            const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace('by ', '').replace('and ', '');
-            (async () => {
-                try {
-                    // Search for track
+        (async() => {
+            try {
+                if(res.utterance.startsWith('play ')){
+                    const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace('by ', '').replace('and ', '');
                     log(`Searching for "${query}"...`)
-                    let res = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
-                    let tracks = res.body.tracks.items;
+
+                    let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
+                    let tracks = searchRes.body.tracks.items;
                     log('Search results: ' + tracks.map(track => getDesc(track)));
 
                     if(tracks.length === 0){
@@ -70,70 +84,71 @@ const Spotify = {
                         return;
                     }
 
-                    let track = tracks[0];
-
                     // Add track to queue, skip to next track
-                    await axiosInstance.post(`/v1/me/player/queue?uri=${track.uri}`);
+                    await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}`);
                     await axiosInstance.post(`/v1/me/player/next`);
 
-                    respond(`Now playing ${getDesc(track)}`);
-                } catch (err) {
-                    handleError(err);
+                    respond(`Now playing ${getDesc(tracks[0])}`);
+                    return;
                 }
-            })();
-            return;
-        }
 
-        if(res.intent === 'spotify.pause'){
-            spotifyApi.pause()
-                .then(() => respond())
-                .catch(err => handleError(err));
-            return;
-        }
-
-        if (res.intent === 'spotify.resume') {
-            spotifyApi.play()
-                .then(() => respond())
-                .catch(err => handleError(err));
-            return;
-        }
+                if(res.intent === 'spotify.pause'){
+                    await spotifyApi.pause();
+                    respond();
+                    return;
+                }
         
-        if (res.intent === 'spotify.next') {
-            spotifyApi.skipToNext()
-                .then(() => respond())
-                .catch(err => handleError(err));
-            return;
-        }
-        
-        if (res.intent === 'spotify.previous') {
-            spotifyApi.skipToPrevious()
-                .then(() => respond())
-                .catch(err => handleError(err));
-            return;
-        }
+                if (res.intent === 'spotify.resume') {
+                    await spotifyApi.play();
+                    respond();
+                    return;
+                }
                 
-        if (res.intent === 'spotify.current') {
-            spotifyApi.getMyCurrentPlayingTrack()
-                .then(res => {
+                if (res.intent === 'spotify.next') {
+                    await spotifyApi.skipToNext();
+                    respond();
+                    return;
+                }
+                
+                if (res.intent === 'spotify.previous') {
+                    await spotifyApi.skipToPrevious();
+                    respond();
+                    return;
+                }
+
+                if (res.intent === 'spotify.replay') {
+                    await spotifyApi.seek(0);
+                    respond();
+                    return;
+                }
+                        
+                if (res.intent === 'spotify.current') {
+                    let res = await spotifyApi.getMyCurrentPlayingTrack();
                     let track = res.body.item;
 
-                    if(track && track.name && track.artists)
+                    if(res && res.body && track && track.name && track.artists)
                         respond(getDesc(track));
                     else
                         respond(`I'm not sure`);
-                })
-                .catch(err => handleError(err));
-            return;
-        }
-        
-        if (res.intent === 'spotify.replay') {
-            spotifyApi.seek(0)
-                .then(() => respond())
-                .catch(err => handleError(err));
-            return;
-        }
+                    return;
+                }
 
-        respond('I do not understand');
+            } catch (err) {
+                log(err, err.stack);
+    
+                if(!!err.statusCode && err.statusCode === 401) {
+                    refreshToken(res, respond, log);
+                    return;
+                }
+            
+                if (err && err.response && err.response.data && err.response.data.error && err.response.data.error.reason && err.response.data.error.reason === 'NO_ACTIVE_DEVICE') {
+                    respond('There are no active devices to play on');
+                    return;
+                }
+            
+                respond('Error, I could not process your request');
+            }
+        })();
     }
 };
 

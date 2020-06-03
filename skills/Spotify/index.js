@@ -69,7 +69,7 @@ const Spotify = {
     },
     override: (res, log) => {
         if(res.utterance.startsWith('play ')){
-            const newRes = { intent: 'spotify.play', score: 1 };
+            const newRes = { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', score: 1 };
             Object.assign(res, newRes);
             log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
         }
@@ -78,7 +78,7 @@ const Spotify = {
     handleIntent: (res, respond, log) => {
         (async() => {
             try {
-                if(res.utterance.startsWith('play ')){
+                if(res.intent === 'spotify.play'){
                     const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace('by ', '').replace('and ', '');
                     log(`Searching for "${query}"...`);
 
@@ -142,6 +142,17 @@ const Spotify = {
                         }
                     else
                         respond(`I'm not sure`);
+                    return;
+                }
+
+                if(res.intent === 'spotify.news') {
+                    let spotifyRes = await axiosInstance.get(`/v1/shows/2AoYk2xxbBfVjagnt4mwuV`);
+                    let episodes = spotifyRes.data.episodes.items;
+                    
+                    // Add track to queue, skip to next track
+                    await axiosInstance.post(`/v1/me/player/queue?uri=${episodes[0].uri}`);
+                    await axiosInstance.post(`/v1/me/player/next`);
+                    respond(`Playing ${spotifyRes.data.name}`);
                     return;
                 }
 

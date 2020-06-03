@@ -69,7 +69,12 @@ function prompt() {
     rl.question('', input => {
         spinner.start();
         // Convert utterance to intent using ML
-        nlp.process('en', input.toLowerCase()).then(res => handleIntent(res));
+        nlp.process('en', input.toLowerCase())
+            .then(res => handleIntent(res))
+            .catch(err => {
+                log(err, err.stack);
+                respond('There was an error with your request');
+            });
     });
 }
 
@@ -105,15 +110,14 @@ function handleIntent(res){
     // Print out intent details
     log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
         
-    // Stealer - ignore NLP result
-    let stealer = skills.find(skill => skill.willStealIntent && skill.willStealIntent(res.utterance));
-    stealer && log(`Intent stolen by ${stealer.name}`);
+    // Override NLP result
+    skills.forEach(skill => skill.override && skill.override(res, log));
 
-    // If no stealer, find skill that handles intent determined by NLP
-    let matched = stealer || skills.find(skill => skill.doesHandleIntent(res.intent));
+    // Find proper skill to handle intent
+    let matched = skills.find(skill => skill.doesHandleIntent(res.intent));
     
     // Auto fallback if match score less than threshold
-    if(!stealer && res.score < 0.70){
+    if(res.score < 0.70){
         log(`Match score too low, using Fallback...`);
         Fallback.handleIntent(res, respond, log);
         return;

@@ -5,7 +5,7 @@ let spotifyApi;
 let axiosInstance;
 
 function refreshToken(res, response, log) {
-    log('Refreshing access token...')
+    log('Refreshing access token...');
     spotifyApi.refreshAccessToken()
         .then(data => {
             log('New access token: ' + data.body['access_token']);
@@ -66,18 +66,24 @@ const Spotify = {
             headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
         });
     },
-    willStealIntent: utterance => utterance.startsWith('play '),
+    override: (res, log) => {
+        if(res.utterance.startsWith('play ')){
+            const newRes = { intent: 'spotify.play', score: 1 };
+            Object.assign(res, newRes);
+            log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
+        }
+    },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
     handleIntent: (res, respond, log) => {
         (async() => {
             try {
                 if(res.utterance.startsWith('play ')){
                     const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace('by ', '').replace('and ', '');
-                    log(`Searching for "${query}"...`)
+                    log(`Searching for "${query}"...`);
 
                     let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
                     let tracks = searchRes.body.tracks.items;
-                    log('Search results: ' + tracks.map(track => getDesc(track)));
+                    log('Search results: ' + tracks.map(track => getDesc(track)).join('; ') );
 
                     if(tracks.length === 0){
                         respond(`No results found for ${query}`);

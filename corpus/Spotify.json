@@ -53,5 +53,14 @@
             "what is this song called"
         ],
         "answers": []
+    },
+    {
+        "intent": "spotify.lyrics",
+        "utterances": [
+            "show me the lyrics",
+            "current song lyrics",
+            "lyrics"
+        ],
+        "answers": []
     }
 ]

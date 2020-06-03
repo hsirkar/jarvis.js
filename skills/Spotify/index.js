@@ -1,5 +1,6 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const axios = require('axios').default;
+const open = require('open');
 
 let spotifyApi;
 let axiosInstance;
@@ -128,12 +129,17 @@ const Spotify = {
                     return;
                 }
                         
-                if (res.intent === 'spotify.current') {
-                    let res = await spotifyApi.getMyCurrentPlayingTrack();
-                    let track = res.body.item;
+                if (res.intent === 'spotify.current' || res.intent === 'spotify.lyrics') {
+                    let apiRes = await spotifyApi.getMyCurrentPlayingTrack();
+                    let track = apiRes.body.item;
 
-                    if(res && res.body && track && track.name && track.artists)
-                        respond(getDesc(track));
+                    if(apiRes && apiRes.body && track && track.name && track.artists)
+                        if(res.intent.includes('current'))
+                            respond(getDesc(track));
+                        else {
+                            open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
+                            respond();
+                        }
                     else
                         respond(`I'm not sure`);
                     return;

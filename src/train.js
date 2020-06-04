@@ -18,17 +18,15 @@ module.exports = async function trainnlp(nlp, skills) {
         data = data.concat(arr);
     });
 
-    // Save master corpus object into disk cache
-    if(!fs.existsSync('./cache'))
-        fs.mkdirSync('./cache');
-
-    fs.writeFileSync('./cache/corpus.json', JSON.stringify({
-        name: 'corpus',
-        locale: 'en-US',
-        data: data }));
-
-    // Load from disk cache
-    await nlp.addCorpus('./cache/corpus.json');
+    // Add data to NLP
+    data.forEach(item => {
+        item.utterances && item.utterances.forEach(utterance => {
+            nlp.addDocument('en', utterance, item.intent);
+        });
+        item.answers && item.answers.forEach(answer => {
+            nlp.addAnswer('en', item.intent, answer);
+        });
+    });
 
     // Train and save
     const hrstart = process.hrtime();

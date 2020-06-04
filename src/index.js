@@ -1,6 +1,6 @@
 // Imports
 const readline = require('readline');
-const { dockStart } = require('@nlpjs/basic');
+const { NlpManager } = require('node-nlp');
 const chalk = require('chalk');
 const ora = require('ora');
 const moment = require('moment');
@@ -48,9 +48,10 @@ log(`Finished loading TTS`);
 // Load NLP engine
 let nlp;
 (async() => {
-    nlp = (await dockStart({ use: ['Basic'] })).get('nlp');
-    nlp.addLanguage('en');
-    await train(nlp, skills, log);
+    nlp = new NlpManager({ languages: ['en'] });
+    try {
+        await train(nlp, skills, log);
+    } catch (err) { console.error(err); }
     log(`Finished loading NLP`);
 
     // Load STT
@@ -108,7 +109,9 @@ function log(message) {
 // Handle the intent determined by ML
 function handleIntent(res){
     // Print out intent details
-    log(JSON.stringify({ utterance: res.utterance, intent: res.intent, score: res.score }));
+    const { classifications, locale, languageGuessed, answers, sentiment, language, localeIso2, nluAnswer, ...rest } = res;
+
+    log(JSON.stringify(rest, null, 2));
         
     // Override NLP result
     skills.forEach(skill => skill.override && skill.override(res, log));

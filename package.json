@@ -17,7 +17,6 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@nlpjs/basic": "^4.4.0",
     "aws-sdk": "^2.686.0",
     "axios": "^0.19.2",
     "bumblebee-hotword-node": "0.0.5",
@@ -27,6 +26,7 @@
     "express": "^4.17.1",
     "mic": "^2.1.2",
     "moment": "^2.26.0",
+    "node-nlp": "^4.4.0",
     "open": "^7.0.4",
     "ora": "^4.0.4",
     "public-ip": "^4.0.1",

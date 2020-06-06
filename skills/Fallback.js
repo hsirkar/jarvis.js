@@ -6,7 +6,11 @@ let instance;
 
 const Fallback = {
     name: 'Fallback',
-    init: () => {
+    init: (respond, log, ask) => {
+        this.respond = respond;
+        this.log = log;
+        this.ask = ask;
+
         instance = axios.create({
             method: 'get',
             headers: {
@@ -21,7 +25,8 @@ const Fallback = {
         });
     },
     doesHandleIntent: intentName => intentName === 'None',
-    handleIntent: (res, respond, log) => {
+    handleIntent: res => {
+        const { respond, log } = this;
         const { utterance } = res;
 
         (async () => {

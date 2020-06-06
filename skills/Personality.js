@@ -1,8 +1,8 @@
 const Personality = {
     name: 'Personality',
-    init: (log, respond, ask) => {
-        this.log = log;
+    init: (respond, log, ask) => {
         this.respond = respond;
+        this.log = log;
         this.ask = ask;
     },
     doesHandleIntent: intentName => {
@@ -13,9 +13,7 @@ const Personality = {
         return false;
     },
     handleIntent: res => {
-        this.ask('are you sure?', input => {
-            this.respond(res.answer);
-        });
+        this.respond(res.answer);
     }
 };
 

@@ -4,7 +4,11 @@ let timers = [];
 
 const DateTime = {
     name: 'DateTime',
-    init: log => {
+    init: (respond, log, ask) => {
+        this.respond = respond;
+        this.log = log;
+        this.ask = ask;
+
         setInterval(() => {
             for(i = 0; i < timers.length; i++) {
                 timers[i]--;
@@ -19,7 +23,8 @@ const DateTime = {
     doesHandleIntent: intentName => {
         return intentName.startsWith('datetime');
     },
-    handleIntent: (res, respond, log) => {
+    handleIntent: res => {
+        const { respond } = this;
         for(intent in ['year', 'timeofday', 'date', 'month']){
             if(res.intent.includes(intent)){
                 const date = moment();

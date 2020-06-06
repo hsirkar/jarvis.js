@@ -37,7 +37,7 @@ spinner.spinner = {
 // Load skills
 skills.forEach(skill => {
     if(!!skill.init)
-        skill.init(log, respond, ask);
+        skill.init(respond, log, ask);
 });
 log(`Finished loading skills`);
 
@@ -62,7 +62,7 @@ let nlp;
     hotword.init(log, stt);
     log(`Finished loading hotword detector`);
 
-    respond('Jarvis has finished booting up');
+    respond('Finished booting');
 })();
 
 // Ask the prompt.
@@ -116,7 +116,12 @@ function respond(message, isQuestion=false, callback=()=>{}) {
         message = message.toString();
 
         spinner.stop();
-        log(`Final response: ${message}`);
+
+        if(isQuestion)
+            log(`Asking user question: ${message}`);
+        else
+            log(`Final response: ${message}`);
+            
         console.log(chalk.cyan('J: ' + message + ''));
         process.env.ENABLE_TTS === '1' && tts.speak(message);
     }
@@ -143,12 +148,12 @@ function log(message) {
 // Handle the intent determined by ML
 function handleIntent(res){
     // Print out intent details
-    const { classifications, locale, languageGuessed, answers, sentiment, language, localeIso2, nluAnswer, ...rest } = res;
+    const { classifications, locale, languageGuessed, answers, language, localeIso2, nluAnswer, actions, ...rest } = res;
 
     log(JSON.stringify(rest, null, 2));
         
     // Override NLP result
-    skills.forEach(skill => skill.override && skill.override(res, log));
+    skills.forEach(skill => skill.override && skill.override(res));
 
     // Find proper skill to handle intent
     let matched = skills.find(skill => skill.doesHandleIntent(res.intent));
@@ -160,7 +165,7 @@ function handleIntent(res){
     }
     
     // Auto fallback if match score less than threshold
-    if(res.score < 0.70){
+    if(res.score < 0.72){
         log(`Match score too low!`);
         matched = Fallback;
     }

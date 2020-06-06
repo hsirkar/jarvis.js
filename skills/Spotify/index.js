@@ -54,7 +54,11 @@ function getDesc(track) {
 
 const Spotify = {
     name: 'Spotify',
-    init: () => {
+    init: (respond, log, ask) => {
+        this.respond = respond;
+        this.log = log;
+        this.ask = ask;
+        
         spotifyApi = new SpotifyWebApi({
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
@@ -67,15 +71,16 @@ const Spotify = {
             headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
         });
     },
-    override: (res, log) => {
+    override: res => {
         if(res.utterance.startsWith('play ')){
             const newRes = { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', score: 1 };
             Object.assign(res, newRes);
-            log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
+            this.log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
         }
     },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
-    handleIntent: (res, respond, log) => {
+    handleIntent: res => {
+        const { respond, log } = this;
         (async() => {
             try {
                 if(res.intent === 'spotify.play'){

@@ -4,7 +4,11 @@ let instance, lat, lon, city, appid;
 
 const Weather = {
     name: 'Weather',
-    init: log => {
+    init: (respond, log, ask) => {
+        this.respond = respond;
+        this.log = log;
+        this.ask = ask;
+
         instance = axios.create({
             method: 'get',
             headers: {
@@ -24,7 +28,8 @@ const Weather = {
         appid = process.env.OWM_APPID;
     },
     doesHandleIntent: intentName => intentName.startsWith('weather'),
-    handleIntent: (nlpRes, respond, log) => {
+    handleIntent: nlpRes => {
+        const { log, respond } = this;
         (async () => {
             try {
                 const res = await instance.get('http://ip-api.com/json');
@@ -64,7 +69,7 @@ const Weather = {
 
             } catch (err) { log(err, err.stack) }
 
-            respond(`I was unable to get the weather`, `I could not get the weather`);
+            respond([`I was unable to get the weather`, `I could not get the weather`]);
         })();
     }
 };

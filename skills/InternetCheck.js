@@ -4,11 +4,17 @@ const publicIp = require('public-ip');
 
 const InternetCheck = {
     name: 'InternetCheck',
+    init: (respond, log, ask) => {
+        this.respond = respond;
+        this.log = log;
+        this.ask = ask;
+    },
     doesHandleIntent: intentName => {
         return intentName.startsWith('netcheck');
     },
-    handleIntent: (res, respond) => {
+    handleIntent: res => {
         const secondary = res.intent.split('.')[1];
+        const { respond } = this;
 
         switch (secondary) {
             case 'general':

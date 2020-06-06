@@ -1,5 +1,10 @@
 const Personality = {
     name: 'Personality',
+    init: (log, respond, ask) => {
+        this.log = log;
+        this.respond = respond;
+        this.ask = ask;
+    },
     doesHandleIntent: intentName => {
         for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog'])
             if(intentName.startsWith(domain))
@@ -7,8 +12,10 @@ const Personality = {
 
         return false;
     },
-    handleIntent: (res, respond) => {
-        respond(res.answer);
+    handleIntent: res => {
+        this.ask('are you sure?', input => {
+            this.respond(res.answer);
+        });
     }
 };
 

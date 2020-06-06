@@ -1,7 +1,7 @@
 const io = require('socket.io')();
 const client = require('./client');
 
-function init(log, spinner, nlp, handleIntent) {
+function init(log, onInputReceived) {
     log('Creating STT server and opening client...');
 
     io.on('connection', client => {
@@ -9,9 +9,7 @@ function init(log, spinner, nlp, handleIntent) {
         
         client.on('final_transcript', message => {
             log(`Message received from STT client: ${message}`);
-            
-            spinner.start();
-            nlp.process('en', message.toLowerCase()).then(res => handleIntent(res));
+            onInputReceived(message);
         });
 
         client.on('disconnect', () => {

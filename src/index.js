@@ -37,7 +37,7 @@ spinner.spinner = {
 // Load skills
 skills.forEach(skill => {
     if(!!skill.init)
-        skill.init(log);
+        skill.init(log, respond, ask);
 });
 log(`Finished loading skills`);
 
@@ -55,7 +55,7 @@ let nlp;
     log(`Finished loading NLP`);
 
     // Load STT
-    stt.init(log, spinner, nlp, handleIntent);
+    stt.init(log, onInputReceived);
     log(`Finished loading STT`);
     
     // Load wakeword detector
@@ -66,21 +66,50 @@ let nlp;
 })();
 
 // Ask the prompt.
-function prompt() {
-    rl.question('', input => {
-        spinner.start();
-        // Convert utterance to intent using ML
-        nlp.process('en', input.toLowerCase())
-            .then(res => handleIntent(res))
-            .catch(err => {
-                log(err, err.stack);
-                respond('There was an error with your request');
-            });
-    });
+function prompt(isQuestion=false, callback=()=>{}) {
+    rl.question('', input => onInputReceived(input, isQuestion, callback));
+}
+
+// Process the input (determine if input should be dismissed, used to answer question, or sent to NLP for new intent)
+function onInputReceived(input, isQuestion=false, callback=()=>{}) {
+    // Dismiss input if dismissal word
+    let dismissed = false;
+
+    for (word of ['cancel', 'stop', 'nevermind', 'never mind', 'quit', 'exit', 'leave']) {
+        if (input === word) {
+            dismissed = true;
+            break;
+        }
+    }
+
+    if (dismissed) {
+        log('Dismissed');
+        respond();
+        return;
+    }
+
+    spinner.start();
+
+    // If user's input is reply to a question
+    if (isQuestion) {
+        log(`User's response: ${input}`);
+        callback(input);
+        return;
+    }
+
+    // Convert utterance to intent using ML
+    nlp.process('en', input.toLowerCase())
+        .then(res => handleIntent(res))
+        .catch(err => {
+            log(err, err.stack);
+            respond('There was an error with your request');
+        });
 }
 
 // Jarvis's final response
-function respond(message) {
+// isQuestion -> whether the response is a question
+// callback -> if isQuestion, then what to do after user answers
+function respond(message, isQuestion=false, callback=()=>{}) {
     if(!!message){
         if(Array.isArray(message))
             message = message[Math.floor(Math.random() * message.length)];
@@ -92,7 +121,12 @@ function respond(message) {
         process.env.ENABLE_TTS === '1' && tts.speak(message);
     }
     spinner.stop();
-    prompt();
+    prompt(isQuestion, callback);
+}
+
+// Ask user question, send answer to callback function
+function ask(question, callback){
+    respond(question, true, callback);
 }
 
 // Debug messages
@@ -118,20 +152,19 @@ function handleIntent(res){
 
     // Find proper skill to handle intent
     let matched = skills.find(skill => skill.doesHandleIntent(res.intent));
-    
-    // Auto fallback if match score less than threshold
-    if(res.score < 0.70){
-        log(`Match score too low, using Fallback...`);
-        Fallback.handleIntent(res, respond, log);
-        return;
-    }
 
     if(!matched){
         log(`No skill found to handle that intent`);
         respond('Oops, no skill can handle that intent');
         return;
     }
+    
+    // Auto fallback if match score less than threshold
+    if(res.score < 0.70){
+        log(`Match score too low!`);
+        matched = Fallback;
+    }
 
     log(`Handling intent through ${matched.name}`);
-    matched.handleIntent(res, respond, log);
+    matched.handleIntent(res);
 }

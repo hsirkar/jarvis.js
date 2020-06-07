@@ -1,0 +1,9 @@
+[
+    {
+        "intent": "stop.stop",
+        "utterances": [
+            "stop"
+        ],
+        "answers": []
+    }
+]

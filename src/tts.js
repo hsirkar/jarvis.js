@@ -3,6 +3,7 @@ const Speaker = require('speaker');
 const Stream = require('stream');
 const sha1 = require('sha1');
 const fs = require('fs');
+const Spotify = require('../skills/Spotify');
 
 let ttsEngine;
 let polly;
@@ -20,6 +21,10 @@ function init() {
 }
 
 function speak(text, cb=()=>{}){
+    // Spotify.spotifyApi.setVolume(30);
+    // cb = () => {
+    //     Spotify.spotifyApi.setVolume(100);
+    // }
     if(ttsEngine === 'polly'){
         speakPolly(text, cb);
     } else {

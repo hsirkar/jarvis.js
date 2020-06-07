@@ -75,7 +75,7 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
     // Dismiss input if dismissal word
     let dismissed = false;
 
-    for (word of ['cancel', 'stop', 'nevermind', 'never mind', 'quit', 'exit', 'leave']) {
+    for (word of ['never mind', 'nevermind', 'quit', 'leave', 'exit']) {
         if (input === word) {
             dismissed = true;
             break;
@@ -148,7 +148,8 @@ function log(message) {
 // Handle the intent determined by ML
 function handleIntent(res){
     // Print out intent details
-    const { classifications, locale, languageGuessed, answers, language, localeIso2, nluAnswer, actions, ...rest } = res;
+    const { classifications, locale, languageGuessed, answers, entities, sourceEntities,
+        language, localeIso2, nluAnswer, actions, sentiment, domain, ...rest } = res;
 
     log(JSON.stringify(rest, null, 2));
         

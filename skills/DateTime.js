@@ -1,6 +1,10 @@
 const moment = require('moment');
+const fs = require('fs');
+const playSound = require('play-sound')();
+const Speaker = require('speaker');
 
 let timers = [];
+let speaker;
 
 const DateTime = {
     name: 'DateTime',
@@ -16,9 +20,19 @@ const DateTime = {
                 if(timers[i] === 0) {
                     log(`Time's up!`);
                     timers.splice(i, 1);
+
+                    let readStream = new fs.createReadStream('./res/ring.raw');
+                    speaker = new Speaker({ channels: 2, bitDepth: 16, sampleRate: 48000 });
+                    readStream.on('open', () => readStream.pipe(speaker));
                 }
             }
         }, 1000);
+    },
+    override: res => {
+        if(res.utterance.includes('stop')) {
+            if(speaker && speaker.close)
+                speaker.close();
+        }
     },
     doesHandleIntent: intentName => {
         return intentName.startsWith('datetime');

@@ -76,6 +76,15 @@ const Spotify = {
             const newRes = { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', score: 1 };
             Object.assign(res, newRes);
             this.log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
+            return;
+        }
+
+        if (res.utterance.includes('stop')) {
+            spotifyApi.pause()
+                .then(() => {
+                    this.log('Spotify paused');
+                })
+                .catch(err => this.log(err));
         }
     },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
@@ -106,30 +115,35 @@ const Spotify = {
 
                 if(res.intent === 'spotify.pause'){
                     await spotifyApi.pause();
+                    log('Spotify paused');
                     respond();
                     return;
                 }
         
                 if (res.intent === 'spotify.resume') {
                     await spotifyApi.play();
+                    log('Spotify resumed');
                     respond();
                     return;
                 }
                 
                 if (res.intent === 'spotify.next') {
                     await spotifyApi.skipToNext();
+                    log('Spotify skipped to next');
                     respond();
                     return;
                 }
                 
                 if (res.intent === 'spotify.previous') {
                     await spotifyApi.skipToPrevious();
+                    log('Spotify back to previous');
                     respond();
                     return;
                 }
 
                 if (res.intent === 'spotify.replay') {
                     await spotifyApi.seek(0);
+                    log('Spotify replaying');
                     respond();
                     return;
                 }
@@ -162,6 +176,11 @@ const Spotify = {
                 }
 
             } catch (err) {
+                if(res.utterance.includes('stop')) {
+                    respond();
+                    return;
+                }
+
                 log(err, err.stack);
     
                 if(!!err.statusCode && err.statusCode === 401) {
@@ -180,4 +199,5 @@ const Spotify = {
     }
 };
 
+Spotify.spotifyApi = spotifyApi;
 module.exports = Spotify;

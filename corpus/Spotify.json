@@ -2,8 +2,6 @@
     {
         "intent": "spotify.pause",
         "utterances": [
-            "stop the music",
-            "stop",
             "pause",
             "pause spotify",
             "pause the music"

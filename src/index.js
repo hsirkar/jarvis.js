@@ -89,6 +89,11 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
         return;
     }
 
+    if(input === 'stop' || input === 'stop talking' || input === 'shut up' || input === 'shush' || input === 'be quiet') {
+        log('Shutting up...');
+        tts.stop();
+    }
+
     spinner.start();
 
     // If user's input is reply to a question

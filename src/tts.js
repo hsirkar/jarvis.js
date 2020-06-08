@@ -9,6 +9,7 @@ let ttsEngine;
 let polly;
 let say;
 let callback;
+let speaker;
 
 function init() {
     ttsEngine = process.env.TTS_ENGINE;
@@ -19,6 +20,11 @@ function init() {
     polly = new AWS.Polly({ region: 'us-east-1' });
 
     say = require('say');
+}
+
+function stop() {
+    if(speaker && speaker.close)
+        speaker.close();
 }
 
 function speak(text, cb=()=>{}, Spotify){
@@ -92,7 +98,7 @@ function speakPolly(text, cb){
                 bufferStream.pipe(fileStream);
 
                 (async() => {
-                    let speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
+                    speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
                     bufferStream.pipe(speaker);
                     speaker.on('close', () => cb());
                 })();
@@ -107,4 +113,4 @@ function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-module.exports = { init, speak };
+module.exports = { init, speak, stop };

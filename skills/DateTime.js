@@ -29,8 +29,10 @@ const DateTime = {
     },
     override: res => {
         if(res.utterance.includes('stop')) {
-            if(speaker && speaker.close)
+            if(speaker && speaker.close) {
+                this.log('Stopping timer alert...');
                 speaker.close();
+            }
         }
     },
     doesHandleIntent: intentName => {

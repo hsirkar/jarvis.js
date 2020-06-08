@@ -1,12 +1,13 @@
 const moment = require('moment');
 const fs = require('fs');
 const Speaker = require('speaker');
+const Spotify = require('Spotify');
 
 let timers = [];
 let speaker;
 
-const DateTime = {
-    name: 'DateTime',
+const Timer = {
+    name: 'Timer',
     init: (respond, log, ask) => {
         this.respond = respond;
         this.log = log;
@@ -28,7 +29,7 @@ const DateTime = {
         }, 1000);
     },
     override: res => {
-        if(res.utterance.includes('stop')) {
+        if(res.intent === 'system.stop') {
             if(speaker && speaker.close) {
                 this.log('Stopping timer alert...');
                 speaker.close();
@@ -36,25 +37,12 @@ const DateTime = {
         }
     },
     doesHandleIntent: intentName => {
-        return intentName.startsWith('datetime');
+        return intentName.startsWith('timer');
     },
     handleIntent: res => {
         const { respond } = this;
-        for(intent in ['year', 'timeofday', 'date', 'month']){
-            if(res.intent.includes(intent)){
-                const date = moment();
-                respond(
-                    res.answer
-                        .replace('%time%', date.format('LT'))
-                        .replace('%date%', date.format('dddd, MMMM Do'))
-                        .replace('%month%', date.format('MMMM'))
-                        .replace('%year%', date.format('YYYY'))
-                );
-                return;
-            }
-        }
 
-        if(res.intent === 'datetime.settimer') {
+        if(res.intent === 'timer.create') {
             let timeInterval = res.entities.find(entity => entity.entity === 'duration');
             let seconds = timeInterval.resolution.values[0].value;
 
@@ -65,4 +53,4 @@ const DateTime = {
     }
 };
 
-module.exports = DateTime;
+module.exports = Timer;

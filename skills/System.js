@@ -1,23 +1,32 @@
-const dns = require('dns');
 const os = require('os');
+const dns = require('dns');
 const publicIp = require('public-ip');
+const tts = require('../src/tts');
+const moment = require('moment');
 
-const InternetCheck = {
-    name: 'InternetCheck',
+const System = {
+    name: 'System',
     init: (respond, log, ask) => {
         this.respond = respond;
         this.log = log;
         this.ask = ask;
     },
+    override: res => {
+        if(res.utterance.startsWith('echo ')){
+            const newRes = { intent: 'system.echo', score: 1 };
+            Object.assign(res, newRes);
+            this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
+        }
+    },
     doesHandleIntent: intentName => {
-        return intentName.startsWith('netcheck');
+        return intentName.startsWith('system');
     },
     handleIntent: res => {
         const secondary = res.intent.split('.')[1];
-        const { respond } = this;
+        const { respond, log, ask } = this;
 
         switch (secondary) {
-            case 'general':
+            case 'netcheck':
                 dns.lookup('google.com', err => {
                     if (err && err.code == 'ENOTFOUND')
                         respond('No, you are not connected to the internet')
@@ -38,6 +47,29 @@ const InternetCheck = {
                     .then(res => respond(`Your public IP address is ${res.toString()}`))
                     .catch(() => respond('There was an error'));
                 break;
+            case 'echo':
+                respond(res.utterance.replace('echo ', ''));
+                break;
+            case 'dismiss':
+                log('Dismissed');
+                respond();
+                break;
+            case 'stop':
+                tts.stop();
+                respond();
+                break;
+            case 'time':
+            case 'date':
+            case 'year':
+                const date = moment();
+                respond(
+                    res.answer
+                        .replace('%time%', date.format('LT'))
+                        .replace('%date%', date.format('dddd, MMMM Do'))
+                        .replace('%month%', date.format('MMMM'))
+                        .replace('%year%', date.format('YYYY'))
+                );
+                break;
             default:
                 respond('I do not understand');
                 break;
@@ -45,4 +77,4 @@ const InternetCheck = {
     }
 };
 
-module.exports = InternetCheck;
+module.exports = System;

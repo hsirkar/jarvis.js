@@ -83,7 +83,7 @@ const Spotify = {
             return;
         }
 
-        if (res.utterance.includes('stop')) {
+        if (res.intent === 'system.stop') {
             spotifyApi.pause()
                 .then(() => {
                     this.log('Spotify paused');

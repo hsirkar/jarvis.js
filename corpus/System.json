@@ -1,0 +1,83 @@
+[
+    {
+        "intent": "system.netcheck",
+        "utterances": [
+            "Do I have internet?",
+            "Am I connected to the internet?",
+            "Is there an internet connection?"
+        ]
+    },
+    {
+        "intent": "system.localip",
+        "utterances": [
+            "What is your local ip address?",
+            "What is my local ip address?"
+        ]
+    },
+    {
+        "intent": "system.publicip",
+        "utterances": [
+            "what is your ip address?",
+            "what is my ip address?",
+            "my public ip",
+            "what is your public ip"
+        ]
+    },
+    {
+        "intent": "system.stop",
+        "utterances": [
+            "stop",
+            "shut up",
+            "stop talking",
+            "shush",
+            "be quiet",
+            "hush"
+        ]
+    },
+    {
+        "intent": "system.dismiss",
+        "utterances": [
+            "nevermind",
+            "never mind",
+            "dismiss"
+        ]
+    },
+    {
+        "intent": "system.time",
+        "utterances": [
+            "What time is it?",
+            "What is the time?",
+            "Time"
+        ],
+        "answers": [
+            "It's %time%",
+            "The time is %time%"
+        ]
+    },
+    {
+        "intent": "system.date",
+        "utterances": [
+            "What is today's date?",
+            "Date",
+            "Date today",
+            "What is the date?",
+            "What day is today?",
+            "What day of the week is it?"
+        ],
+        "answers": [
+            "Today is %date%",
+            "%date%"
+        ]
+    },
+    {
+        "intent": "system.year",
+        "utterances": [
+            "What year is it?",
+            "What is the current year?"
+        ],
+        "answers": [
+            "It's %year%",
+            "The current year is %year%"
+        ]
+    }
+]

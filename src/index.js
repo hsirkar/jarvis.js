@@ -73,27 +73,6 @@ function prompt(isQuestion=false, callback=()=>{}) {
 
 // Process the input (determine if input should be dismissed, used to answer question, or sent to NLP for new intent)
 function onInputReceived(input, isQuestion=false, callback=()=>{}) {
-    // Dismiss input if dismissal word
-    let dismissed = false;
-
-    for (word of ['never mind', 'nevermind', 'quit', 'leave', 'exit']) {
-        if (input === word) {
-            dismissed = true;
-            break;
-        }
-    }
-
-    if (dismissed) {
-        log('Dismissed');
-        respond();
-        return;
-    }
-
-    if(input === 'stop' || input === 'stop talking' || input === 'shut up' || input === 'shush' || input === 'be quiet') {
-        log('Shutting up...');
-        tts.stop();
-    }
-
     spinner.start();
 
     // If user's input is reply to a question

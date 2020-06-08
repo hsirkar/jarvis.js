@@ -1,0 +1,16 @@
+[
+    {
+        "intent": "timer.create",
+        "utterances": [
+            "set a %duration% timer",
+            "set a %duration% second timer",
+            "set a timer for %duration%",
+            "create a timer for %duration%",
+            "create a %duration% timer"
+        ],
+        "answers": [
+            "Ok, creating a timer for %time%",
+            "Timer for %time% has been set"
+        ]
+    }
+]

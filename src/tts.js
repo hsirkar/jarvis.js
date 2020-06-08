@@ -3,11 +3,12 @@ const Speaker = require('speaker');
 const Stream = require('stream');
 const sha1 = require('sha1');
 const fs = require('fs');
-const Spotify = require('../skills/Spotify');
+// const Spotify = require('../skills/Spotify');
 
 let ttsEngine;
 let polly;
 let say;
+let callback;
 
 function init() {
     ttsEngine = process.env.TTS_ENGINE;
@@ -20,16 +21,25 @@ function init() {
     say = require('say');
 }
 
-function speak(text, cb=()=>{}){
-    // Spotify.spotifyApi.setVolume(30);
-    // cb = () => {
-    //     Spotify.spotifyApi.setVolume(100);
-    // }
-    if(ttsEngine === 'polly'){
-        speakPolly(text, cb);
-    } else {
-        speakOffline(text, cb);
-    }
+function speak(text, cb=()=>{}, Spotify){
+    callback = cb;
+
+    Spotify.spotifyApi.setVolume(40)
+        .then(() => {
+            const old = callback;
+            callback = () => {
+                Spotify.spotifyApi.setVolume(85).catch(() => {});
+                old();
+            };
+        })
+        .catch(() => {})
+        .finally(() => {
+            if(ttsEngine === 'polly'){
+                speakPolly(text, callback);
+            } else {
+                speakOffline(text, callback);
+            }
+        });
 }
 
 function speakOffline(text, cb){

@@ -21,6 +21,8 @@ function refreshToken(res, response, log) {
                 baseURL: 'https://api.spotify.com',
                 headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
             });
+            
+            Object.assign(Spotify, { spotifyApi, axiosInstance });
 
             log('Saving it to env...');
             let env = require('fs').readFileSync('.env', 'utf-8');
@@ -70,6 +72,8 @@ const Spotify = {
             baseURL: 'https://api.spotify.com',
             headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
         });
+
+        Object.assign(Spotify, { spotifyApi, axiosInstance });
     },
     override: res => {
         if(res.utterance.startsWith('play ')){
@@ -199,5 +203,4 @@ const Spotify = {
     }
 };
 
-Spotify.spotifyApi = spotifyApi;
 module.exports = Spotify;

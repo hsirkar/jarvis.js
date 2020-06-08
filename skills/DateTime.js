@@ -1,6 +1,5 @@
 const moment = require('moment');
 const fs = require('fs');
-const playSound = require('play-sound')();
 const Speaker = require('speaker');
 
 let timers = [];

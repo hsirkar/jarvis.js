@@ -12,6 +12,7 @@ const hotword = require('./hotword');
 
 const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
+const Spotify = require('../skills/Spotify');
 
 require('dotenv').config();
 
@@ -123,7 +124,7 @@ function respond(message, isQuestion=false, callback=()=>{}) {
             log(`Final response: ${message}`);
             
         console.log(chalk.cyan('J: ' + message + ''));
-        process.env.ENABLE_TTS === '1' && tts.speak(message);
+        process.env.ENABLE_TTS === '1' && tts.speak(message, ()=>{}, Spotify);
     }
     spinner.stop();
     prompt(isQuestion, callback);

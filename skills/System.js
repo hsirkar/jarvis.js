@@ -70,8 +70,21 @@ const System = {
                         .replace('%year%', date.format('YYYY'))
                 );
                 break;
+            case 'volumeup':
+                break;
+            case 'volumedown':
+                break;
+            case 'setvolume':
+                break;
+            case 'uptime':
+                respond('The system has been up for ' + moment.duration(os.uptime()*1000).humanize());
+                break;
+            case 'freemem':
+                respond('About ' + Math.round(os.freemem()/1000000) + ' MB');
+                break;
+
             default:
-                respond('I do not understand');
+                respond('That feature has not been implemented yet');
                 break;
         }
     }

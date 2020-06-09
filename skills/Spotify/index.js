@@ -4,6 +4,7 @@ const open = require('open');
 
 let spotifyApi;
 let axiosInstance;
+let deviceId;
 
 function refreshToken(res, response, log) {
     log('Refreshing access token...');
@@ -73,6 +74,8 @@ const Spotify = {
             headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
         });
 
+        deviceId = process.env.SPOTIFY_DEVICE_ID;
+
         Object.assign(Spotify, { spotifyApi, axiosInstance });
     },
     override: res => {
@@ -110,8 +113,8 @@ const Spotify = {
                     }
 
                     // Add track to queue, skip to next track
-                    await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}`);
-                    await axiosInstance.post(`/v1/me/player/next`);
+                    await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}&device_id=${deviceId}`);
+                    await axiosInstance.post(`/v1/me/player/next?device_id=${deviceId}`);
 
                     respond(`Now playing ${getDesc(tracks[0])}`);
                     return;

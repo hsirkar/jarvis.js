@@ -1,10 +1,11 @@
 const moment = require('moment');
 const fs = require('fs');
 const Speaker = require('speaker');
-const Spotify = require('Spotify');
+const Spotify = require('./Spotify');
 
 let timers = [];
 let speaker;
+let callback;
 
 const Timer = {
     name: 'Timer',
@@ -21,9 +22,19 @@ const Timer = {
                     log(`Time's up!`);
                     timers.splice(i, 1);
 
-                    let readStream = new fs.createReadStream('./res/ring.raw');
-                    speaker = new Speaker({ channels: 2, bitDepth: 16, sampleRate: 48000 });
-                    readStream.on('open', () => readStream.pipe(speaker));
+                    callback = ()=>{};
+
+                    Spotify.spotifyApi.pause()
+                        .then(() => {
+                            callback = () => Spotify.spotifyApi.play().catch(()=>{});
+                        })
+                        .catch(()=>{})
+                        .finally(() => {
+                            let readStream = new fs.createReadStream('./res/ring.raw');
+                            speaker = new Speaker({ channels: 2, bitDepth: 16, sampleRate: 48000 });
+                            readStream.on('open', () => readStream.pipe(speaker));
+                            readStream.on('close', () => callback());
+                        });
                 }
             }
         }, 1000);

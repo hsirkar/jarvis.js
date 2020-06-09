@@ -4,8 +4,7 @@ let routines = [];
 
 const Routines = {
     name: 'Routines',
-    init: (respond, log, ask) => {
-        this.respond = respond;
+    init: (log, ask) => {
         this.log = log;
         this.ask = ask;
 
@@ -17,8 +16,8 @@ const Routines = {
         this.onInputReceived = onInputReceived;
     },
     doesHandleIntent: intentName => intentName.startsWith('routines'),
-    handleIntent: res => {
-        const { respond, log, onInputReceived } = this;
+    handleIntent: res => new Promise(resolve => {
+        const { onInputReceived } = this;
 
         if(res.intent.includes('.routine.')) {
             
@@ -27,11 +26,11 @@ const Routines = {
 
             onInputReceived(routine.commands[0]);
 
-            respond(`You have reached the ${res.intent} routine`);
+            resolve(`You have reached the ${res.intent} routine`);
         } else {
-            respond(res.answer);
+            resolve(res.answer);
         }
-    }
+    })
 };
 
 module.exports = Routines;

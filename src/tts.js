@@ -30,22 +30,22 @@ function stop() {
 function speak(text, cb=()=>{}, Spotify){
     callback = cb;
 
-    // Spotify.spotifyApi.setVolume(30)
-    //     .then(() => {
-    //         const old = callback;
-    //         callback = () => {
-    //             Spotify.spotifyApi.setVolume(60).catch(() => {});
-    //             old();
-    //         };
-    //     })
-    //     .catch(() => {})
-    //     .finally(() => {
+    Spotify.spotifyApi.setVolume(30)
+        .then(() => {
+            const old = callback;
+            callback = () => {
+                Spotify.spotifyApi.setVolume(60).catch(() => {});
+                old();
+            };
+        })
+        .catch(() => {})
+        .finally(() => {
             if(ttsEngine === 'polly'){
                 speakPolly(text, callback);
             } else {
                 speakOffline(text, callback);
             }
-        // });
+        });
 }
 
 function speakOffline(text, cb){

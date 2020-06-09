@@ -6,7 +6,7 @@ let spotifyApi;
 let axiosInstance;
 let deviceId;
 
-function refreshToken(res, response, log) {
+function refreshToken(res, resolve, log) {
     log('Refreshing access token...');
     spotifyApi.refreshAccessToken()
         .then(data => {
@@ -31,7 +31,8 @@ function refreshToken(res, response, log) {
             require('fs').writeFileSync('.env', env);
 
             log('Rehanding the intent');
-            Spotify.handleIntent(res, response, log);
+            Spotify.handleIntent(res)
+                .then(res => resolve(res));
         });
 }
 
@@ -57,8 +58,7 @@ function getDesc(track) {
 
 const Spotify = {
     name: 'Spotify',
-    init: (respond, log, ask) => {
-        this.respond = respond;
+    init: (log, ask) => {
         this.log = log;
         this.ask = ask;
         
@@ -95,8 +95,8 @@ const Spotify = {
         }
     },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
-    handleIntent: res => {
-        const { respond, log } = this;
+    handleIntent: res => new Promise(resolve => {
+        const { log } = this;
         (async() => {
             try {
                 if(res.intent === 'spotify.play'){
@@ -108,7 +108,7 @@ const Spotify = {
                     log('Search results: ' + tracks.map(track => getDesc(track)).join('; ') );
 
                     if(tracks.length === 0){
-                        respond(`No results found for ${query}`);
+                        resolve(`No results found for ${query}`);
                         return;
                     }
 
@@ -116,42 +116,42 @@ const Spotify = {
                     await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}&device_id=${deviceId}`);
                     await axiosInstance.post(`/v1/me/player/next?device_id=${deviceId}`);
 
-                    respond(`Now playing ${getDesc(tracks[0])}`);
+                    resolve(`Now playing ${getDesc(tracks[0])}`);
                     return;
                 }
 
                 if(res.intent === 'spotify.pause'){
                     await spotifyApi.pause();
                     log('Spotify paused');
-                    respond();
+                    resolve();
                     return;
                 }
         
                 if (res.intent === 'spotify.resume') {
                     await spotifyApi.play();
                     log('Spotify resumed');
-                    respond();
+                    resolve();
                     return;
                 }
                 
                 if (res.intent === 'spotify.next') {
                     await spotifyApi.skipToNext();
                     log('Spotify skipped to next');
-                    respond();
+                    resolve();
                     return;
                 }
                 
                 if (res.intent === 'spotify.previous') {
                     await spotifyApi.skipToPrevious();
                     log('Spotify back to previous');
-                    respond();
+                    resolve();
                     return;
                 }
 
                 if (res.intent === 'spotify.replay') {
                     await spotifyApi.seek(0);
                     log('Spotify replaying');
-                    respond();
+                    resolve();
                     return;
                 }
                         
@@ -161,13 +161,13 @@ const Spotify = {
 
                     if(apiRes && apiRes.body && track && track.name && track.artists)
                         if(res.intent.includes('current'))
-                            respond(getDesc(track));
+                            resolve(getDesc(track));
                         else {
                             open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
-                            respond();
+                            resolve();
                         }
                     else
-                        respond(`I'm not sure`);
+                        resolve(`I'm not sure`);
                     return;
                 }
 
@@ -178,32 +178,32 @@ const Spotify = {
                     // Add track to queue, skip to next track
                     await axiosInstance.post(`/v1/me/player/queue?uri=${episodes[0].uri}`);
                     await axiosInstance.post(`/v1/me/player/next`);
-                    respond(`Playing ${spotifyRes.data.name}`);
+                    resolve(`Playing ${spotifyRes.data.name}`);
                     return;
                 }
 
             } catch (err) {
                 if(res.utterance.includes('stop')) {
-                    respond();
+                    resolve();
                     return;
                 }
 
                 log(err, err.stack);
     
                 if(!!err.statusCode && err.statusCode === 401) {
-                    refreshToken(res, respond, log);
+                    refreshToken(res, resolve, log);
                     return;
                 }
             
                 if (err && err.response && err.response.data && err.response.data.error && err.response.data.error.reason && err.response.data.error.reason === 'NO_ACTIVE_DEVICE') {
-                    respond('There are no active devices to play on');
+                    resolve('There are no active devices to play on');
                     return;
                 }
             
-                respond('Error, I could not process your request');
+                resolve('Error, I could not process your request');
             }
         })();
-    }
+    })
 };
 
 module.exports = Spotify;

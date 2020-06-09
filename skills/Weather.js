@@ -4,8 +4,7 @@ let instance, lat, lon, city, appid;
 
 const Weather = {
     name: 'Weather',
-    init: (respond, log, ask) => {
-        this.respond = respond;
+    init: (log, ask) => {
         this.log = log;
         this.ask = ask;
 
@@ -28,8 +27,8 @@ const Weather = {
         appid = process.env.OWM_APPID;
     },
     doesHandleIntent: intentName => intentName.startsWith('weather'),
-    handleIntent: nlpRes => {
-        const { log, respond } = this;
+    handleIntent: nlpRes => new Promise(resolve => {
+        const { log } = this;
         (async () => {
             try {
                 const res = await instance.get('http://ip-api.com/json');
@@ -52,7 +51,7 @@ const Weather = {
                 if(res && res.status === 200 && res.data){
                     log('Successfully retrieved weather');
                     const { current, daily } = res.data;
-                    respond(
+                    resolve(
                         nlpRes.answer
                             .replace('%city%', city)
                             .replace('%desc%', current.weather[0].description)
@@ -69,9 +68,9 @@ const Weather = {
 
             } catch (err) { log(err, err.stack) }
 
-            respond([`I was unable to get the weather`, `I could not get the weather`]);
+            resolve([`I was unable to get the weather`, `I could not get the weather`]);
         })();
-    }
+    })
 };
 
 module.exports = Weather;

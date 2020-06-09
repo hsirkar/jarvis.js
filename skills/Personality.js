@@ -1,7 +1,6 @@
 const Personality = {
     name: 'Personality',
-    init: (respond, log, ask) => {
-        this.respond = respond;
+    init: (log, ask) => {
         this.log = log;
         this.ask = ask;
     },
@@ -12,9 +11,9 @@ const Personality = {
 
         return false;
     },
-    handleIntent: res => {
-        this.respond(res.answer);
-    }
+    handleIntent: res => new Promise(resolve => {
+        resolve(res.answer);
+    })
 };
 
 module.exports = Personality;

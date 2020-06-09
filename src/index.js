@@ -39,7 +39,7 @@ spinner.spinner = {
 // Load skills
 skills.forEach(skill => {
     if(!!skill.init)
-        skill.init(respond, log, ask);
+        skill.init(log, ask);
 });
 Routines.setOnInputReceived(onInputReceived);
 log(`Finished loading skills`);
@@ -86,9 +86,38 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
 
     // Convert utterance to intent using ML
     nlp.process('en', input.toLowerCase())
-        .then(res => handleIntent(res))
+        .then(res => {
+            const { utterance, intent, score, answer } = res;
+            log(JSON.stringify({ utterance, intent, score, answer }, null, 2));
+
+            // Override NLP result
+            skills.forEach(skill => skill.override && skill.override(res));
+
+            // Find proper skill to handle intent
+            let matched = skills.find(skill => skill.doesHandleIntent(res.intent));
+
+            if (!matched) {
+                log(`No skill found to handle that intent`);
+                return 'Oops, no skill can handle that intent';
+            }
+
+            // Auto fallback if match score less than threshold
+            if (res.score < 0.72) {
+                log(`Match score too low!`);
+                matched = Fallback;
+            }
+
+            log(`Handling intent through ${matched.name}`);
+            return matched.handleIntent(res);
+        })
+        .then(res => {
+            respond(res);
+            if(callback && typeof callback === 'function') {
+                callback();
+            }
+        })
         .catch(err => {
-            log(err, err.stack);
+            error(err);
             respond('There was an error with your request');
         });
 }
@@ -132,32 +161,13 @@ function log(message) {
     isSpinning && spinner.start();
 }
 
-// Handle the intent determined by ML
-function handleIntent(res){
-    // Print out intent details
-    const { classifications, locale, languageGuessed, answers, entities, sourceEntities,
-        language, localeIso2, nluAnswer, actions, sentiment, domain, ...rest } = res;
-
-    log(JSON.stringify(rest, null, 2));
-        
-    // Override NLP result
-    skills.forEach(skill => skill.override && skill.override(res));
-
-    // Find proper skill to handle intent
-    let matched = skills.find(skill => skill.doesHandleIntent(res.intent));
-
-    if(!matched){
-        log(`No skill found to handle that intent`);
-        respond('Oops, no skill can handle that intent');
+// Debug error
+function error(message) {
+    if(process.env.DEBUG !== '1')
         return;
-    }
-    
-    // Auto fallback if match score less than threshold
-    if(res.score < 0.72){
-        log(`Match score too low!`);
-        matched = Fallback;
-    }
 
-    log(`Handling intent through ${matched.name}`);
-    matched.handleIntent(res);
+    isSpinning = spinner.isSpinning;
+    isSpinning && spinner.stop();
+    console.log(chalk.red(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
+    isSpinning && spinner.start();
 }

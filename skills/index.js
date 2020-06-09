@@ -1,10 +1,10 @@
 module.exports = [
-    require('./Fallback'),
-    require('./Joke'),
+    // require('./Fallback'),
+    // require('./Joke'),
     require('./Personality'),
-    require('./Weather'),
-    require('./Spotify'),
-    require('./System'),
-    require('./Timer'),
-    require('./Routines'),
+    // require('./Weather'),
+    // require('./Spotify'),
+    // require('./System'),
+    // require('./Timer'),
+    // require('./Routines'),
 ];

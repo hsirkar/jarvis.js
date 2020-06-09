@@ -1,7 +1,8 @@
-const moment = require('moment');
+const humanizeDuration = require('humanize-duration');
 const fs = require('fs');
 const Speaker = require('speaker');
 const Spotify = require('./Spotify');
+const { list } = require('../src/util');
 
 let timers = [];
 let speaker;
@@ -16,10 +17,10 @@ const Timer = {
 
         setInterval(() => {
             for(i = 0; i < timers.length; i++) {
-                timers[i]--;
+                timers[i].timeLeft--;
 
-                if(timers[i] === 0) {
-                    log(`Time's up!`);
+                if(timers[i].timeLeft === 0) {
+                    log(`Timer for ${humanizeDuration(timers[i].total*1000)} is up`);
                     timers.splice(i, 1);
 
                     callback = ()=>{};
@@ -52,14 +53,70 @@ const Timer = {
     },
     handleIntent: res => {
         const { respond } = this;
+        const secondary = res.intent.split('.')[1];
 
-        if(res.intent === 'timer.create') {
+        if(secondary === 'create') {
             let timeInterval = res.entities.find(entity => entity.entity === 'duration');
             let seconds = timeInterval.resolution.values[0].value;
 
-            timers.push(seconds);
+            timers.push({ total: seconds, timeLeft: seconds });
+            this.log(JSON.stringify(timers));
         
-            respond(`Setting a timer for ${moment.duration(seconds, 's').humanize()}`);
+            respond(`Setting a timer for ${humanizeDuration(seconds*1000)}`);
+            return;
+        }
+
+        if(secondary === 'stopall') {
+            timers = [];
+            respond('Deleted all timers');
+            return;
+        }
+
+        if(secondary === 'stop') {
+            let timerToStop = {};
+            let timeInterval = res.entities.find(entity => entity.entity === 'duration');
+            
+            if(!timeInterval){
+                timerToStop = timers[0];
+            }else{
+                let seconds = timeInterval.resolution.values[0].value;
+                timerToStop = timers.find(timer => timer.total === seconds) || timers[0];
+            }
+
+            let index = timers.indexOf(timerToStop);
+            if(index === -1)
+                index = 0;
+
+            timers.splice(timers.indexOf(timerToStop), 1);
+            respond(`Timer for ${humanizeDuration(timerToStop.total*1000)} removed`);
+        }
+        
+        if(secondary === 'list') {
+            this.log(JSON.stringify(timers));
+            if(timers.length === 0)
+                respond('You do not have any active timers');
+            else
+                respond(
+                    timers.map((t, i) => `Timer ${i+1}: ${humanizeDuration(t.total*1000)}`).join('; ')
+                );
+        }
+
+        if(secondary === 'timeleft'){
+            let timerToStop = {};
+            let timeInterval = res.entities.find(entity => entity.entity === 'duration');
+            
+            if(!timeInterval){
+                timerToStop = timers[0];
+            }else{
+                let seconds = timeInterval.resolution.values[0].value;
+                timerToStop = timers.find(timer => timer.total === seconds) || timers[0];
+            }
+
+            let index = timers.indexOf(timerToStop);
+            if(index === -1)
+                index = 0;
+
+            respond(`${humanizeDuration(timers[index].timeLeft*1000)} left on your ${humanizeDuration(timers[index].total*1000).replace(/s$/, '')} timer`);
         }
     }
 };

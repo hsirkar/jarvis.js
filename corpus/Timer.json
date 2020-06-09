@@ -12,5 +12,46 @@
             "Ok, creating a timer for %time%",
             "Timer for %time% has been set"
         ]
+    },
+    {
+        "intent": "timer.list",
+        "utterances": [
+            "list my timers",
+            "what timers do I have"
+        ]
+    },
+    {
+        "intent": "timer.stop",
+        "utterances": [
+            "stop the timer",
+            "stop the %duration% timer",
+            "stop the %duration% second timer",
+            "delete the timer for %duration%",
+            "remove the %duration% second timer"
+        ]
+    },
+    {
+        "intent": "timer.stopall",
+        "utterances": [
+            "stop all timers"
+        ]
+    },
+    {
+        "intent": "timer.pause",
+        "utterances": [
+            "pause the timer",
+            "pause the %duration% timer",
+            "pause the %duration% second timer"
+        ]
+    },
+    {
+        "intent": "timer.timeleft",
+        "utterances": [
+            "how much time left",
+            "how much left on %duration% timer",
+            "how much left on %duration% second timer",
+            "how much time left on my %duration% second timer",
+            "how much time is remaining"
+        ]
     }
 ]

@@ -15,58 +15,65 @@ const Fallback = require('../skills/Fallback');
 const Spotify = require('../skills/Spotify');
 const Routines = require('../skills/Routines');
 
-require('dotenv').config();
+let spinner;
+let rl;
+let nlp;
 
-// Clear console
-const blank = '\n'.repeat(process.stdout.rows);
-console.log(blank);
-readline.cursorTo(process.stdout, 0, 0);
-readline.clearScreenDown(process.stdout);
+const init = () => {
+    require('dotenv').config();
 
-// Terminal I/O
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+    // Clear console
+    const blank = '\n'.repeat(process.stdout.rows);
+    console.log(blank);
+    readline.cursorTo(process.stdout, 0, 0);
+    readline.clearScreenDown(process.stdout);
 
-// Load spinner
-const spinner = ora(chalk.gray('Processing...'));
-spinner.spinner = {
-    'interval': 80,
-    'frames': ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏']
+    // Terminal I/O
+    rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    // Load spinner
+    spinner = ora(chalk.gray('Processing...'));
+    spinner.spinner = {
+        'interval': 80,
+        'frames': ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏']
+    };
+
+    // Load skills
+    skills.forEach(skill => {
+        if(!!skill.init)
+            skill.init(log, ask);
+    });
+    Routines.setOnInputReceived(onInputReceived);
+    log(`Finished loading skills`);
+
+    // Load TTS
+    tts.init();
+    log(`Finished loading TTS`);
+
+    // Load NLP engine
+    (async() => {
+        nlp = new NlpManager({ languages: ['en'] });
+        try {
+            await train(nlp, skills, log);
+        } catch (err) { console.error(err); }
+        log(`Finished loading NLP`);
+
+        // Load STT
+        stt.init(log, onInputReceived);
+        log(`Finished loading STT`);
+        
+        // Load wakeword detector
+        hotword.init(log, stt);
+        log(`Finished loading hotword detector`);
+
+        respond('Finished booting');
+    })();
 };
 
-// Load skills
-skills.forEach(skill => {
-    if(!!skill.init)
-        skill.init(log, ask);
-});
-Routines.setOnInputReceived(onInputReceived);
-log(`Finished loading skills`);
-
-// Load TTS
-tts.init();
-log(`Finished loading TTS`);
-
-// Load NLP engine
-let nlp;
-(async() => {
-    nlp = new NlpManager({ languages: ['en'] });
-    try {
-        await train(nlp, skills, log);
-    } catch (err) { console.error(err); }
-    log(`Finished loading NLP`);
-
-    // Load STT
-    stt.init(log, onInputReceived);
-    log(`Finished loading STT`);
-    
-    // Load wakeword detector
-    hotword.init(log, stt);
-    log(`Finished loading hotword detector`);
-
-    respond('Finished booting');
-})();
+init();
 
 // Ask the prompt.
 function prompt(isQuestion=false, callback=()=>{}) {

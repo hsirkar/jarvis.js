@@ -18,7 +18,7 @@
         "commands": [
             "echo Good morning, sir",
             "weather",
-            "echo Have a great day, sir, here is today's news",
+            "echo I hope you have a great day, sir",
             "play the news"
         ]
     }

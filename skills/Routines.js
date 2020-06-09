@@ -2,6 +2,17 @@ const fs = require('fs');
 
 let routines = [];
 
+const next = (commands, index, onInputReceived, resolve) => {
+    onInputReceived(commands[index], false, () => {
+        setTimeout(() => {
+            if(index === commands.length - 1)
+                resolve();
+            else
+                next(commands, index+1, onInputReceived, resolve);
+        }, 500);
+    });
+}
+
 const Routines = {
     name: 'Routines',
     init: (log, ask) => {
@@ -24,9 +35,8 @@ const Routines = {
             const routine = routines.find(r => r.intent === res.intent);
             this.log(routine.commands);
 
-            onInputReceived(routine.commands[0]);
+            next(routine.commands, 0, onInputReceived, resolve);
 
-            resolve(`You have reached the ${res.intent} routine`);
         } else {
             resolve(res.answer);
         }

@@ -6,4 +6,5 @@ module.exports = [
     require('./Spotify'),
     require('./System'),
     require('./Timer'),
+    require('./Routines'),
 ];

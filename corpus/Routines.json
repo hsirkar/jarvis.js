@@ -1,0 +1,25 @@
+[
+    {
+        "intent": "routines.create",
+        "utterances": [
+            "create a new routine"
+        ],
+        "answers": [
+            "Unfortunately, that is not yet supported. Please create a new routine manually"
+        ]
+    },
+    {
+        "intent": "routines.routine.goodmorning",
+        "utterances": [
+            "good morning",
+            "mornin jarvis",
+            "good morning jarvis"
+        ],
+        "commands": [
+            "echo Good morning, sir",
+            "weather",
+            "echo Have a great day, sir, here is today's news",
+            "play the news"
+        ]
+    }
+]

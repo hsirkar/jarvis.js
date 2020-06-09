@@ -13,6 +13,7 @@ const hotword = require('./hotword');
 const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
 const Spotify = require('../skills/Spotify');
+const Routines = require('../skills/Routines');
 
 require('dotenv').config();
 
@@ -40,6 +41,7 @@ skills.forEach(skill => {
     if(!!skill.init)
         skill.init(respond, log, ask);
 });
+Routines.setOnInputReceived(onInputReceived);
 log(`Finished loading skills`);
 
 // Load TTS

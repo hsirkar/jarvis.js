@@ -1,3 +1,5 @@
+const cheerio = require('cheerio');
+
 // make a list in the Oxford comma style (eg "a, b, c, and d")
 // Examples with conjunction "and":
 // ["a"] -> "a"
@@ -13,4 +15,16 @@ const list = (arr, conjunction, ifempty) => {
     return arr.join(", ");
 }
 
-module.exports = { list }
+// Shuffle an array
+const shuffle = a => {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// Returns text from html
+const clean = html => cheerio.load(html).text();
+
+module.exports = { list, shuffle, clean }

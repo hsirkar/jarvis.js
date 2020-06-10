@@ -1,0 +1,24 @@
+[
+    {
+        "intent": "fun.qod",
+        "utterances": [
+            "quote of the day"
+        ]
+    },
+    {
+        "intent": "fun.catfact",
+        "utterances": [
+            "tell me a cat fact",
+            "random facts about cats"
+        ]
+    },
+    {
+        "intent": "fun.trivia",
+        "utterances": [
+            "trivia",
+            "quiz me",
+            "ask me a trivia question",
+            "play trivia"
+        ]
+    }
+]

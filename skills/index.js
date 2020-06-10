@@ -7,4 +7,5 @@ module.exports = [
     require('./System'),
     require('./Timer'),
     require('./Routines'),
+    require('./Fun'),
 ];

@@ -19,6 +19,7 @@
             "echo Good morning, sir",
             "date",
             "weather",
+            "quote of the day",
             "echo I hope you have a great day, sir",
             "play the news"
         ]

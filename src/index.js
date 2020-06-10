@@ -14,6 +14,7 @@ const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
 const Spotify = require('../skills/Spotify');
 const Routines = require('../skills/Routines');
+const System = require('../skills/System');
 
 let spinner;
 let rl;
@@ -29,10 +30,12 @@ const init = () => {
     readline.clearScreenDown(process.stdout);
 
     // Terminal I/O
-    rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
+    if(!rl){
+        rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+    }
 
     // Load spinner
     spinner = ora(chalk.gray('Processing...'));
@@ -47,6 +50,7 @@ const init = () => {
             skill.init(log, ask);
     });
     Routines.setOnInputReceived(onInputReceived);
+    System.setInit(init);
     log(`Finished loading skills`);
 
     // Load TTS

@@ -9,7 +9,7 @@ const next = (commands, index, onInputReceived, resolve) => {
                 resolve();
             else
                 next(commands, index+1, onInputReceived, resolve);
-        }, 500);
+        }, 1000);
     });
 }
 

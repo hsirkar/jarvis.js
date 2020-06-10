@@ -17,6 +17,9 @@ const System = {
             this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
     },
+    setInit: initJarvis => {
+        this.initJarvis = initJarvis;
+    },
     doesHandleIntent: intentName => {
         return intentName.startsWith('system');
     },
@@ -81,7 +84,21 @@ const System = {
             case 'freemem':
                 resolve('About ' + Math.round(os.freemem()/1000000) + ' MB');
                 break;
+            case 'restart':
+                setTimeout(() => this.initJarvis(), 1000);
+                require('../src/stt/index').io.close();
+                require('../src/stt/client').close();
+                resolve('Restarting Jarvis...');
+                break;
+            case 'retrain':
+                require('child_process').execSync('npm run clear');
 
+                setTimeout(() => {
+                    System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
+                }, 500);
+
+                resolve('Retraining Jarvis...');
+                break;
             default:
                 resolve('That feature has not been implemented yet');
                 break;

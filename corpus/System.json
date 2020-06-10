@@ -117,5 +117,20 @@
             "uptime",
             "system uptime"
         ]
+    },
+    {
+        "intent": "system.restart",
+        "utterances": [
+            "reboot",
+            "restart jarvis",
+            "reload"
+        ]
+    },
+    {
+        "intent": "system.retrain",
+        "utterances": [
+            "retrain",
+            "clear cache"
+        ]
     }
 ]

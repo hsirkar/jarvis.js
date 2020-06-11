@@ -1,4 +1,5 @@
 const cheerio = require('cheerio');
+const similarity = require('string-similarity');
 
 // make a list in the Oxford comma style (eg "a, b, c, and d")
 // Examples with conjunction "and":
@@ -27,4 +28,36 @@ const shuffle = a => {
 // Returns text from html
 const clean = html => cheerio.load(html).text();
 
-module.exports = { list, shuffle, clean }
+// Determines whether utterance means "yes" or "no"
+// Returns true or false
+const isYes = utterance => {
+    const yesValues = [
+        'yes', 'sure', 'yes please', 'of course', 'continue', 'go ahead',
+        'do it', 'ok', 'sounds good', 'alright', 'certainly', 'definitely',
+        'absolutely', 'indeed', 'fine', 'obviously', 'yea', 'yeah', 'uh huh',
+        'you bet', 'okie dokie', 'okay', 'totally', 'yes sir', 'by all means',
+        'ye', 'shore', 'totes', 'yup', 'yep', 'please'
+    ];
+    const noValues = [
+        'no', 'not', 'nevermind', 'don\'t', 'nope', 'nah', 'i\'m good', 'it\'s okay',
+        'that\'s fine', 'stop', 'cancel', 'exit', 'quit', 'dismiss'
+    ];
+
+    utterance = utterance.toLowerCase().replace('-', ' ').replace(',', '');
+    
+    for (const no of noValues) {
+        if(utterance === no || utterance.includes(no)) {
+            return false;
+        }
+    }
+
+    for(const yes of yesValues) {
+        if(utterance === yes || utterance.includes(yes) || similarity.compareTwoStrings(utterance, yes) > 0.75){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+module.exports = { list, shuffle, clean, isYes }

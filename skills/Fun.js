@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const similarity = require('string-similarity');
-const { list, shuffle, clean } = require('../src/util');
+const { list, shuffle, clean, isYes } = require('../src/util');
 
 let instance;
 
@@ -58,19 +58,31 @@ const Fun = {
                         else if(item.difficulty === 'hard')
                             points = 15;
 
-                        this.ask(
-                            `The category is ${clean(item.category)}. ` +
-                            `For ${points} points, ${clean(item.question)} ` +
-                            `Is it: ${list(shuffle(all), 'or', 'None')}`
-                        , answer => {
-                            if(similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase()) > 0.85)
-                                resolve(`That's right, the answer is ${correct}`);
-                            else
-                                resolve(`That's incorrect, the correct answer is ${correct}`);
-                        });
+                        this.ask(`The category is ${clean(item.category)}. For ${points} points, ${clean(item.question)} Is it: ${list(shuffle(all), 'or', 'None')}`,
+                            answer => {
+                                const score = similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase());
+                                this.log(`Similarity to answer: ${score}`);
+
+                                if (score > 0.75)
+                                    resolve(`That's right, the answer is ${correct}`);
+                                else
+                                    resolve(`That's incorrect, the correct answer is ${correct}`);
+                            });
                         // resolve(res.results[0].)
                     })
                     .catch(() => resolve('Failed getting trivia question'));
+                break;
+            case 'insult':
+                this.ask(['Do you want me to insult you?', 'Are you sure?', 'Should I insult you?'], answer => {
+                    if(isYes(answer))
+                        instance.get('https://evilinsult.com/generate_insult.php?lang=en&type=json')
+                            .then(res => {
+                                resolve(res.data.insult);
+                            })
+                            .catch(() => resolve(res.answer))
+                    else
+                        resolve(['Okay', 'Alright', 'Fine']);
+                });
                 break;
             default:
                 resolve(`I'm not sure`);

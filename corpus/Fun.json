@@ -20,5 +20,29 @@
             "ask me a trivia question",
             "play trivia"
         ]
+    },
+    {
+        "intent": "fun.insult",
+        "utterances": [
+            "tell me an insult",
+            "insult me",
+            "fuck you",
+            "you look ugly",
+            "you suck",
+            "fuck off",
+            "asshole",
+            "you're an idiot",
+            "i fucking hate you"
+        ],
+        "answers": [
+            "You know, you are a classic example of the inverse ratio between the size of the mouth and the size of the brain",
+            "You're about as much use as a condom machine in the Vatican",
+            "Freaking idiot",
+            "Hey, where'd you get those clothes, the toilet store?",
+            "If I wanted a joke, I'd follow you into the John and watch you take a leak",
+            "There’s no more faith in thee than in a stewed prune",
+            "Thou art a boil, a plague sore",
+            "Thou art as fat as butter"
+        ]
     }
 ]

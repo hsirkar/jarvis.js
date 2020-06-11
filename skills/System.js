@@ -3,6 +3,7 @@ const dns = require('dns');
 const publicIp = require('public-ip');
 const tts = require('../src/tts');
 const moment = require('moment');
+const { isYes } = require('../src/util');
 
 const System = {
     name: 'System',
@@ -91,13 +92,19 @@ const System = {
                 resolve('Restarting Jarvis...');
                 break;
             case 'retrain':
-                require('child_process').execSync('npm run clear');
+                this.ask('Are you sure?', answer => {
+                    if (isYes(answer)) {
+                        require('child_process').execSync('npm run clear');
 
-                setTimeout(() => {
-                    System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
-                }, 500);
+                        setTimeout(() => {
+                            System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
+                        }, 500);
 
-                resolve('Retraining Jarvis...');
+                        resolve('Retraining Jarvis...');
+                    } else {
+                        resolve('Alright, I will not retrain');
+                    }
+                });
                 break;
             default:
                 resolve('That feature has not been implemented yet');

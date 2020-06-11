@@ -36,11 +36,12 @@ const isYes = utterance => {
         'do it', 'ok', 'sounds good', 'alright', 'certainly', 'definitely',
         'absolutely', 'indeed', 'fine', 'obviously', 'yea', 'yeah', 'uh huh',
         'you bet', 'okie dokie', 'okay', 'totally', 'yes sir', 'by all means',
-        'ye', 'shore', 'totes', 'yup', 'yep', 'please'
+        'ye', 'shore', 'totes', 'yup', 'yep', 'please', 'carry on', 'proceed'
     ];
     const noValues = [
         'no', 'not', 'nevermind', 'don\'t', 'nope', 'nah', 'i\'m good', 'it\'s okay',
-        'that\'s fine', 'stop', 'cancel', 'exit', 'quit', 'dismiss'
+        'that\'s fine', 'stop', 'cancel', 'exit', 'quit', 'dismiss', 'halt', 'disengage',
+        'negative', 'negatory', 'nevermind', 'scratch'
     ];
 
     utterance = utterance.toLowerCase().replace('-', ' ').replace(',', '');
@@ -52,7 +53,7 @@ const isYes = utterance => {
     }
 
     for(const yes of yesValues) {
-        if(utterance === yes || utterance.includes(yes) || similarity.compareTwoStrings(utterance, yes) > 0.75){
+        if(utterance === yes || utterance.includes(yes) || similarity.compareTwoStrings(utterance, yes) > 0.7){
             return true;
         }
     }

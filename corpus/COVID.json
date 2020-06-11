@@ -1,0 +1,15 @@
+[
+    {
+        "intent": "covid.summary",
+        "utterances": [
+            "coronavirus cases",
+            "covid cases",
+            "covid-19 deaths",
+            "how many new coronavirus cases",
+            "total number of cases of covid 19",
+            "confirmed deaths in the united states",
+            "total coronavirus deaths in the world",
+            "us confirmed deaths from covid"
+        ]
+    }
+]

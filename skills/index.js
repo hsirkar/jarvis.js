@@ -8,4 +8,5 @@ module.exports = [
     require('./Timer'),
     require('./Routines'),
     require('./Fun'),
+    require('./COVID'),
 ];

@@ -12,7 +12,7 @@ const Personality = {
         return false;
     },
     handleIntent: res => new Promise(resolve => {
-        resolve(res.answer);
+        resolve(res.answer.replace('%utterance%', res.utterance));
     })
 };
 

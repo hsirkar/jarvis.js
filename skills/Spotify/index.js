@@ -174,6 +174,7 @@ const Spotify = {
                 }
 
                 log(err.statusCode);
+                log(err);
     
                 if(err.statusCode && err.statusCode === 401) {
                     Spotify.refreshToken(() => Spotify.handleIntent(res).then(res => resolve(res)));
@@ -194,10 +195,12 @@ const Spotify = {
         spotifyApi[functionName](...args)
             .then(() => resolve())
             .catch(err => {
-                console.log(err);
                 if (err.statusCode && err.statusCode === 401)
                     Spotify.refreshToken(() => Spotify.api(functionName, args).then(() => resolve()));
-            });
+                
+                resolve();
+            })
+            .finally(() => resolve());
     })
 };
 

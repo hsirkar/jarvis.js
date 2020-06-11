@@ -237,7 +237,7 @@
             "you are just a chatbot"
         ],
         "answers": [
-            "I am an AI virtual assitant. I'll be here whenever you need me"
+            "I am an AI virtual assistant. I'll be here whenever you need me"
         ]
     },
     {
@@ -255,6 +255,19 @@
         "answers": [
             "Thank you. I try my best",
             "You're pretty smart yourself"
+        ]
+    },
+    {
+        "intent": "agent.howsmart",
+        "utterances": [
+            "how smart are you",
+            "what's your IQ",
+            "how intelligent are you",
+            "are you smart"
+        ],
+        "answers": [
+            "I am very smart, but not as smart as my creator",
+            "I'm pretty clever, but intelligence is like underwear. Important to have, but don't show it off"
         ]
     },
     {
@@ -575,11 +588,14 @@
             "good to know",
             "glad to hear that",
             "really well",
-            "that's awesome thank you"
+            "that's awesome thank you",
+            "you're great",
+            "great"
         ],
         "answers": [
             "Agree!",
-            "Glad you think so"
+            "Glad you think so",
+            "Thanks!"
         ]
     },
     {
@@ -589,7 +605,8 @@
             "no worries",
             "no problem about that",
             "don't worry",
-            "sure no problem"
+            "sure no problem",
+            "of course"
         ],
         "answers": [
             "Glad to hear that!",
@@ -603,7 +620,8 @@
             "nice thank you",
             "thanks buddy",
             "cheers",
-            "alright thanks"
+            "alright thanks",
+            "thanks"
         ],
         "answers": [
             "Anytime. That's what I'm here for",
@@ -985,6 +1003,88 @@
             "I'm sorry about that",
             "I'm always here for you",
             "I can tell you a joke or ask you a trivia question"
+        ]
+    },
+    {
+        "intent": "user.interjection",
+        "utterances": [
+            "ahem",
+            "ahh",
+            "aw",
+            "bam",
+            "bingo",
+            "bloody hell",
+            "boo",
+            "bravo",
+            "brrr",
+            "cheers",
+            "crap",
+            "dang",
+            "darn",
+            "damn",
+            "damn it",
+            "duh",
+            "eh",
+            "fuck",
+            "fucking god",
+            "fucking hell",
+            "goodness",
+            "good grief",
+            "good lord",
+            "gosh",
+            "god",
+            "god damn it",
+            "hallelujah",
+            "hmm",
+            "holy buckets",
+            "holy cow",
+            "holy fuck",
+            "holy smokes",
+            "holy shit",
+            "huh",
+            "hurray",
+            "jesus",
+            "jesus christ",
+            "jesus fucking christ",
+            "mother fucker",
+            "motherfucking",
+            "oh",
+            "oh dear",
+            "oh my",
+            "oh well",
+            "oops",
+            "ouch",
+            "ow",
+            "phew",
+            "pooh",
+            "pow",
+            "shit",
+            "thank god",
+            "the fuck",
+            "the hell",
+            "uh huh",
+            "uh oh",
+            "ugh",
+            "wahoo",
+            "well",
+            "what the hell",
+            "what in the world",
+            "what the fuck",
+            "whoa",
+            "whoops",
+            "wow",
+            "yeah",
+            "yes",
+            "yikes",
+            "yuck"
+        ],
+        "answers": [
+            "Indeed",
+            "Yes indeed",
+            "%utterance% indeed",
+            "Yessir",
+            "I agree",
+            ""
         ]
     }
 ]

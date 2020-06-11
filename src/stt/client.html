@@ -82,9 +82,15 @@
         socket.on('connect', () => {
             console.log('socket.io connected!');
         });
-        socket.on('hotword', () => {
+        socket.on('start', () => {
             console.log('Hotword detected, activating mic...');
             document.getElementById('start_button').click();
+        });
+        socket.on('stop', () => {
+            if(recognizing) {
+                console.log('Stop command received, disabling mic...');
+                document.getElementById('start_button').click();
+            }
         });
 
         // WebSpeech API

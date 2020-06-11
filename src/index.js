@@ -81,6 +81,11 @@ init();
 
 // Ask the prompt.
 function prompt(isQuestion=false, callback=()=>{}) {
+    Object.assign(stt, { isQuestion, callback });
+
+    if(isQuestion)
+        stt.start();
+
     rl.question('', input => onInputReceived(input, isQuestion, callback));
 }
 
@@ -92,6 +97,7 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
     if (isQuestion) {
         log(`User's response: ${input}`);
         callback(input);
+        stt.stop();
         return;
     }
 
@@ -137,12 +143,12 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
 // isQuestion -> whether the response is a question
 // callback -> if isQuestion, then what to do after user answers
 function respond(message, isQuestion=false, callback=()=>{}) {
-    if(!!message){
+    spinner.stop();
+
+    if(message){
         if(Array.isArray(message))
             message = message[Math.floor(Math.random() * message.length)];
         message = message.toString();
-
-        spinner.stop();
 
         if(isQuestion)
             log(`Asking user question: ${message}`);
@@ -150,9 +156,13 @@ function respond(message, isQuestion=false, callback=()=>{}) {
             log(`Final response: ${message}`);
             
         console.log(chalk.cyan('J: ' + message + ''));
-        process.env.ENABLE_TTS === '1' && tts.speak(message, ()=>{}, Spotify);
+
+        if(process.env.ENABLE_TTS === '1') {
+            tts.speak(message, () => prompt(isQuestion, callback), Spotify);
+            return;
+        }
     }
-    spinner.stop();
+
     prompt(isQuestion, callback);
 }
 

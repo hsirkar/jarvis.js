@@ -26,7 +26,7 @@ function init(log, stt) {
 
     bb.on('hotword', hotword => {
         log(`Hotword detected: ${hotword}, alerting STT client...`);
-        stt.io.emit('hotword');
+        stt.start();
     });
 
     bb.start(micInputStream, 32000);

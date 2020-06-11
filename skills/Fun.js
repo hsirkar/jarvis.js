@@ -77,7 +77,7 @@ const Fun = {
                     if(isYes(answer))
                         instance.get('https://evilinsult.com/generate_insult.php?lang=en&type=json')
                             .then(res => {
-                                resolve(res.data.insult);
+                                resolve(clean(res.data.insult));
                             })
                             .catch(() => resolve(res.answer))
                     else

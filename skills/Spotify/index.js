@@ -1,59 +1,14 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const axios = require('axios').default;
 const open = require('open');
+const { list } = require('../../src/util');
 
 let spotifyApi;
 let axiosInstance;
 let deviceId;
 
-function refreshToken(res, resolve, log) {
-    log('Refreshing access token...');
-    spotifyApi.refreshAccessToken()
-        .then(data => {
-            log('New access token: ' + data.body['access_token']);
-
-            const newAT = data.body['access_token'];
-            const oldAT = spotifyApi.getAccessToken();
-
-            log('Setting new access token...');
-            spotifyApi.setAccessToken(newAT);
-
-            axiosInstance = axios.create({
-                baseURL: 'https://api.spotify.com',
-                headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
-            });
-            
-            Object.assign(Spotify, { spotifyApi, axiosInstance });
-
-            log('Saving it to env...');
-            let env = require('fs').readFileSync('.env', 'utf-8');
-            env = env.replace(oldAT, newAT);
-            require('fs').writeFileSync('.env', env);
-
-            log('Rehanding the intent');
-            Spotify.handleIntent(res)
-                .then(res => resolve(res));
-        });
-}
-
 function getDesc(track) {
-    try {
-        const name = track.name;
-        const artists = track.artists;
-
-        let artistsDesc;
-
-        if (artists.length === 0)
-            artistsDesc = '';
-        else if (artists.length === 1)
-            artistsDesc = artists[0].name;
-        else
-            artistsDesc = artists.map(a => a.name).slice(0, -1).join(', ') + ' and ' + artists[artists.length - 1].name;
-
-        return `${name} by ${artistsDesc}`;
-    } catch {
-        return track.name;
-    }
+    return `${track.name} by ${list(track.artists.map(a => a.name), 'and', 'No Artist')}`;
 }
 
 const Spotify = {
@@ -87,12 +42,42 @@ const Spotify = {
         }
 
         if (res.intent === 'system.stop') {
-            spotifyApi.pause()
+            Spotify.api('pause')
                 .then(() => {
                     this.log('Spotify paused');
                 })
                 .catch(err => this.log(err));
         }
+    },
+    refreshToken: callback => {
+        const { log } = this;
+        log('Refreshing access token...');
+        spotifyApi.refreshAccessToken()
+            .then(data => {
+                log('New access token: ' + data.body['access_token']);
+    
+                const newAT = data.body['access_token'];
+                const oldAT = spotifyApi.getAccessToken();
+    
+                log('Setting new access token...');
+                spotifyApi.setAccessToken(newAT);
+    
+                axiosInstance = axios.create({
+                    baseURL: 'https://api.spotify.com',
+                    headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
+                });
+                
+                Object.assign(Spotify, { spotifyApi, axiosInstance });
+    
+                log('Saving it to env...');
+                let env = require('fs').readFileSync('.env', 'utf-8');
+                env = env.replace(oldAT, newAT);
+                require('fs').writeFileSync('.env', env);
+    
+                log('Rehanding the intent');
+                callback();
+            })
+            .catch(err => log(err));
     },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
     handleIntent: res => new Promise(resolve => {
@@ -100,7 +85,7 @@ const Spotify = {
         (async() => {
             try {
                 if(res.intent === 'spotify.play'){
-                    const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace('by ', '').replace('and ', '');
+                    const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace(' by ', ' ').replace(' and ', ' ');
                     log(`Searching for "${query}"...`);
 
                     let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
@@ -188,10 +173,10 @@ const Spotify = {
                     return;
                 }
 
-                log(err, err.stack);
+                log(err.statusCode);
     
-                if(!!err.statusCode && err.statusCode === 401) {
-                    refreshToken(res, resolve, log);
+                if(err.statusCode && err.statusCode === 401) {
+                    Spotify.refreshToken(() => Spotify.handleIntent(res).then(res => resolve(res)));
                     return;
                 }
             
@@ -203,6 +188,16 @@ const Spotify = {
                 resolve('Error, I could not process your request');
             }
         })();
+    }),
+    // Use functions from SpotifyWebApi with error handling for expired access token
+    api: (functionName, ...args) => new Promise(resolve => {
+        spotifyApi[functionName](...args)
+            .then(() => resolve())
+            .catch(err => {
+                console.log(err);
+                if (err.statusCode && err.statusCode === 401)
+                    Spotify.refreshToken(() => Spotify.api(functionName, args).then(() => resolve()));
+            });
     })
 };
 

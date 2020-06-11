@@ -63,7 +63,7 @@ const Fun = {
                                 const score = similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase());
                                 this.log(`Similarity to answer: ${score}`);
 
-                                if (score > 0.75)
+                                if (score > 0.70)
                                     resolve(`That's right, the answer is ${correct}`);
                                 else
                                     resolve(`That's incorrect, the correct answer is ${correct}`);

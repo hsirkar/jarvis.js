@@ -24,9 +24,9 @@ const Timer = {
 
                     callback = ()=>{};
 
-                    Spotify.spotifyApi.pause()
+                    Spotify.api('pause')
                         .then(() => {
-                            callback = () => Spotify.spotifyApi.play().catch(()=>{});
+                            callback = () => Spotify.api('play').catch(()=>{});
                         })
                         .catch(()=>{})
                         .finally(() => {

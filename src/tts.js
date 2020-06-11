@@ -30,11 +30,11 @@ function stop() {
 function speak(text, cb=()=>{}, Spotify){
     callback = cb;
 
-    Spotify.spotifyApi.setVolume(30)
+    Spotify.api('setVolume', ['30'])
         .then(() => {
             const old = callback;
             callback = () => {
-                Spotify.spotifyApi.setVolume(60).catch(() => {});
+                Spotify.api('setVolume', ['60']).catch(() => {});
                 old();
             };
         })

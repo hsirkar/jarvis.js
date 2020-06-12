@@ -3,7 +3,8 @@ const dns = require('dns');
 const publicIp = require('public-ip');
 const tts = require('../src/tts');
 const moment = require('moment');
-const { isYes } = require('../src/util');
+const { isYes, setEnv, list } = require('../src/util');
+const similarity = require('string-similarity');
 
 const System = {
     name: 'System',
@@ -14,6 +15,11 @@ const System = {
     override: res => {
         if(res.utterance.startsWith('echo ')){
             const newRes = { intent: 'system.echo', score: 1 };
+            Object.assign(res, newRes);
+            this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
+        }
+        if(res.utterance.startsWith('set ') && res.utterance.includes(' to ')) {
+            const newRes = { intent: 'system.setenv', score: 1 };
             Object.assign(res, newRes);
             this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
@@ -103,6 +109,32 @@ const System = {
                         resolve('Retraining Jarvis...');
                     } else {
                         resolve('Alright, I will not retrain');
+                    }
+                });
+                break;
+            case 'setenv':
+                const variables = ['DEFAULT_CITY', 'ENABLE_TTS', 'DEBUG', 'NODE_ENV', 'TTS_ENGINE', 'OPEN_STT_CLIENT'];
+
+                let variable = res.utterance.split(' to ')[0].replace('set', '').trim();
+                let matches = similarity.findBestMatch(variable, variables.map(v => v.toLowerCase()));
+
+                if(matches.bestMatch.rating < 0.7) {
+                    resolve(`There is no variable named ${variable}. You can choose from ${list(variables, 'and', '')}`);
+                    return;
+                }
+
+                let index = matches.bestMatchIndex;
+                let value = res.utterance.split(' to ')[1].trim();
+                
+                log(`Target variable: ${variables[index]} (${matches.bestMatch.rating})`);
+                log(`Target value: ${value}`);
+
+                this.ask(`Confirming: Set ${variables[index]} to ${value}?`, answer => {
+                    if (isYes(answer)) {
+                        setEnv(variables[index], value);
+                        System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
+                    } else {
+                        resolve('OK, cancelled');
                     }
                 });
                 break;

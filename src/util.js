@@ -1,5 +1,6 @@
 const cheerio = require('cheerio');
 const similarity = require('string-similarity');
+const fs = require('fs');
 
 // make a list in the Oxford comma style (eg "a, b, c, and d")
 // Examples with conjunction "and":
@@ -14,6 +15,18 @@ const list = (arr, conjunction, ifempty) => {
     arr = arr.slice();
     arr[l - 1] = `${conjunction} ${arr[l - 1]}`;
     return arr.join(", ");
+}
+
+// "a, b, c, and 5 others"
+const abbrList = (arr, conjunction, ifempty, max) => {
+    let arr2 = arr;
+
+    if (arr.length - max > 1) {
+        arr2 = arr.slice(0, max);
+        arr2.push(`${arr.length - max} others`);
+    }
+
+    return list(arr2, conjunction, ifempty);
 }
 
 // Shuffle an array
@@ -61,4 +74,15 @@ const isYes = utterance => {
     return false;
 }
 
-module.exports = { list, shuffle, clean, isYes }
+// override an existing .env value
+const setEnv = (name, value) => {
+    let envText = fs.readFileSync('.env', 'utf-8');
+    let currentValue = process.env[name];
+    let newEnv = envText.replace(`${name}=${currentValue}`, `${name}=${value}`);
+
+    fs.writeFileSync('.env', newEnv);
+
+    process.env[name] = value;
+}
+
+module.exports = { list, shuffle, clean, isYes, setEnv, abbrList }

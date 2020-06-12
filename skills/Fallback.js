@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 const cheerio = require('cheerio');
+const { abbrList } = require('../src/util');
 require('dotenv').config();
 
 let instance;
@@ -50,12 +51,41 @@ const Fallback = {
 
             try {
                 google = await instance.get(`https://www.google.com/search?q=${utterance}`);
+                const $ = cheerio.load(google.data);
 
-                if (google && google.status === 200 && google.data && cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text()) {
-                    answer = cheerio.load(google.data)('#center_col').find("[role='heading'][data-attrid]").children().first().text();
-                    resolve(answer + (answer.length < 70 ? ', according to Google' : ''));
+                let answer;
+
+                // Basic info
+                const basic = $('#center_col').find('[role=heading][data-attrid]').children().first().text();
+
+                if(basic) {
+                    answer = basic;
+                }
+
+                // List (type 1)
+                const arr1 = $('[role=list]').children().toArray();
+
+                if(arr1.length > 0) {
+                    const answers = arr1.map(e => cheerio.load(e).text());
+                    answer = abbrList(answers, 'and', '', 4);
+                }
+
+                // List (type 2)
+                const arr2 = $('.rl_item').toArray();
+
+                if(arr2.length > 0) {
+                    const answers = arr2.map(e => cheerio.load(e).text());
+                    answer = abbrList(answers, 'and', '', 4);
+                }
+
+                if(answer) {
+                    if(answer.length < 70)
+                        resolve([`According to Google, ${answer}`, `${answer}, according to Google`]);
+                    else
+                        resolve(answer);
                     return;
                 }
+
             } catch (err) { log(err, err.stack) }
 
             log(`No results found`);

@@ -119,7 +119,7 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
             }
 
             // Auto fallback if match score less than threshold
-            if (res.score < 0.72) {
+            if (res.score < 0.735) {
                 log(`Match score too low!`);
                 matched = Fallback;
             }

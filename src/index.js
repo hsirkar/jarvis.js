@@ -125,7 +125,9 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
             }
 
             log(`Handling intent through ${matched.name}`);
-            return matched.handleIntent(res);
+
+            const timeout = new Promise(resolve => setTimeout(() => resolve('Request timed out'), 5000));
+            return Promise.race([ timeout, matched.handleIntent(res) ]);
         })
         .then(res => {
             respond(res);

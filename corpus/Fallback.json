@@ -7,5 +7,17 @@
             "You'll have to rephrase that",
             "I do not understand"
         ]
+    },
+    {
+        "intent": "fallback.force",
+        "utterances": [
+            "wrong answer",
+            "fallback",
+            "reanswer",
+            "try again",
+            "that's not right",
+            "look it up",
+            "wrong skill"
+        ]
     }
 ]

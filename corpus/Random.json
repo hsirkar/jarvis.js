@@ -1,0 +1,25 @@
+[
+    {
+        "intent": "random.number",
+        "utterances": [
+            "generate a random number",
+            "pick a random number between %number% and %number",
+            "give me a random number from %number% to %number%",
+            "pick a whole number"
+        ]
+    },
+    {
+        "intent": "random.coinflip",
+        "utterances": [
+            "flip a coin",
+            "heads or tails"
+        ]
+    },
+    {
+        "intent": "random.die",
+        "utterances": [
+            "roll a die",
+            "flip a die"
+        ]
+    }
+]

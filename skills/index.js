@@ -9,4 +9,5 @@ module.exports = [
     require('./Routines'),
     require('./Fun'),
     require('./COVID'),
+    require('./Random'),
 ];

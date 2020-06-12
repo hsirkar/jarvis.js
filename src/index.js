@@ -20,6 +20,9 @@ let spinner;
 let rl;
 let nlp;
 
+let previous = {};
+let current = {};
+
 const init = () => {
     require('dotenv').config();
 
@@ -51,6 +54,7 @@ const init = () => {
     });
     Routines.setOnInputReceived(onInputReceived);
     System.setInit(init);
+    Fallback.setPrevious(previous);
     log(`Finished loading skills`);
 
     // Load TTS
@@ -104,6 +108,8 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
     // Convert utterance to intent using ML
     nlp.process('en', input.toLowerCase())
         .then(res => {
+            current.res = res;
+
             const { utterance, intent, score, answer } = res;
             log(JSON.stringify({ utterance, intent, score, answer }, null, 2));
 
@@ -126,7 +132,7 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
 
             log(`Handling intent through ${matched.name}`);
 
-            const timeout = new Promise(resolve => setTimeout(() => resolve('Request timed out'), 5000));
+            const timeout = new Promise(resolve => setTimeout(() => resolve('Request timed out'), 20000));
             return Promise.race([ timeout, matched.handleIntent(res) ]);
         })
         .then(res => {
@@ -134,6 +140,8 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
             if(callback && typeof callback === 'function') {
                 callback();
             }
+            previous.res = current.res;
+            current.res = null;
         })
         .catch(err => {
             error(err);

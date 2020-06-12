@@ -5,6 +5,19 @@ require('dotenv').config();
 
 let instance;
 
+// Takes in an array and returns answer
+const getAnswer = arr => {
+    const answers = arr.map(e => {
+        let text = cheerio.load(e).text();
+
+        if (/[A-Za-z]\d{4}$/.test(text))
+            text = text.replace(/\d{4}$/, match => ` (${match})`);
+
+        return text.replace(' · ', ' ').replace('·', '');
+    });
+    return abbrList(answers, 'and', '', 4);
+}
+
 const Fallback = {
     name: 'Fallback',
     init: (log, ask) => {
@@ -24,10 +37,20 @@ const Fallback = {
             }
         });
     },
-    doesHandleIntent: intentName => intentName === 'None',
+    setPrevious: previous => this.previous = previous,
+    doesHandleIntent: intentName => intentName === 'None' || intentName.startsWith('fallback'),
     handleIntent: res => new Promise(resolve => {
         const { log } = this;
-        const { utterance } = res;
+        let { utterance } = res;
+
+        if(res.intent === 'fallback.force') {
+            if(this.previous) {
+                utterance = this.previous.res.utterance;
+            }else{
+                resolve(`I'm not sure`);
+                return;
+            }
+        }
 
         (async () => {
             // First query DDG
@@ -55,27 +78,25 @@ const Fallback = {
 
                 let answer;
 
-                // Basic info
-                const basic = $('#center_col').find('[role=heading][data-attrid]').children().first().text();
-
-                if(basic) {
-                    answer = basic;
-                }
-
                 // List (type 1)
                 const arr1 = $('[role=list]').children().toArray();
 
                 if(arr1.length > 0) {
-                    const answers = arr1.map(e => cheerio.load(e).text());
-                    answer = abbrList(answers, 'and', '', 4);
+                    answer = getAnswer(arr1);
                 }
 
                 // List (type 2)
                 const arr2 = $('.rl_item').toArray();
 
                 if(arr2.length > 0) {
-                    const answers = arr2.map(e => cheerio.load(e).text());
-                    answer = abbrList(answers, 'and', '', 4);
+                    answer = getAnswer(arr1);
+                }
+                
+                // Basic info
+                const basic = $('#center_col').find('[role=heading][data-attrid]').children().first().text();
+
+                if(basic) {
+                    answer = basic;
                 }
 
                 if(answer) {

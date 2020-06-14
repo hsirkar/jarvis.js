@@ -62,7 +62,9 @@
             "Date today",
             "What is the date?",
             "What day is today?",
-            "What day of the week is it?"
+            "What day of the week is it?",
+            "today's date",
+            "what day is it"
         ],
         "answers": [
             "Today is %date%",
@@ -73,7 +75,8 @@
         "intent": "system.year",
         "utterances": [
             "What year is it?",
-            "What is the current year?"
+            "What is the current year?",
+            "what is the year"
         ],
         "answers": [
             "It's %year%",

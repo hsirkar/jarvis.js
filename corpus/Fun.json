@@ -13,6 +13,17 @@
         ]
     },
     {
+        "intent": "fun.fact",
+        "utterances": [
+            "tell me something",
+            "tell me a random fact",
+            "random fact",
+            "teach me something new",
+            "I want to learn something",
+            "fun fact"
+        ]
+    },
+    {
         "intent": "fun.trivia",
         "utterances": [
             "trivia",

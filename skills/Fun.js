@@ -43,6 +43,15 @@ const Fun = {
                     })
                     .catch(() => resolve('Failed to get a random cat fact'))
                 break;
+            case 'fact':
+                instance.get('https://uselessfacts.jsph.pl/random.json?language=en')
+                    .then(res => {
+                        resolve([
+                            `Did you know that ${res.data.text}`, `Fun fact: ${res.data.text}`, res.data.text
+                        ]);
+                    })
+                    .catch(() => resolve('Failed to get a fact'))
+                break;
             case 'trivia':
                 instance.get('https://opentdb.com/api.php?amount=10')
                     .then(res => {
@@ -58,22 +67,29 @@ const Fun = {
                         else if(item.difficulty === 'hard')
                             points = 15;
 
-                        this.ask(`The category is ${clean(item.category)}. For ${points} points, ${clean(item.question)} Is it: ${list(shuffle(all), 'or', 'None')}`,
+                        let question = `The category is ${clean(item.category)}. For ${points} points, ${clean(item.question)} `;
+                        
+                        if(item.type === 'multiple')
+                            question += `Is it: ${list(shuffle(all), 'or', 'None')}`;
+                        else
+                            question += `True or False?`;
+
+                        this.ask(question,
                             answer => {
                                 const score = similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase());
                                 this.log(`Similarity to answer: ${score}`);
 
                                 if (score > 0.70)
-                                    resolve(`That's right, the answer is ${correct}`);
+                                    resolve([`That's right, the answer is ${correct}`, `Correct, it is ${correct}`, `Yep, you got it. The answer is ${correct}`]);
                                 else
-                                    resolve(`That's incorrect, the correct answer is ${correct}`);
+                                    resolve([`That's incorrect, the correct answer is ${correct}`, `Oof, that's not correct. The right answer is ${correct}`]);
                             });
                         // resolve(res.results[0].)
                     })
                     .catch(() => resolve('Failed getting trivia question'));
                 break;
             case 'insult':
-                this.ask(['Do you want me to insult you?', 'Are you sure?', 'Should I insult you?'], answer => {
+                this.ask(['Do you want me to insult you?', 'Are you sure?', 'Should I insult you?', 'Do you want me to roast you?'], answer => {
                     if(isYes(answer))
                         instance.get('https://evilinsult.com/generate_insult.php?lang=en&type=json')
                             .then(res => {

@@ -16,6 +16,8 @@ const Spotify = require('../skills/Spotify');
 const Routines = require('../skills/Routines');
 const System = require('../skills/System');
 
+const { randomElement } = require('./util');
+
 let spinner;
 let rl;
 let nlp;
@@ -77,7 +79,7 @@ const init = () => {
         hotword.init(log, stt);
         log(`Finished loading hotword detector`);
 
-        respond('Finished booting');
+        respond('Hi');
     })();
 };
 
@@ -157,7 +159,7 @@ function respond(message, isQuestion=false, callback=()=>{}) {
 
     if(message){
         if(Array.isArray(message))
-            message = message[Math.floor(Math.random() * message.length)];
+            message = randomElement(message);
         message = message.toString();
 
         if(isQuestion)

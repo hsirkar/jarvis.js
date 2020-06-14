@@ -110,7 +110,9 @@
         "utterances": [
             "Tell me a joke",
             "Tell me a clean joke",
-            "Make me laugh"
+            "Make me laugh",
+            "Do you know a joke?",
+            "Can you make me laugh?"
         ],
         "answers": [
             "What did the fish say when it hit the wall? Dam.",
@@ -530,7 +532,7 @@
             "What do you get if you cross an owl and a rooster?A cock that stays up all night.",
             "Did you hear about the constipated mathematician?He worked it out with a pencil.",
             "What did the elephant say to the naked man?How do you breathe through that tiny thing?",
-            "Why do they say that eating yogurt and oysters will improve your sex life?Because if you'll eat that stuff, you'll eat anything.\nAnd some vulgar one-liners:",
+            "Why do they say that eating yogurt and oysters will improve your sex life?Because if you'll eat that stuff, you'll eat anything.",
             "I bought a box of condoms earlier today. The cashier asked if I'd like a bag. I said \"no, I'll just turn the lights off.\"",
             "Masturbation always leads to sex. It's a gateway tug.",
             "My girlfriend tried to make me have sex on the bonnet of her Honda. I refused. If I'm going to have sex, it's going to be on my own Accord.",

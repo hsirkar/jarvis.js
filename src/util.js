@@ -85,4 +85,22 @@ const setEnv = (name, value) => {
     process.env[name] = value;
 }
 
-module.exports = { list, shuffle, clean, isYes, setEnv, abbrList }
+const randomElements = (arr, n) => {
+    var result = new Array(n),
+        len = arr.length,
+        taken = new Array(len);
+    if (n > len)
+        throw new RangeError("getRandom: more elements taken than available");
+    while (n--) {
+        var x = Math.floor(Math.random() * len);
+        result[n] = arr[x in taken ? taken[x] : x];
+        taken[x] = --len in taken ? taken[len] : len;
+    }
+    return result;
+}
+
+const randomElement = arr => {
+    return randomElements(arr, 1)[0];
+}
+
+module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements }

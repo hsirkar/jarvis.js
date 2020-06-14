@@ -59,6 +59,20 @@ const Fun = {
                     })
                     .catch(() => resolve(res.answer));
                 break;
+            case 'trumpquote':
+                instance.get('https://api.tronalddump.io/random/quote')
+                    .then(res => {
+                        resolve(`"${res.data.value}"`);
+                    })
+                    .catch(() => resolve(`Failed to get Donald Trump quote`));
+                break;
+            case 'corporatebs':
+                instance.get('https://corporatebs-generator.sameerkumar.website/')
+                    .then(res => {
+                        resolve(res.data.phrase);
+                    })
+                    .catch(() => resolve(`Failed to get corporate BS`));
+                break;
             case 'trivia':
                 instance.get('https://opentdb.com/api.php?amount=10')
                     .then(res => {

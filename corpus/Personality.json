@@ -141,7 +141,9 @@
             "you're pretty",
             "you look gorgeous",
             "you're cute",
-            "you're handsome"
+            "you're handsome",
+            "you look beautiful",
+            "you're beautiful"
         ],
         "answers": [
             "Oh! Thank you!",
@@ -293,7 +295,14 @@
             "Where do you live?",
             "Will Smith movies",
             "What is the US constitution?",
-            "Do black lives matter?"
+            "Do black lives matter?",
+            "Generate corporate BS",
+            "Tell me a pick up line",
+            "Quote by Donald Trump",
+            "Fun facts",
+            "What is 21 Savage's full name",
+            "Taylor Swift albums",
+            "Who is your girlfriend?"
         ]
     },
     {

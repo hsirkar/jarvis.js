@@ -27,7 +27,11 @@
             "stop the %duration% timer",
             "stop the %duration% second timer",
             "delete the timer for %duration%",
-            "remove the %duration% second timer"
+            "remove the %duration% second timer",
+            "remove the %duration% timer",
+            "stop the timer",
+            "remove timer",
+            "delete timer"
         ]
     },
     {

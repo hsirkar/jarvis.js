@@ -234,5 +234,24 @@
             "Thou art a boil, a plague sore",
             "Thou art as fat as butter"
         ]
+    },
+    {
+        "intent": "fun.trumpquote",
+        "utterances": [
+            "tell me a quote by trump",
+            "what has donald trump said",
+            "quotes by donald trump",
+            "trump quotes",
+            "random donald trump quote"
+        ]
+    },
+    {
+        "intent": "fun.corporatebs",
+        "utterances": [
+            "generate corporate BS",
+            "corporate jargon",
+            "corporate bullshit",
+            "bullshit generator"
+        ]
     }
 ]

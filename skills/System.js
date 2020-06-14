@@ -23,6 +23,11 @@ const System = {
             Object.assign(res, newRes);
             this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
+        if(res.utterance.startsWith('renew ')) {
+            const newRes = { intent: 'system.renew', score: 1 };
+            Object.assign(res, newRes);
+            this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
+        }
     },
     setInit: initJarvis => {
         this.initJarvis = initJarvis;
@@ -113,17 +118,17 @@ const System = {
                 });
                 break;
             case 'setenv':
-                const variables = ['DEFAULT_CITY', 'ENABLE_TTS', 'DEBUG', 'NODE_ENV', 'TTS_ENGINE', 'OPEN_STT_CLIENT'];
+                const variables = ['ENABLE_TTS', 'DEBUG', 'TTS_ENGINE', 'OPEN_STT_CLIENT', 'ALERT_ON_BOOT'];
 
                 let variable = res.utterance.split(' to ')[0].replace('set', '').trim();
-                let matches = similarity.findBestMatch(variable, variables.map(v => v.toLowerCase()));
+                var matches = similarity.findBestMatch(variable, variables.map(v => v.toLowerCase()));
 
                 if(matches.bestMatch.rating < 0.7) {
                     resolve(`There is no variable named ${variable}. You can choose from ${list(variables, 'and', '')}`);
                     return;
                 }
 
-                let index = matches.bestMatchIndex;
+                var index = matches.bestMatchIndex;
                 let value = res.utterance.split(' to ')[1].trim();
                 
                 log(`Target variable: ${variables[index]} (${matches.bestMatch.rating})`);
@@ -137,6 +142,29 @@ const System = {
                         resolve('OK, cancelled');
                     }
                 });
+                break;
+            case 'renew':
+                const products = ['Photoshop', 'Illustrator', 'Premiere Pro'];
+
+                let target = res.utterance.toLowerCase();
+                ['renew', 'trial', 'reset', 'new', 'the', 'my'].forEach(c => target = target.replace(c, '').trim());
+
+                var matches = similarity.findBestMatch(target, products.map(p => p.toLowerCase()));
+
+                log(target);
+
+                if(matches.bestMatch.rating < 0.7) {
+                    resolve(`No product named ${target} found. You can choose from ${list(products, 'and', '')}`);
+                    return;
+                }
+
+                var index = matches.bestMatchIndex;
+                
+                log(`Target product: ${products[index]} (${matches.bestMatch.rating})`);
+
+                resolve('Hi');
+
+
                 break;
             default:
                 resolve('That feature has not been implemented yet');

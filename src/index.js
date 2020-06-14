@@ -79,7 +79,7 @@ const init = () => {
         hotword.init(log, stt);
         log(`Finished loading hotword detector`);
 
-        respond('Hi');
+        respond(process.env.ALERT_ON_BOOT === '1' ? 'Finished booting' : '');
     })();
 };
 

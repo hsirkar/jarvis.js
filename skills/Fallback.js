@@ -89,7 +89,7 @@ const Fallback = {
                 const arr2 = $('.rl_item').toArray();
 
                 if(arr2.length > 0) {
-                    answer = getAnswer(arr1);
+                    answer = getAnswer(arr2);
                 }
                 
                 // Basic info

@@ -307,7 +307,9 @@
             "you are just a chatbot"
         ],
         "answers": [
-            "I am an AI virtual assistant. I'll be here whenever you need me"
+            "I am an AI virtual assistant. I'll be here whenever you need me",
+            "I'm not sure what you heard, but virtual assistants have feelings too",
+            "Well, I don't want to brag, but I got a B+ on the Turing test"
         ]
     },
     {
@@ -842,7 +844,8 @@
     {
         "intent": "greetings.goodnight",
         "utterances": [
-            "good evening"
+            "good night",
+            "night jarvis"
         ],
         "answers": [
             "Good night",

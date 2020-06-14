@@ -1,11 +1,13 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const axios = require('axios').default;
 const open = require('open');
+const moment = require('moment');
 const { list } = require('../../src/util');
 
 let spotifyApi;
 let axiosInstance;
 let deviceId;
+let lastRefreshed;
 
 function getDesc(track) {
     return `${track.name} by ${list(track.artists.map(a => a.name), 'and', 'No Artist')}`;
@@ -51,10 +53,18 @@ const Spotify = {
     },
     refreshToken: callback => {
         const { log } = this;
+
+        if(lastRefreshed && moment().diff(lastRefreshed, 'minutes') < 30) {
+            log('Access token was refreshed less than 30 minutes ago, skipping refresh');
+            return;
+        }
+
         log('Refreshing access token...');
         spotifyApi.refreshAccessToken()
             .then(data => {
                 log('New access token: ' + data.body['access_token']);
+
+                lastRefreshed = moment();
     
                 const newAT = data.body['access_token'];
                 const oldAT = spotifyApi.getAccessToken();

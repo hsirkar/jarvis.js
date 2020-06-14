@@ -41,7 +41,7 @@ const Fun = {
                     .then(res => {
                         resolve(res.data.text);
                     })
-                    .catch(() => resolve('Failed to get a random cat fact'))
+                    .catch(() => resolve('Failed to get a random cat fact'));
                 break;
             case 'fact':
                 instance.get('https://uselessfacts.jsph.pl/random.json?language=en')
@@ -50,7 +50,14 @@ const Fun = {
                             `Did you know that ${res.data.text}`, `Fun fact: ${res.data.text}`, res.data.text
                         ]);
                     })
-                    .catch(() => resolve('Failed to get a fact'))
+                    .catch(() => resolve(res.answer));
+                break;
+            case 'pickupline':
+                instance.get('http://pebble-pickup.herokuapp.com/tweets/random')
+                    .then(res => {
+                        resolve(res.data.tweet);
+                    })
+                    .catch(() => resolve(res.answer));
                 break;
             case 'trivia':
                 instance.get('https://opentdb.com/api.php?amount=10')

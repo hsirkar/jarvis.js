@@ -52,7 +52,7 @@ const init = () => {
     // Load skills
     skills.forEach(skill => {
         if(!!skill.init)
-            skill.init(log, ask);
+            skill.init(log, ask, say);
     });
     Routines.setOnInputReceived(onInputReceived);
     System.setInit(init);
@@ -134,8 +134,9 @@ function onInputReceived(input, isQuestion=false, callback=()=>{}) {
 
             log(`Handling intent through ${matched.name}`);
 
-            const timeout = new Promise(resolve => setTimeout(() => resolve('Request timed out'), 20000));
-            return Promise.race([ timeout, matched.handleIntent(res) ]);
+            // const timeout = new Promise(resolve => setTimeout(() => resolve('Request timed out'), 20000));
+            // return Promise.race([ timeout, matched.handleIntent(res) ]);
+            return matched.handleIntent(res);
         })
         .then(res => {
             respond(res);
@@ -181,6 +182,18 @@ function respond(message, isQuestion=false, callback=()=>{}) {
 // Ask user question, send answer to callback function
 function ask(question, callback){
     respond(question, true, callback);
+}
+
+// Say something out loud, not ask or respond
+function say(message) {
+    isSpinning = spinner.isSpinning;
+    isSpinning && spinner.stop();
+    console.log(chalk.cyan('J: ' + message + ''));
+    if(process.env.ENABLE_TTS === '1') {
+        tts.speak(message, ()=>isSpinning && spinner.start(), Spotify);
+        return;
+    }
+    isSpinning && spinner.start();
 }
 
 // Debug messages

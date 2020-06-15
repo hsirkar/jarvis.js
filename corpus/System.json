@@ -135,5 +135,13 @@
             "retrain",
             "clear cache"
         ]
+    },
+    {
+        "intent": "system.speedtest",
+        "utterances": [
+            "what's my internet speed",
+            "do a speed test",
+            "what's my ping"
+        ]
     }
 ]

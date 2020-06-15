@@ -35,6 +35,7 @@
     "sha1": "^1.1.1",
     "socket.io": "^2.3.0",
     "speaker": "^0.5.1",
+    "speedtest-net": "^2.1.1",
     "spotify-web-api-node": "^4.0.0",
     "string-similarity": "^4.0.1"
   },

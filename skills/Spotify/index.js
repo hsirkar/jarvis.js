@@ -32,6 +32,7 @@ const Spotify = {
         });
 
         deviceId = process.env.SPOTIFY_DEVICE_ID;
+        lastRefreshed = undefined;
 
         Object.assign(Spotify, { spotifyApi, axiosInstance });
     },

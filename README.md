@@ -5,7 +5,6 @@ to do list:
 - reminder
 - calendar
 - volume
-- speedtest?
 - lists/notes
 - alarm?
 - stock prices
@@ -15,6 +14,7 @@ to do list:
 - stackexchange / yahoo answers / answers.com / question.com scraping
 - improved timeout (dependent on skill)
 - find my phone
+- cache all requests
 
 done:
 - ~~adobe renew~~
@@ -28,3 +28,4 @@ done:
 - ~~personalization (add your name to personality answers)~~
 - ~~coronavirus~~
 - ~~wakeword detection!~~
+- ~~speedtest?~~

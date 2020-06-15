@@ -143,5 +143,24 @@
             "do a speed test",
             "what's my ping"
         ]
+    },
+    {
+        "intent": "system.location",
+        "utterances": [
+            "what is your location",
+            "what's my location",
+            "where are you",
+            "where am I?"
+        ]
+    },
+    {
+        "intent": "system.isp",
+        "utterances": [
+            "who is my internet service provider",
+            "who is your ISP?",
+            "what's my ISP's name?",
+            "what internet service provider am I using",
+            "whose internet am I using"
+        ]
     }
 ]

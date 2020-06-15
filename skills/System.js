@@ -8,6 +8,7 @@ const similarity = require('string-similarity');
 const fs = require('fs');
 const path = require('path');
 const speedtest = require('speedtest-net');
+const axios = require('axios').default;
 
 const System = {
     name: 'System',
@@ -64,6 +65,28 @@ const System = {
                 publicIp.v4()
                     .then(res => resolve(`Your public IP address is ${res.toString()}`))
                     .catch(() => resolve('There was an error'));
+                break;
+            case 'location':
+                axios.get('http://ip-api.com/json')
+                    .then(res => {
+                        const { city, regionName, country } = res.data;
+                        resolve([
+                            `Based on your IP address, your location is ${city}, ${regionName}, ${country}`,
+                            `The host location of your IP address is ${city}, ${regionName}, ${country}`
+                        ]);
+                    })
+                    .catch(() => resolve('I could not get your location'));
+                break;
+            case 'isp':
+                axios.get('http://ip-api.com/json')
+                    .then(res => {
+                        const { isp } = res.data;
+                        resolve([
+                            `Based on your IP address, ${isp}`,
+                            `The host ISP of your IP address is ${isp}`
+                        ]);
+                    })
+                    .catch(() => resolve('I could not get your location'));
                 break;
             case 'echo':
                 resolve(res.utterance.replace('echo ', ''));

@@ -255,5 +255,30 @@
             "corporate bullshit",
             "bullshit generator"
         ]
+    },
+    {
+        "intent": "fun.bored",
+        "utterances": [
+            "boring",
+            "this is boring",
+            "I'm getting bored",
+            "It bores me",
+            "that was boring",
+            "I'm bored",
+            "help me I'm bored",
+            "I have nothing to do",
+            "What should I do?",
+            "give me something to do",
+            "what can I do for free?",
+            "I want to do something",
+            "what can I do?",
+            "I am so freaking bored",
+            "give me an activity",
+            "fun thing to do"
+        ],
+        "answers": [
+            "If you're bored, you could plan your dream vacation",
+            "Boredom, huh? Have you ever seen a hedgehog taking a bath?"
+        ]
     }
 ]

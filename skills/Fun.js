@@ -73,6 +73,13 @@ const Fun = {
                     })
                     .catch(() => resolve(`Failed to get corporate BS`));
                 break;
+            case 'bored':
+                instance.get('https://www.boredapi.com/api/activity/')
+                    .then(res => {
+                        resolve(res.data.activity);
+                    })
+                    .catch(() => resolve(res.answer));
+                break;
             case 'trivia':
                 instance.get('https://opentdb.com/api.php?amount=10')
                     .then(res => {

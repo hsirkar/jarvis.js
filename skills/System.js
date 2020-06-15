@@ -113,7 +113,7 @@ const System = {
                             System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
                         }, 500);
 
-                        resolve('Retraining the natural language processor...');
+                        resolve('Retraining Jarvis...');
                     } else {
                         resolve(['Alright, I will not retrain', 'Retrain canceled']);
                     }

@@ -14,10 +14,10 @@ to do list:
 - speaker detection
 - stackexchange / yahoo answers / answers.com / question.com scraping
 - improved timeout (dependent on skill)
-- adobe renew
 - find my phone
 
 done:
+- ~~adobe renew~~
 - ~~spotify~~
 - ~~news~~
 - ~~routines~~

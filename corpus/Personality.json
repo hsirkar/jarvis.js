@@ -1592,7 +1592,9 @@
             "what are you wearing"        
         ],
         "answers": [
-            "They don't make clothes for me"
+            "They don't make clothes for me",
+            "In the cloud, no one knows what you're wearing",
+            "Let's see...OK, just as I thought...the same as yesterday"
         ]
     },
     {
@@ -1605,6 +1607,21 @@
         "answers": [
             "I don't have a surname",
             "I'm mononymous, like Plato and Michaelangelo"
+        ]
+    },
+    {
+        "intent": "user.wrongassistant",
+        "utterances": [
+            "Hey Google",
+            "OK Google",
+            "Hey Siri",
+            "Alexa",
+            "Hey Cortana"
+        ],
+        "answers": [
+            "Very funny",
+            "You've got the wrong assistant",
+            "Haha, my name is Jarvis"
         ]
     }
 ]

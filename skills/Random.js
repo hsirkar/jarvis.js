@@ -62,6 +62,16 @@ const Random = {
 
                 resolve(getRandomIntInclusive(min, max));
                 break;
+            case 'person':
+                instance.get('https://randomuser.me/api/?nat=us')
+                    .then(res => {
+                        const person = res.data.results[0];
+                        this.log(JSON.stringify(person, null, 2));
+                        const { name, dob, gender } = person;
+                        resolve(`${name.first} ${name.last}, ${gender}, ${dob.age}`);
+                    })
+                    .catch(() => resolve('Failed getting random person'));
+                break;
             default:
                 resolve(`I'm not sure`);
                 break;

@@ -21,5 +21,12 @@
             "roll a die",
             "flip a die"
         ]
+    },
+    {
+        "intent": "random.person",
+        "utterances": [
+            "generate a random person",
+            "random person"
+        ]
     }
 ]

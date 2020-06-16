@@ -80,6 +80,13 @@ const Fun = {
                     })
                     .catch(() => resolve(res.answer));
                 break;
+            case 'advice':
+                instance.get('https://api.adviceslip.com/advice')
+                    .then(res => {
+                        resolve(res.data.slip.advice);
+                    })
+                    .catch(() => resolve(`Failed getting advice`));
+                break;
             case 'trivia':
                 instance.get('https://opentdb.com/api.php?amount=10')
                     .then(res => {

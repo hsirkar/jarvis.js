@@ -281,5 +281,16 @@
             "If you're bored, you could plan your dream vacation",
             "Boredom, huh? Have you ever seen a hedgehog taking a bath?"
         ]
+    },
+    {
+        "intent": "fun.advice",
+        "utterances": [
+            "give me advice",
+            "give me words of wisdom",
+            "advice slip",
+            "slip of advice",
+            "teach me",
+            "words of wisdom"
+        ]
     }
 ]

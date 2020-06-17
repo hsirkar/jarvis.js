@@ -32,7 +32,7 @@ const Fun = {
                 instance.get('https://quotes.rest/qod')
                     .then(res => {
                         const quote = res.data.contents.quotes[0];
-                        resolve(`Today's quote is... ${quote.quote} by ${quote.author}`);
+                        resolve(`Today's quote is "${quote.quote}" by ${quote.author}`);
                     })
                     .catch(() => resolve('Failed to get quote of the day'));
                 break;
@@ -117,7 +117,7 @@ const Fun = {
                                 if (score > 0.70)
                                     resolve([`That's right, the answer is ${correct}`, `Correct, it is ${correct}`, `Yep, you got it. The answer is ${correct}`]);
                                 else
-                                    resolve([`That's incorrect, the correct answer is ${correct}`, `Oof, that's not correct. The right answer is ${correct}`]);
+                                    resolve([`That's incorrect, the correct answer is ${correct}`, `0 points. The right answer is ${correct}`]);
                             });
                         // resolve(res.results[0].)
                     })

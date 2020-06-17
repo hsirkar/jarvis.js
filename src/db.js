@@ -1,9 +1,22 @@
 const mongoose = require('mongoose');
 
-function init(log) {
+
+function init(log, say) {
     mongoose.connect('mongodb://localhost:27017/jarvis', { useNewUrlParser: true, useUnifiedTopology: true })
         .then(() => log('Connected to mongodb!'))
         .catch(err => log(err));
+
+    mongoose.connection.on('connected', () => {
+        say('Connected to Jarvis database');
+    });
+
+    mongoose.connection.on('disconnected', () => {
+        say('Disconnected from Jarvis database');
+    });
+
+    mongoose.connection.on('connecting', () => {
+        say('Connecting to Jarvis database...');
+    });
 }
 
 const Person = mongoose.model('Person',

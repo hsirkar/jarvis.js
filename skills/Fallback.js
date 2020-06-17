@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 const cheerio = require('cheerio');
 const { abbrList } = require('../src/util');
+const similarity = require('string-similarity');
 require('dotenv').config();
 
 let instance;
@@ -76,7 +77,25 @@ const Fallback = {
                 google = await instance.get(`https://www.google.com/search?q=${utterance}`);
                 const $ = cheerio.load(google.data);
 
-                let answer;
+                let answer = "";
+
+                // Lyrics
+                const lyrics = $('[data-lyricid]').find('span:not(:has(*))').toArray().map(s => cheerio.load(s).text());
+
+                if(Array.isArray(lyrics) && lyrics.length) {
+                    const { bestMatch, bestMatchIndex } = similarity.findBestMatch(utterance, lyrics);
+                    if(bestMatch.rating > 0.6 && lyrics[bestMatchIndex+1]) {
+                        answer = lyrics[bestMatchIndex+1];
+                        for(swear of ["bitch","shit","fuck","nigger","nigga","shit","dick","cum","pussy","shit","retard","fag","whore"]) {
+                            answer = answer.replace(swear, '[...]');
+                        }
+                    }
+                }
+
+                if(answer) {
+                    resolve(answer);
+                    return;
+                }
 
                 // List (type 1)
                 const arr1 = $('[role=list]').children().toArray();

@@ -65,7 +65,7 @@ const init = () => {
     log(`Finished loading TTS`);
 
     // Load Mongoose
-    mongoose.init(log);
+    mongoose.init(log, say);
 
     // Load NLP engine
     (async() => {

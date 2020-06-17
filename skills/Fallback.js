@@ -83,11 +83,17 @@ const Fallback = {
                 const lyrics = $('[data-lyricid]').find('span:not(:has(*))').toArray().map(s => cheerio.load(s).text());
 
                 if(Array.isArray(lyrics) && lyrics.length) {
-                    const { bestMatch, bestMatchIndex } = similarity.findBestMatch(utterance, lyrics);
-                    if(bestMatch.rating > 0.6 && lyrics[bestMatchIndex+1]) {
-                        answer = lyrics[bestMatchIndex+1];
-                        for(swear of ["bitch","shit","fuck","nigger","nigga","shit","dick","cum","pussy","shit","retard","fag","whore"]) {
-                            answer = answer.replace(swear, '[...]');
+                    const index = similarity.findBestMatch(utterance, lyrics).bestMatchIndex;
+                    if(lyrics[index+1]) {
+
+                        answer = lyrics[index+1].trim();
+
+                        if(answer.length < 32 && lyrics[index+2] && lyrics[index+2].trim() !== '…' && lyrics[index+2].trim() !== '\u2026'){
+                            answer += ' / ' + lyrics[index+2].trim();
+                        }
+
+                        for(swear of ["bitch","shit","fuck","nigger","nigga","shit","dick","cum","pussy","shit","retard","fag","whore","hoe"]) {
+                            answer = answer.replace(new RegExp('\\w*' + swear + '\\w*', 'gi'), '[...]');
                         }
                     }
                 }

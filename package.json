@@ -27,6 +27,7 @@
     "humanize-duration": "^3.23.0",
     "mic": "^2.1.2",
     "moment": "^2.26.0",
+    "mongoose": "^5.9.19",
     "node-nlp": "^4.4.0",
     "open": "^7.0.4",
     "ora": "^4.0.4",

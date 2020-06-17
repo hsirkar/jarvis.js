@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const similarity = require('string-similarity');
-const { list, shuffle, clean, isYes } = require('../src/util');
+const { Book } = require('../src/db');
 
 let instance;
 
@@ -31,7 +31,7 @@ const Random = {
         });
     },
     doesHandleIntent: intentName => intentName.startsWith('random'),
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: res => new Promise((resolve, reject) => {
         const secondary = res.intent.split('.')[1];
         let min, max, numbers, randomNumber;
 
@@ -71,6 +71,15 @@ const Random = {
                         resolve(`${name.first} ${name.last}, ${gender}, ${dob.age}`);
                     })
                     .catch(() => resolve('Failed getting random person'));
+                break;
+            case 'book':
+                Book.countDocuments()
+                    .then(count => {
+                        let random = Math.floor(Math.random() * count);
+                        return Book.findOne().skip(random);
+                    })
+                    .then(book => resolve(book.title))
+                    .catch(err => reject(err));
                 break;
             default:
                 resolve(`I'm not sure`);

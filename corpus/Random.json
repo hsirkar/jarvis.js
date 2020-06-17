@@ -28,5 +28,12 @@
             "generate a random person",
             "random person"
         ]
+    },
+    {
+        "intent": "random.book",
+        "utterances": [
+            "generate a random book",
+            "random book"
+        ]
     }
 ]

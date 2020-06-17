@@ -9,6 +9,7 @@ const train = require('./train');
 const tts = require('./tts');
 const stt = require('./stt');
 const hotword = require('./hotword');
+const mongoose = require('./db');
 
 const skills = require('../skills');
 const Fallback = require('../skills/Fallback');
@@ -62,6 +63,9 @@ const init = () => {
     // Load TTS
     tts.init();
     log(`Finished loading TTS`);
+
+    // Load Mongoose
+    mongoose.init(log);
 
     // Load NLP engine
     (async() => {

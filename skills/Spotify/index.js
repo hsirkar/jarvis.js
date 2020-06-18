@@ -60,12 +60,12 @@ const Spotify = {
             return;
         }
 
+        lastRefreshed = moment();
+
         log('Refreshing access token...');
         spotifyApi.refreshAccessToken()
             .then(data => {
                 log('New access token: ' + data.body['access_token']);
-
-                lastRefreshed = moment();
     
                 const newAT = data.body['access_token'];
                 const oldAT = spotifyApi.getAccessToken();

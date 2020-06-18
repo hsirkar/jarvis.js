@@ -11,4 +11,5 @@ module.exports = [
     require('./COVID'),
     require('./Random'),
     require('./Database'),
+    require('./Reminders'),
 ];

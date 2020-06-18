@@ -9,12 +9,22 @@ const Reminders = {
         this.log = log;
         this.ask = ask;
     },
+    override: res => {
+        const keywords = ['create a reminder', 'set a reminder', 'remind me to', 'create a new reminder', 'set a new reminder'];
+
+        keywords.forEach(keyword => {
+            if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
+                const newRes = { intent: 'reminders.create', score: 1 };
+                Object.assign(res, newRes);
+                this.log(`Overriden by Reminders: ${JSON.stringify(newRes)}`);
+            }
+        });
+    },
     doesHandleIntent: intentName => {
         return intentName.startsWith('reminders');
     },
     handleIntent: res => new Promise((resolve, reject) => {
         const secondary = res.intent.split('.')[1];
-
         switch (secondary) {
             case 'list':
                 Reminder.find({})
@@ -24,22 +34,13 @@ const Reminders = {
                     })
                     .catch(err => reject(err));
                 break;
-        
             case 'create':
-
-                // this.log(JSON.stringify(res.entities));
-
-                resolve('');
+                resolve('Create new reminder');
             
                 break;
             default:
                 break;
         }
-
-
-
-
-        
     })
 };
 

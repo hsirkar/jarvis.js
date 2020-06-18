@@ -9,13 +9,9 @@
     {
         "intent": "reminders.create",
         "utterances": [
-            "create a reminder at %datetime%",
-            "remind me to take the trash out %datetime%",
-            "remind me at %datetime% to take a shower",
-            "remind me at %datetime%",
-            "set a reminder %datetime% to do my homework",
-            "remind me to take the trash out %date%",
-            "create a new reminder for %datetime%"
+            "create a reminder",
+            "set a reminder",
+            "create new reminder"
         ]
     }
 ]

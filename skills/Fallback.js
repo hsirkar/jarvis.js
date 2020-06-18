@@ -75,7 +75,7 @@ const Fallback = {
 
             try {
                 google = await instance.get(`https://www.google.com/search?q=${utterance}`);
-                const $ = cheerio.load(google.data);
+                let $ = cheerio.load(google.data);
 
                 let answer = "";
 
@@ -136,7 +136,7 @@ const Fallback = {
 
             log(`No results found`);
             
-            // Finally query WolframAlpha
+            // Query WolframAlpha
             log(`Searching WolframAlpha...`);
 
             try {
@@ -145,6 +145,24 @@ const Fallback = {
                 if (wolfram && wolfram.status === 200 && wolfram.data) {
                     resolve(wolfram.data);
                     return;
+                }
+            } catch (err) { log(err, err.stack) }
+
+            log(`No results found`);
+
+            // Finally query Answers.com
+            log(`Searching Answers.com...`);
+
+            try {
+                const answers = await instance.get(`https://www.answers.com/search?q=${res.utterance}`);
+
+                if (answers && answers.status === 200 && answers.data) {                    
+                    answer = cheerio.load(answers.data)('head > meta[name=description]').attr('content');
+
+                    if(answer && answer !== 'Answers is the place to go to get the answers you need and to ask the questions you want') {
+                        resolve(answer.trim());
+                        return;
+                    }
                 }
             } catch (err) { log(err, err.stack) }
 

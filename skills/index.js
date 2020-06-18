@@ -10,4 +10,5 @@ module.exports = [
     require('./Fun'),
     require('./COVID'),
     require('./Random'),
+    require('./Database'),
 ];

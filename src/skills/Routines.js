@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { log } = require('../util');
 
 let routines = [];
 
@@ -15,10 +16,7 @@ const next = (commands, index, onInputReceived, resolve) => {
 
 const Routines = {
     name: 'Routines',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-
+    init: () => {
         routines = JSON.parse(fs.readFileSync('./corpus/Routines.json'));
         routines = routines.filter(element => element.intent.includes('.routine.'));
         // log(JSON.stringify(routines, null, 2));
@@ -33,7 +31,7 @@ const Routines = {
         if(res.intent.includes('.routine.')) {
             
             const routine = routines.find(r => r.intent === res.intent);
-            this.log(routine.commands);
+            log(routine.commands);
 
             next(routine.commands, 0, onInputReceived, resolve);
 

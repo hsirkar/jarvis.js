@@ -69,7 +69,7 @@ function speakPolly(text, cb){
     // Play from cache
     if(fs.existsSync('cache/polly/' + sha1(text))){
         let readStream = new fs.createReadStream('cache/polly/' + sha1(text));
-        let speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
+        speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 16000 });
         readStream.on('open', function(){
             readStream.pipe(speaker);
             speaker.on('close', () => cb());

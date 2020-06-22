@@ -1,9 +1,6 @@
 const Database = {
     name: 'Database',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-    },
+    init: () => {},
     doesHandleIntent: intentName => {
         return intentName.startsWith('db');
     },

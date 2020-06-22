@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 const similarity = require('string-similarity');
-const { Book } = require('../src/db');
+const { Book } = require('../db');
+const { log } = require('../util');
 
 let instance;
 
@@ -14,9 +15,9 @@ function getRandomIntInclusive(min, max) {
 
 const Random = {
     name: 'Random',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
+    init: () => {
+        
+        
         
         instance = axios.create({
             method: 'get',
@@ -66,7 +67,7 @@ const Random = {
                 instance.get('https://randomuser.me/api/?nat=us')
                     .then(res => {
                         const person = res.data.results[0];
-                        this.log(JSON.stringify(person, null, 2));
+                        log(JSON.stringify(person, null, 2));
                         const { name, dob, gender } = person;
                         resolve(`${name.first} ${name.last}, ${gender}, ${dob.age}`);
                     })

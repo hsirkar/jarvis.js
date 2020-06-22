@@ -1,16 +1,12 @@
-const { isYes } = require('../src/util');
+const { isYes, log } = require('../util');
 
 const Joke = {
     name: 'Joke',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-    },
+    init: params => Object.assign(this, params),
     doesHandleIntent: intentName => intentName.startsWith('joke'),
     handleIntent: res => new Promise(resolve => {
-        const { ask } = this;
         if(res.intent.includes('dirty')) {
-            ask(['Are you sure?', 'You sure about that?', 'Do you really want me to?'], answer => {
+            this.ask(['Are you sure?', 'You sure about that?', 'Do you really want me to?'], answer => {
                 if(isYes(answer))
                     resolve(res.answer);
                 else

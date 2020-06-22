@@ -1,15 +1,13 @@
 const axios = require('axios').default;
 const similarity = require('string-similarity');
-const { list, shuffle, clean, isYes } = require('../src/util');
+const { list, shuffle, clean, isYes } = require('../util');
 
 let instance;
 
 const Fun = {
     name: 'Fun',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-        
+    init: params => {
+        Object.assign(this, params);
         instance = axios.create({
             method: 'get',
             headers: {
@@ -112,7 +110,7 @@ const Fun = {
                         this.ask(question,
                             answer => {
                                 const score = similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase());
-                                this.log(`Similarity to answer: ${score}`);
+                                log(`Similarity to answer: ${score}`);
 
                                 if (score > 0.70)
                                     resolve([`That's right, the answer is ${correct}`, `Correct, it is ${correct}`, `Yep, you got it. The answer is ${correct}`]);

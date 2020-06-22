@@ -2,7 +2,7 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const axios = require('axios').default;
 const open = require('open');
 const moment = require('moment');
-const { list } = require('../../src/util');
+const { log, list } = require('../../util');
 
 let spotifyApi;
 let axiosInstance;
@@ -15,10 +15,7 @@ function getDesc(track) {
 
 const Spotify = {
     name: 'Spotify',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-        
+    init: () => {
         spotifyApi = new SpotifyWebApi({
             clientId: process.env.SPOTIFY_CLIENT_ID,
             clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
@@ -40,21 +37,19 @@ const Spotify = {
         if(res.utterance.startsWith('play ')){
             const newRes = { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', score: 1 };
             Object.assign(res, newRes);
-            this.log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
+            log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
             return;
         }
 
         if (res.intent === 'system.stop') {
             Spotify.api('pause')
                 .then(() => {
-                    this.log('Spotify paused');
+                    log('Spotify paused');
                 })
-                .catch(err => this.log(err));
+                .catch(err => log(err));
         }
     },
     refreshToken: callback => {
-        const { log } = this;
-
         if(lastRefreshed && moment().diff(lastRefreshed, 'minutes') < 30) {
             log('Access token was refreshed less than 30 minutes ago, skipping refresh');
             return;
@@ -92,7 +87,6 @@ const Spotify = {
     },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
     handleIntent: res => new Promise(resolve => {
-        const { log } = this;
         (async() => {
             try {
                 if(res.intent === 'spotify.play'){

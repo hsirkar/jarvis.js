@@ -1,6 +1,14 @@
 const cheerio = require('cheerio');
 const similarity = require('string-similarity');
 const fs = require('fs');
+const chalk = require('chalk');
+const moment = require('moment');
+const spinner = require('ora')(chalk.gray('Processing...'));
+
+spinner.spinner = {
+    'interval': 80,
+    'frames': ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏']
+};
 
 // make a list in the Oxford comma style (eg "a, b, c, and d")
 // Examples with conjunction "and":
@@ -103,4 +111,17 @@ const randomElement = arr => {
     return randomElements(arr, 1)[0];
 }
 
-module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements }
+// Log to console
+function log(message) {
+    let spin = spinner.isSpinning;
+    spin && spinner.stop();
+    console.log(chalk.gray(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
+    spin && spinner.start();
+}
+
+function sanitizeNlpRes(res) {
+    const { answers, classifications, nluAnswer, languageGuessed, locale, localeIso2, language, sourceEntities, domain, actions, ...rest } = res;
+    return rest;
+}
+
+module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, log, sanitizeNlpRes };

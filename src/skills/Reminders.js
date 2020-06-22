@@ -1,13 +1,11 @@
-const { Reminder } = require('../src/db');
+const { Reminder } = require('../db');
 const moment = require('moment');
 const humanize = require('humanize-duration');
-const { abbrList } = require('../src/util');
+const { abbrList } = require('../util');
 
 const Reminders = {
     name: 'Reminders',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
+    init: () => {
     },
     override: res => {
         const keywords = ['create a reminder', 'set a reminder', 'remind me to', 'create a new reminder', 'set a new reminder'];
@@ -16,7 +14,7 @@ const Reminders = {
             if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
                 const newRes = { intent: 'reminders.create', score: 1 };
                 Object.assign(res, newRes);
-                this.log(`Overriden by Reminders: ${JSON.stringify(newRes)}`);
+                log(`Overriden by Reminders: ${JSON.stringify(newRes)}`);
             }
         });
     },

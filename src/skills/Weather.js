@@ -1,13 +1,11 @@
+const { log } = require('../util');
 let axios = require('axios').default;
 
 let instance, lat, lon, city, appid;
 
 const Weather = {
     name: 'Weather',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-
+    init: () => {
         instance = axios.create({
             method: 'get',
             headers: {
@@ -28,7 +26,6 @@ const Weather = {
     },
     doesHandleIntent: intentName => intentName.startsWith('weather'),
     handleIntent: nlpRes => new Promise(resolve => {
-        const { log } = this;
         (async () => {
             try {
                 const res = await instance.get('http://ip-api.com/json');

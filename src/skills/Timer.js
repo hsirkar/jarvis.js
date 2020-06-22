@@ -2,7 +2,7 @@ const humanizeDuration = require('humanize-duration');
 const fs = require('fs');
 const Speaker = require('speaker');
 const Spotify = require('./Spotify');
-const { list } = require('../src/util');
+const { log } = require('../util');
 
 let timers = [];
 let speaker;
@@ -10,10 +10,7 @@ let callback;
 
 const Timer = {
     name: 'Timer',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-
+    init: () => {
         setInterval(() => {
             for(i = 0; i < timers.length; i++) {
                 timers[i].timeLeft--;
@@ -42,7 +39,7 @@ const Timer = {
     override: res => {
         if(res.intent === 'system.stop') {
             if(speaker && speaker.close) {
-                this.log('Stopping timer alert...');
+                log('Stopping timer alert...');
                 speaker.close();
             }
         }
@@ -58,7 +55,7 @@ const Timer = {
             let seconds = timeInterval.resolution.values[0].value;
 
             timers.push({ total: seconds, timeLeft: seconds });
-            this.log(JSON.stringify(timers));
+            log(JSON.stringify(timers));
         
             resolve(`Setting a timer for ${humanizeDuration(seconds*1000)}`);
             return;
@@ -90,7 +87,7 @@ const Timer = {
         }
         
         if(secondary === 'list') {
-            this.log(JSON.stringify(timers));
+            log(JSON.stringify(timers));
             if(timers.length === 0)
                 resolve('You do not have any active timers');
             else

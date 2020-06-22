@@ -1,9 +1,9 @@
 const os = require('os');
 const dns = require('dns');
 const publicIp = require('public-ip');
-const tts = require('../src/tts');
+const tts = require('../tts');
 const moment = require('moment');
-const { isYes, setEnv, list } = require('../src/util');
+const { isYes, setEnv, list, log } = require('../util');
 const similarity = require('string-similarity');
 const fs = require('fs');
 const path = require('path');
@@ -12,26 +12,22 @@ const axios = require('axios').default;
 
 const System = {
     name: 'System',
-    init: (log, ask, say) => {
-        this.log = log;
-        this.ask = ask;
-        this.say = say;
-    },
+    init: params => Object.assign(this, params),
     override: res => {
         if(res.utterance.startsWith('echo ')){
             const newRes = { intent: 'system.echo', score: 1 };
             Object.assign(res, newRes);
-            this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
         if(res.utterance.startsWith('set ') && res.utterance.includes(' to ')) {
             const newRes = { intent: 'system.setenv', score: 1 };
             Object.assign(res, newRes);
-            this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
         if(res.utterance.startsWith('renew ')) {
             const newRes = { intent: 'system.renew', score: 1 };
             Object.assign(res, newRes);
-            this.log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
     },
     setInit: initJarvis => {
@@ -42,7 +38,7 @@ const System = {
     },
     handleIntent: res => new Promise(resolve => {
         const secondary = res.intent.split('.')[1];
-        const { log, ask, say } = this;
+        const { ask, say } = this;
 
         switch (secondary) {
             case 'netcheck':

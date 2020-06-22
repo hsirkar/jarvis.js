@@ -29,10 +29,8 @@ var countries = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Angu
 
 const COVID = {
     name: 'COVID',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-        
+    init: params => {
+        Object.assign(this, params);
         instance = axios.create({
             method: 'get',
             headers: {

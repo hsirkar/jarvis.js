@@ -1,11 +1,8 @@
-const { randomElements } = require('../src/util');
+const { randomElements } = require('../util');
 
 const Personality = {
     name: 'Personality',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-    },
+    init: () => {},
     doesHandleIntent: intentName => {
         for(let domain of ['user', 'agent', 'greetings', 'appraisal', 'dialog', 'misc'])
             if(intentName.startsWith(domain))

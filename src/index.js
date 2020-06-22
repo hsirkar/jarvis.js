@@ -1,223 +1,146 @@
-// Imports
-const readline = require('readline');
-const { NlpManager } = require('node-nlp');
-const chalk = require('chalk');
-const ora = require('ora');
-const moment = require('moment');
-
-const train = require('./train');
+const io = require('socket.io')();
+const skills = require('./skills');
+const Routines = require('./skills/Routines');
+const Fallback = require('./skills/Fallback');
+const nlp = require('./nlp');
 const tts = require('./tts');
-const stt = require('./stt');
-const hotword = require('./hotword');
-const mongoose = require('./db');
+const db = require('./db');
+const { log, spinner, randomElement, sanitizeNlpRes } = require('./util');
+const { reset } = require('nodemon');
 
-const skills = require('../skills');
-const Fallback = require('../skills/Fallback');
-const Spotify = require('../skills/Spotify');
-const Routines = require('../skills/Routines');
-const System = require('../skills/System');
+require('dotenv').config();
 
-const { randomElement } = require('./util');
+// Properties
+const state = {
+    previous: {},
+    current: {},
+    isQuestion: false,
+    onUserAnswered: ()=>{},
+    onIntentComplete: ()=>{}
+}
 
-let spinner;
-let rl;
-let nlp;
-
-let previous = {};
-let current = {};
-
-const init = () => {
-    require('dotenv').config();
-
-    // Clear console
-    const blank = '\n'.repeat(process.stdout.rows);
-    console.log(blank);
-    readline.cursorTo(process.stdout, 0, 0);
-    readline.clearScreenDown(process.stdout);
-
-    // Terminal I/O
-    if(!rl){
-        rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
+// Load everything
+async function init() {
+    for(skill of skills) {
+        skill.init && skill.init({ ask, say });
     }
-
-    // Load spinner
-    spinner = ora(chalk.gray('Processing...'));
-    spinner.spinner = {
-        'interval': 80,
-        'frames': ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏']
-    };
-
-    // Load skills
-    skills.forEach(skill => {
-        if(!!skill.init)
-            skill.init(log, ask, say);
-    });
-    Routines.setOnInputReceived(onInputReceived);
-    System.setInit(init);
-    Fallback.setPrevious(previous);
-    log(`Finished loading skills`);
-
-    // Load TTS
+    log('Skills loaded');
+    
     tts.init();
-    log(`Finished loading TTS`);
+    log('TTS loaded');
+    
+    db.init();
+    log('Database loaded');
 
-    // Load Mongoose
-    mongoose.init(log, say);
+    await nlp.init();
 
-    // Load NLP engine
-    (async() => {
-        nlp = new NlpManager({ languages: ['en'] });
-        try {
-            await train(nlp, skills, log);
-        } catch (err) { console.error(err); }
-        log(`Finished loading NLP`);
+    io.on('connection', client => {
+        log('Connected to new client');
 
-        // Load STT
-        stt.init(log, onInputReceived);
-        log(`Finished loading STT`);
-        
-        // Load wakeword detector
-        hotword.init(log, stt);
-        log(`Finished loading hotword detector`);
-
-        respond(process.env.ALERT_ON_BOOT === '1' ? 'Finished booting' : '');
-    })();
-};
+        client.on('message', message => {
+            log('Message received: ' + message);
+            io.emit('received');
+            onInputReceived(message);
+        });
+    });
+    
+    // Start the server
+    io.listen(3000);
+    log('Now listening on port 3000');
+}
 
 init();
 
-// Ask the prompt.
-function prompt(isQuestion=false, callback=()=>{}) {
-    Object.assign(stt, { isQuestion, callback });
-
-    if(isQuestion)
-        stt.start();
-
-    rl.question('', input => onInputReceived(input, isQuestion, callback));
-}
-
-// Process the input (determine if input should be dismissed, used to answer question, or sent to NLP for new intent)
-function onInputReceived(input, isQuestion=false, callback=()=>{}) {
+function onInputReceived(input) {
     spinner.start();
 
     // If user's input is reply to a question
-    if (isQuestion) {
-        log(`User's response: ${input}`);
-        callback(input);
-        stt.stop();
+    if(state.isQuestion){
+        log(`User's answer: ${input}`);
+        state.onUserAnswered(input);
+        stopListening();
         return;
     }
 
-    // Convert utterance to intent using ML
-    nlp.process('en', input.toLowerCase())
+    // Parse utterance into intent
+    nlp.manager.process(input || 'What can you do?')
         .then(res => {
-            current.res = res;
-
-            const { utterance, intent, score, answer } = res;
-            log(JSON.stringify({ utterance, intent, score, answer }, null, 2));
-
-            // Override NLP result
             skills.forEach(skill => skill.override && skill.override(res));
+            state.current = sanitizeNlpRes(res);
 
-            // Find proper skill to handle intent
-            let matched = skills.find(skill => skill.doesHandleIntent(res.intent));
-
-            if (!matched) {
-                log(`No skill found to handle that intent`);
+            let matched = skills.find(s => s.doesHandleIntent(res.intent));
+            
+            if(!matched) {
                 return 'Oops, no skill can handle that intent';
             }
-
-            // Auto fallback if match score less than threshold
-            if (res.score < 0.735) {
-                log(`Match score too low!`);
+            
+            if(res.score < 0.735) {
+                log('Match score too low!');
                 matched = Fallback;
             }
+            
+            Object.assign(state.current, { matchedSkill: matched.name });
 
             log(`Handling intent through ${matched.name}`);
 
-            // const timeout = new Promise(resolve => setTimeout(() => resolve('Request timed out'), 20000));
-            // return Promise.race([ timeout, matched.handleIntent(res) ]);
             return matched.handleIntent(res);
         })
         .then(res => {
-            respond(res);
-            if(callback && typeof callback === 'function') {
-                callback();
-            }
-            previous.res = current.res;
-            current.res = null;
-        })
-        .catch(err => {
-            error(err);
-            respond('There was an error with your request');
+            if(Array.isArray(res))  
+                res = randomElement(res);
+
+            res = res ? res.toString() : '';
+
+            spinner.stop();
+            log('Final response: ' + res);
+
+            state.isQuestion = false;
+            const obj = {
+                text: res,
+                type: 'response',
+                current: state.current,
+                previous: state.previous
+            };
+            io.send(obj);
+
+            if(state.onIntentComplete)
+                state.onIntentComplete(obj);
+
+            state.previous = state.current;
+            state.current = null;
         });
 }
 
-// Jarvis's final response
-// isQuestion -> whether the response is a question
-// callback -> if isQuestion, then what to do after user answers
-function respond(message, isQuestion=false, callback=()=>{}) {
+function ask(question, callback) {
     spinner.stop();
-
-    if(message){
-        if(Array.isArray(message))
-            message = randomElement(message);
-        message = message.toString();
-
-        if(isQuestion)
-            log(`Asking user question: ${message}`);
-        else
-            log(`Final response: ${message}`);
-            
-        console.log(chalk.cyan('J: ' + message + ''));
-
-        if(process.env.ENABLE_TTS === '1') {
-            tts.speak(message, () => prompt(isQuestion, callback), Spotify);
-            return;
-        }
-    }
-
-    prompt(isQuestion, callback);
+    state.isQuestion = true;
+    state.onUserAnswered = callback;
+    const obj = {
+        text: Array.isArray(question) ? randomElement(question) : question,
+        type: 'question',
+        current: state.current,
+        previous: state.previous
+    };
+    io.send(obj);
 }
 
-// Ask user question, send answer to callback function
-function ask(question, callback){
-    respond(question, true, callback);
-}
-
-// Say something out loud, not ask or respond
 function say(message) {
-    isSpinning = spinner.isSpinning;
-    isSpinning && spinner.stop();
-    console.log(chalk.cyan('J: ' + message + ''));
-    if(process.env.ENABLE_TTS === '1') {
-        tts.speak(message, ()=>isSpinning && spinner.start(), Spotify);
-        return;
-    }
-    isSpinning && spinner.start();
+    state.isQuestion = false;
+    const obj = {
+        text: message,
+        type: 'message',
+        current: state.current,
+        previous: state.previous
+    };
+    io.send(obj);
 }
 
-// Debug messages
-function log(message) {
-    if(process.env.DEBUG !== '1')
-        return;
-
-    isSpinning = spinner.isSpinning;
-    isSpinning && spinner.stop();
-    console.log(chalk.gray(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
-    isSpinning && spinner.start();
+function startListening() {
+    io.emit('startListening');
 }
 
-// Debug error
-function error(message) {
-    if(process.env.DEBUG !== '1')
-        return;
-
-    isSpinning = spinner.isSpinning;
-    isSpinning && spinner.stop();
-    console.log(chalk.red(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
-    isSpinning && spinner.start();
+function stopListening() {
+    io.emit('stopListening');
 }
+
+module.exports = { state, onInputReceived, ask, say, startListening, stopListening };

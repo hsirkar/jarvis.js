@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const cheerio = require('cheerio');
-const { abbrList } = require('../src/util');
+const { log, abbrList } = require('../util');
 const similarity = require('string-similarity');
 require('dotenv').config();
 
@@ -21,10 +21,7 @@ const getAnswer = arr => {
 
 const Fallback = {
     name: 'Fallback',
-    init: (log, ask) => {
-        this.log = log;
-        this.ask = ask;
-
+    init: () => {
         instance = axios.create({
             method: 'get',
             headers: {
@@ -41,7 +38,6 @@ const Fallback = {
     setPrevious: previous => this.previous = previous,
     doesHandleIntent: intentName => intentName === 'None' || intentName.startsWith('fallback'),
     handleIntent: res => new Promise(resolve => {
-        const { log } = this;
         let { utterance } = res;
 
         if(res.intent === 'fallback.force') {

@@ -3,6 +3,7 @@ const axios = require('axios').default;
 const open = require('open');
 const moment = require('moment');
 const { log, list } = require('../../util');
+const cheerio = require('cheerio');
 
 let spotifyApi;
 let axiosInstance;
@@ -25,7 +26,14 @@ const Spotify = {
         });
         axiosInstance = axios.create({
             baseURL: 'https://api.spotify.com',
-            headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
+            headers: {
+                'Authorization': 'Bearer ' + spotifyApi.getAccessToken(),
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Connection': 'keep-alive',
+                'Dnt': '1',
+                'Referer': 'https://www.google.com',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0'
+            }
         });
 
         deviceId = process.env.SPOTIFY_DEVICE_ID;
@@ -70,7 +78,14 @@ const Spotify = {
     
                 axiosInstance = axios.create({
                     baseURL: 'https://api.spotify.com',
-                    headers: { 'Authorization': 'Bearer ' + spotifyApi.getAccessToken() }
+                    headers: {
+                        'Authorization': 'Bearer ' + spotifyApi.getAccessToken(),
+                        'Accept-Language': 'en-US,en;q=0.5',
+                        'Connection': 'keep-alive',
+                        'Dnt': '1',
+                        'Referer': 'https://www.google.com',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0'
+                    }
                 });
                 
                 Object.assign(Spotify, { spotifyApi, axiosInstance });
@@ -153,8 +168,22 @@ const Spotify = {
                         if(res.intent.includes('current'))
                             resolve(getDesc(track));
                         else {
-                            open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
-                            resolve();
+                            // open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
+                            // open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
+                            (async () => {
+                                try {
+                                    google = await axiosInstance.get(`https://www.google.com/search?q=${getDesc(track)} lyrics`);
+                                    const $ = cheerio.load(google.data);
+
+                                    const spans = $('[data-lyricid]').find('span').toArray();
+                                    const lyrics = spans.map(span => cheerio.load(span).text()).join('\n');
+                                    resolve({ fullText: lyrics });
+                                } catch (err) {
+                                    log(err);
+                                    resolve('Error');
+                                }
+                            })();
+                            // resolve();
                         }
                     else
                         resolve(`I'm not sure`);

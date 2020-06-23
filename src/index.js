@@ -2,10 +2,11 @@ const io = require('socket.io')();
 const skills = require('./skills');
 const Routines = require('./skills/Routines');
 const Fallback = require('./skills/Fallback');
+const Spotify = require('./skills/Spotify');
 const nlp = require('./nlp');
 const tts = require('./tts');
 const db = require('./db');
-const { log, spinner, randomElement, sanitizeNlpRes } = require('./util');
+const { log, spinner, randomElement, sanitizeNlpRes, server } = require('./util');
 const { reset } = require('nodemon');
 
 require('dotenv').config();
@@ -21,12 +22,14 @@ const state = {
 
 // Load everything
 async function init() {
+    server.io = io;
+
     for(skill of skills) {
         skill.init && skill.init({ ask, say });
     }
     log('Skills loaded');
     
-    tts.init();
+    tts.init({ Spotify });
     log('TTS loaded');
     
     db.init();
@@ -67,6 +70,7 @@ function onInputReceived(input) {
         .then(res => {
             skills.forEach(skill => skill.override && skill.override(res));
             state.current = sanitizeNlpRes(res);
+            log(JSON.stringify(state.current, null, 2));
 
             let matched = skills.find(s => s.doesHandleIntent(res.intent));
             
@@ -78,30 +82,38 @@ function onInputReceived(input) {
                 log('Match score too low!');
                 matched = Fallback;
             }
-            
-            Object.assign(state.current, { matchedSkill: matched.name });
+
+            state.current.matchedSkill = matched.name;
 
             log(`Handling intent through ${matched.name}`);
 
             return matched.handleIntent(res);
         })
         .then(res => {
-            if(Array.isArray(res))  
+            spinner.stop();
+
+            if(!res)
+                res = '';
+
+            if(Array.isArray(res))
                 res = randomElement(res);
 
-            res = res ? res.toString() : '';
+            if(typeof res === 'string')
+                res = { text: res };
 
-            spinner.stop();
-            log('Final response: ' + res);
+            log('Final response: ' + JSON.stringify(res,null,2));
 
             state.isQuestion = false;
             const obj = {
-                text: res,
+                ...res,
                 type: 'response',
                 current: state.current,
                 previous: state.previous
             };
             io.send(obj);
+            tts.speak(res.text);
+
+            // log(tts.getAudioBuffer(text));
 
             if(state.onIntentComplete)
                 state.onIntentComplete(obj);
@@ -122,6 +134,7 @@ function ask(question, callback) {
         previous: state.previous
     };
     io.send(obj);
+    tts.speak(question);
 }
 
 function say(message) {
@@ -133,6 +146,7 @@ function say(message) {
         previous: state.previous
     };
     io.send(obj);
+    tts.speak(message);
 }
 
 function startListening() {

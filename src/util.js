@@ -111,11 +111,14 @@ const randomElement = arr => {
     return randomElements(arr, 1)[0];
 }
 
+let server = {};
+
 // Log to console
 function log(message) {
     let spin = spinner.isSpinning;
     spin && spinner.stop();
     console.log(chalk.gray(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
+    server.io && server.io.emit('log', moment().format('MM/DD/YY HH:mm:ss.SS: ') + message);
     spin && spinner.start();
 }
 
@@ -124,4 +127,4 @@ function sanitizeNlpRes(res) {
     return rest;
 }
 
-module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, log, sanitizeNlpRes };
+module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, server, log, sanitizeNlpRes };

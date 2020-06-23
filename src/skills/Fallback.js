@@ -58,8 +58,9 @@ const Fallback = {
 
                 if (ddg && ddg.status === 200 && ddg.data && ddg.data.AbstractText && ddg.data.AbstractSource) {
                     answer = cheerio.load(`<div>${ddg.data.AbstractText}</div>`)('div').text();
-                    arr = answer.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|");
-                    resolve(`According to ${ddg.data.AbstractSource}, ${arr[0]} ${arr[1] || ''}`);
+                    arr = answer.match(/\(?[^\.\?\!]+[\.!\?]\)?/g);
+                    resolve({ text: `${arr[0]} ${arr[1] || ''}`, fullText: answer, source: ddg.data.AbstractSource, url: encodeURI(ddg.data.AbstractURL) });
+                    
                     return;
                 }
             } catch (err) { log(err, err.stack) }
@@ -70,7 +71,8 @@ const Fallback = {
             log(`Searching Google...`);
 
             try {
-                google = await instance.get(`https://www.google.com/search?q=${utterance}`);
+                let url = encodeURI(`https://www.google.com/search?q=${utterance}`);
+                google = await instance.get(url);
                 let $ = cheerio.load(google.data);
 
                 let answer = "";
@@ -95,7 +97,7 @@ const Fallback = {
                 }
 
                 if(answer) {
-                    resolve(answer);
+                    resolve({ text: answer, fullText: lyrics.join('\n'), source: 'Google (LyricFind)', url: url });
                     return;
                 }
 
@@ -121,10 +123,7 @@ const Fallback = {
                 }
 
                 if(answer) {
-                    if(answer.length < 70)
-                        resolve([`According to Google, ${answer}`, `${answer}, according to Google`]);
-                    else
-                        resolve(answer);
+                    resolve({ text: answer, source: 'Google', url: url });
                     return;
                 }
 
@@ -139,7 +138,7 @@ const Fallback = {
                 wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
 
                 if (wolfram && wolfram.status === 200 && wolfram.data) {
-                    resolve(wolfram.data);
+                    resolve({ text: wolfram.data, source: 'Wolfram Alpha' });
                     return;
                 }
             } catch (err) { log(err, err.stack) }
@@ -150,13 +149,14 @@ const Fallback = {
             log(`Searching Answers.com...`);
 
             try {
-                const answers = await instance.get(`https://www.answers.com/search?q=${res.utterance}`);
+                let url = encodeURI(`https://www.answers.com/search?q=${res.utterance}`);
+                const answers = await instance.get(url);
 
                 if (answers && answers.status === 200 && answers.data) {                    
                     answer = cheerio.load(answers.data)('head > meta[name=description]').attr('content');
 
                     if(answer && answer !== 'Answers is the place to go to get the answers you need and to ask the questions you want') {
-                        resolve(answer.trim());
+                        resolve({ text: answer.trim(), source: 'Answers.com', url: url });
                         return;
                     }
                 }

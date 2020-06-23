@@ -4,6 +4,7 @@ const Stream = require('stream');
 const sha1 = require('sha1');
 const fs = require('fs');
 // const Spotify = require('../skills/Spotify');
+const { log } = require('./util');
 
 let ttsEngine;
 let polly;
@@ -11,7 +12,8 @@ let say;
 let callback;
 let speaker;
 
-function init() {
+function init(params) {
+    Object.assign(this, params);
     ttsEngine = process.env.TTS_ENGINE;
 
     AWS.config.accessKeyId = process.env.ACCESS_KEY_ID;
@@ -27,8 +29,13 @@ function stop() {
         speaker.close();
 }
 
-function speak(text, cb=()=>{}, Spotify){
+function speak(text, cb=()=>{}){
+    if(!text)
+        return;
+
     callback = cb;
+
+    const { Spotify } = this;
 
     Spotify.api('setVolume', ['30'])
         .then(() => {
@@ -109,8 +116,50 @@ function speakPolly(text, cb){
 
 }
 
+function getAudioBuffer(text, cb=()=>{}){
+    const map = {
+        'rakrish': 'ra-kreesh',
+        'Rakrish': 'Ra-kreesh'
+    }
+
+    for(const elem in map){
+        text = text.replace(elem, map[elem]);
+    }
+
+    // Play from cache
+    if(fs.existsSync('cache/polly/' + sha1(text))){
+        log('Getting from cache...');
+        return fs.readFileSync('cache/polly/' + sha1(text));
+    }
+
+    const options = {
+        OutputFormat: 'pcm',
+        Text: `<speak><prosody rate="110%">${htmlEntities(text)}</prosody></speak>`,
+        TextType: 'ssml',
+        VoiceId: 'Matthew',
+        Engine: 'neural'
+    };
+
+    log('Getting from Polly...');
+    polly.synthesizeSpeech(options, (err, data) => {
+        if(err)
+            console.log(err, err.stack);
+        else if (data){
+            if(data.AudioStream instanceof Buffer) {
+                let fileStream = fs.WriteStream('cache/polly/' + sha1(text));
+                // bufferStream.pipe(fileStream);
+                fileStream.on('close', () => {
+                    let audio = fs.readFileSync('cache/polly/' + sha1(text));
+                    return audio;
+                });
+            }
+        } 
+    });
+
+}
+
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-module.exports = { init, speak, stop };
+module.exports = { init, speak, stop, getAudioBuffer };

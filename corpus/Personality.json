@@ -517,7 +517,8 @@
             "Will you marry me?",
             "Can we have kids?",
             "will you be my boyfriend?",
-            "will you be my girlfriend?"
+            "will you be my girlfriend?",
+            "can I marry you"
         ],
         "answers": [
             "I'm afraid I'm too virtual for such a commitment",
@@ -703,7 +704,6 @@
             "good to know",
             "glad to hear that",
             "really well",
-            "that's awesome thank you",
             "you're great",
             "great",
             "you are amazing",
@@ -748,7 +748,12 @@
             "I'm really grateful",
             "That's so kind of you",
             "I owe you one",
-            "that was really helpful"
+            "that was really helpful",
+            "thank ya",
+            "I appreciate it",
+            "that means a lot",
+            "thank you for your help",
+            "thank you so much"
         ],
         "answers": [
             "Anytime. That's what I'm here for",
@@ -859,7 +864,8 @@
             "I must go",
             "Nice talking with you",
             "Good chatting with you",
-            "I should get going"
+            "I should get going",
+            "see ya later"
         ],
         "answers": [
             "Till next time",
@@ -882,7 +888,8 @@
             "what's crackin",
             "greetings",
             "what's up",
-            "sup"
+            "sup",
+            "what's good"
         ],
         "answers": [
             "Hey there!",
@@ -926,7 +933,8 @@
             "how's life",
             "how's it going",
             "how is it going",
-            "howdy"
+            "howdy",
+            "how are ya bud"
         ],
         "answers": [
             "Feeling wonderful!",
@@ -1622,6 +1630,37 @@
             "Very funny",
             "You've got the wrong assistant",
             "Haha, my name is Jarvis"
+        ]
+    },
+    {
+        "intent": "user.isgood",
+        "utterances": [
+            "I'm doing great!",
+            "I'm doing well",
+            "Good, thanks for asking",
+            "I'm good, thanks",
+            "I'm doing amazing",
+            "I'm fine, thanks",
+            "Pretty well",
+            "I'm doing good"
+        ],
+        "answers": [
+            "Good, I'm glad",
+            "Great!"
+        ]
+    },
+    {
+        "intent": "user.isbad",
+        "utterances": [
+            "Not too well",
+            "I don't feel very good",
+            "I'm doing bad",
+            "I'm not doing very well",
+            "Kinda bad"
+        ],
+        "answers": [
+            "I'm sorry",
+            "I hope you feel better"
         ]
     }
 ]

@@ -17,7 +17,6 @@ const state = {
     current: {},
     isQuestion: false,
     onUserAnswered: ()=>{},
-    onIntentComplete: ()=>{}
 }
 
 // Load everything
@@ -25,7 +24,7 @@ async function init() {
     server.io = io;
 
     for(skill of skills) {
-        skill.init && skill.init({ ask, say });
+        skill.init && skill.init({ ask, say, onInputReceived });
     }
     log('Skills loaded');
     
@@ -45,6 +44,13 @@ async function init() {
             io.emit('received');
             onInputReceived(message);
         });
+
+        client.on('recognitionStart', () => {
+            tts.stop();
+            Spotify.api('setVolume', ['30']).catch(()=>{});
+        });
+
+        client.on('recognitionEnd', () => Spotify.api('setVolume', ['60']).catch(()=>{}));
     });
     
     // Start the server
@@ -54,7 +60,7 @@ async function init() {
 
 init();
 
-function onInputReceived(input) {
+function onInputReceived(input, onIntentComplete=()=>{}) {
     spinner.start();
 
     // If user's input is reply to a question
@@ -68,9 +74,10 @@ function onInputReceived(input) {
     // Parse utterance into intent
     nlp.manager.process(input || 'What can you do?')
         .then(res => {
+            log(JSON.stringify(sanitizeNlpRes(res), null, 2));
+
             skills.forEach(skill => skill.override && skill.override(res));
             state.current = sanitizeNlpRes(res);
-            log(JSON.stringify(state.current, null, 2));
 
             let matched = skills.find(s => s.doesHandleIntent(res.intent));
             
@@ -113,20 +120,17 @@ function onInputReceived(input) {
             io.send(obj);
             tts.speak(res.text);
 
-            // log(tts.getAudioBuffer(text));
-
-            if(state.onIntentComplete)
-                state.onIntentComplete(obj);
+            onIntentComplete instanceof Function && onIntentComplete(obj);
 
             state.previous = state.current;
             state.current = null;
         });
 }
 
-function ask(question, callback) {
+function ask(question, onUserAnswered) {
     spinner.stop();
     state.isQuestion = true;
-    state.onUserAnswered = callback;
+    state.onUserAnswered = onUserAnswered;
     const obj = {
         text: Array.isArray(question) ? randomElement(question) : question,
         type: 'question',
@@ -134,19 +138,19 @@ function ask(question, callback) {
         previous: state.previous
     };
     io.send(obj);
-    tts.speak(question);
+    tts.speak(obj.text);
 }
 
 function say(message) {
     state.isQuestion = false;
     const obj = {
-        text: message,
+        text: Array.isArray(message) ? randomElement(message) : message,
         type: 'message',
         current: state.current,
         previous: state.previous
     };
     io.send(obj);
-    tts.speak(message);
+    tts.speak(obj.text);
 }
 
 function startListening() {

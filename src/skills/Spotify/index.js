@@ -121,7 +121,7 @@ const Spotify = {
                     await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}&device_id=${deviceId}`);
                     await axiosInstance.post(`/v1/me/player/next?device_id=${deviceId}`);
 
-                    resolve(`Now playing ${getDesc(tracks[0])}`);
+                    resolve({ text: `Now playing ${getDesc(tracks[0])}`, image: tracks[0].album.images[0].url });
                     return;
                 }
 
@@ -165,8 +165,9 @@ const Spotify = {
                     let track = apiRes.body.item;
 
                     if(apiRes && apiRes.body && track && track.name && track.artists)
-                        if(res.intent.includes('current'))
-                            resolve(getDesc(track));
+                        if(res.intent.includes('current')) {
+                            resolve({ text: getDesc(track), image: track.album.images[0].url });
+                        }
                         else {
                             // open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
                             // open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });

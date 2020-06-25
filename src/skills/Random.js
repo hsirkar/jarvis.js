@@ -16,9 +16,6 @@ function getRandomIntInclusive(min, max) {
 const Random = {
     name: 'Random',
     init: () => {
-        
-        
-        
         instance = axios.create({
             method: 'get',
             headers: {
@@ -47,7 +44,7 @@ const Random = {
                     max = numbers[1].resolution.value;
                 }
                 
-                resolve(getRandomIntInclusive(min, max));
+                resolve(getRandomIntInclusive(min, max).toString());
                 break;
             case 'coinflip':
                 resolve(Math.random() >= 0.5 ? 'Heads' : 'Tails');
@@ -61,15 +58,18 @@ const Random = {
                     max = numbers[0].resolution.value;
                 }
 
-                resolve(getRandomIntInclusive(min, max));
+                resolve(getRandomIntInclusive(min, max).toString());
                 break;
             case 'person':
                 instance.get('https://randomuser.me/api/?nat=us')
                     .then(res => {
                         const person = res.data.results[0];
                         log(JSON.stringify(person, null, 2));
-                        const { name, dob, gender } = person;
-                        resolve(`${name.first} ${name.last}, ${gender}, ${dob.age}`);
+                        const { name, dob, gender, picture } = person;
+                        resolve({
+                            text: `${name.first} ${name.last}, ${gender}, ${dob.age}`,
+                            image: picture.large,
+                            extras: person });
                     })
                     .catch(() => resolve('Failed getting random person'));
                 break;

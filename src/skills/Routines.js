@@ -3,9 +3,21 @@ const { log } = require('../util');
 
 let routines = [];
 
+let stopped = false;
+
 const next = (commands, index, onInputReceived, resolve) => {
-    onInputReceived(commands[index], false, () => {
+    if(stopped) {
+        resolve();
+        return;
+    }
+
+    this.onInputReceived(commands[index], () => {
         setTimeout(() => {
+            if(stopped) {
+                resolve();
+                return;
+            }
+
             if(index === commands.length - 1)
                 resolve();
             else
@@ -16,17 +28,21 @@ const next = (commands, index, onInputReceived, resolve) => {
 
 const Routines = {
     name: 'Routines',
-    init: () => {
+    init: params => {
+        Object.assign(this, params);
         routines = JSON.parse(fs.readFileSync('./corpus/Routines.json'));
         routines = routines.filter(element => element.intent.includes('.routine.'));
-        // log(JSON.stringify(routines, null, 2));
     },
-    setOnInputReceived: onInputReceived => {
-        this.onInputReceived = onInputReceived;
+    override: res => {
+        if (res.intent === 'system.stop') {
+            stopped = true;
+        }
     },
     doesHandleIntent: intentName => intentName.startsWith('routines'),
     handleIntent: res => new Promise(resolve => {
         const { onInputReceived } = this;
+
+        stopped = false;
 
         if(res.intent.includes('.routine.')) {
             

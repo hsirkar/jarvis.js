@@ -120,9 +120,9 @@ const System = {
                 resolve('About ' + Math.round(os.freemem()/1000000) + ' MB');
                 break;
             case 'restart':
-                setTimeout(() => this.initJarvis(), 1000);
-                require('../src/stt/index').io.close();
-                require('../src/stt/client').close();
+                // setTimeout(() => restart(), 1000);
+                // require('../src/stt/index').io.close();
+                // require('../src/stt/client').close();
                 resolve('Restarting Jarvis...');
                 break;
             case 'retrain':

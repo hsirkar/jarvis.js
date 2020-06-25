@@ -123,7 +123,7 @@ function log(message) {
 }
 
 function sanitizeNlpRes(res) {
-    const { answers, classifications, nluAnswer, languageGuessed, locale, localeIso2, language, sourceEntities, domain, actions, ...rest } = res;
+    const { sentiment, answers, classifications, nluAnswer, languageGuessed, locale, localeIso2, language, sourceEntities, domain, actions, ...rest } = res;
     return rest;
 }
 

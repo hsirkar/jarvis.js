@@ -127,4 +127,10 @@ function sanitizeNlpRes(res) {
     return rest;
 }
 
-module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, server, log, sanitizeNlpRes };
+// Get the first two sentences of a paragraph
+function firstTwoSentences(text) {
+    const sentences = text.match(/\(?[^\.\?\!]+[\.!\?]\)?/g);
+    return sentences.slice(0, 2).join(' ');
+}
+
+module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, server, log, sanitizeNlpRes, firstTwoSentences };

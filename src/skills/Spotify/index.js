@@ -42,7 +42,7 @@ const Spotify = {
         Object.assign(Spotify, { spotifyApi, axiosInstance });
     },
     override: res => {
-        if(res.utterance.startsWith('play ')){
+        if(res.utterance.toLowerCase().startsWith('play')){
             const newRes = { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', score: 1 };
             Object.assign(res, newRes);
             log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
@@ -105,7 +105,7 @@ const Spotify = {
         (async() => {
             try {
                 if(res.intent === 'spotify.play'){
-                    const query = res.utterance.replace('play ', '').replace(' on spotify', '').replace(' by ', ' ').replace(' and ', ' ');
+                    const query = res.utterance.toLowerCase().replace('play ', '').replace(' on spotify', '').replace(' by ', ' ').replace(' and ', ' ');
                     log(`Searching for "${query}"...`);
 
                     let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
@@ -169,8 +169,6 @@ const Spotify = {
                             resolve({ text: getDesc(track), image: track.album.images[0].url });
                         }
                         else {
-                            // open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
-                            // open(`https://www.google.com/search?q=${getDesc(track)} lyrics`, { app: ['chrome', '--incognito'] });
                             (async () => {
                                 try {
                                     google = await axiosInstance.get(`https://www.google.com/search?q=${getDesc(track)} lyrics`);
@@ -184,7 +182,6 @@ const Spotify = {
                                     resolve('Error');
                                 }
                             })();
-                            // resolve();
                         }
                     else
                         resolve(`I'm not sure`);

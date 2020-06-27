@@ -9,8 +9,6 @@ const db = require('./db');
 const { log, spinner, randomElement, sanitizeNlpRes, server } = require('./util');
 const { reset } = require('nodemon');
 
-require('dotenv').config();
-
 // Properties
 const state = {
     previous: {},
@@ -21,10 +19,11 @@ const state = {
 
 // Load everything
 async function init() {
+    require('dotenv').config();
     server.io = io;
 
     for(skill of skills) {
-        skill.init && skill.init({ ask, say, onInputReceived });
+        skill.init && skill.init({ ask, say, onInputReceived, state, restart: init, io });
     }
     log('Skills loaded');
     

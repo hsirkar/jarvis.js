@@ -3,7 +3,7 @@ const dns = require('dns');
 const publicIp = require('public-ip');
 const tts = require('../tts');
 const moment = require('moment');
-const { isYes, setEnv, list, log } = require('../util');
+const { isYes, setEnv, list, log, server } = require('../util');
 const similarity = require('string-similarity');
 const fs = require('fs');
 const path = require('path');
@@ -14,24 +14,26 @@ const System = {
     name: 'System',
     init: params => Object.assign(this, params),
     override: res => {
-        if(res.utterance.startsWith('echo ')){
+        if(res.utterance.toLowerCase().startsWith('echo ')){
             const newRes = { intent: 'system.echo', score: 1 };
             Object.assign(res, newRes);
             log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
-        if(res.utterance.startsWith('set ') && res.utterance.includes(' to ')) {
+        if(res.utterance.toLowerCase().startsWith('set ') && res.utterance.includes(' to ')) {
             const newRes = { intent: 'system.setenv', score: 1 };
             Object.assign(res, newRes);
             log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
-        if(res.utterance.startsWith('renew ')) {
+        if(res.utterance.toLowerCase().startsWith('renew ')) {
             const newRes = { intent: 'system.renew', score: 1 };
             Object.assign(res, newRes);
             log(`Overriden by System: ${JSON.stringify(newRes)}`);
         }
-    },
-    setInit: initJarvis => {
-        this.initJarvis = initJarvis;
+        if(res.utterance.toLowerCase().includes('nevermind') || res.utterance.toLowerCase().includes('never mind')) {
+            const newRes = { intent: 'system.dismiss', score: 1 };
+            Object.assign(res, newRes);
+            log(`Overriden by System: ${JSON.stringify(newRes)}`);
+        }
     },
     doesHandleIntent: intentName => {
         return intentName.startsWith('system');
@@ -120,9 +122,7 @@ const System = {
                 resolve('About ' + Math.round(os.freemem()/1000000) + ' MB');
                 break;
             case 'restart':
-                // setTimeout(() => restart(), 1000);
-                // require('../src/stt/index').io.close();
-                // require('../src/stt/client').close();
+                setTimeout(() => this.io.close(() => this.restart()), 500);
                 resolve('Restarting Jarvis...');
                 break;
             case 'retrain':

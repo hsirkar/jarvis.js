@@ -61,9 +61,9 @@ const COVID = {
                         }
 
                         if(utterance.includes('death')) {
-                            resolve(`There are ${finalItem.TotalDeaths} total deaths, plus ${finalItem.NewDeaths} from yesterday, in ${finalItem.Country ? finalItem.Country : 'the world'}`);
+                            resolve(`There are ${finalItem.TotalDeaths} total, and ${finalItem.NewDeaths} new deaths, in ${finalItem.Country ? finalItem.Country : 'the world'}`);
                         } else {
-                            resolve(`There are ${finalItem.TotalConfirmed} total cases, plus ${finalItem.NewConfirmed} from yesterday, in ${finalItem.Country ? finalItem.Country : 'the world'}`);
+                            resolve(`There are ${finalItem.TotalConfirmed} total, and ${finalItem.NewConfirmed} new cases, in ${finalItem.Country ? finalItem.Country : 'the world'}`);
                         }
                     })
                     .catch(() => resolve('Request failed'));

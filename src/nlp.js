@@ -5,7 +5,13 @@ const { log } = require('./util');
 
 const nlp = {
     init: async () => {
-        nlp.manager = new NlpManager({ languages: ['en'] });
+        nlp.manager = new NlpManager({
+            languages: ['en'],
+            nlu: {
+                log: message => log(JSON.stringify(message)),
+            },
+            modelFileName: './cache/model.nlp'
+        });
 
         // Load previously trained model
         if (fs.existsSync('./cache/model.nlp')) {

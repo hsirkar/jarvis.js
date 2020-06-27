@@ -33,6 +33,7 @@ function speak(text, cb=()=>{}){
     if(!text)
         return;
 
+    text = text.toString();
     callback = cb;
 
     const { Spotify } = this;

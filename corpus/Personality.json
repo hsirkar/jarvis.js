@@ -44,11 +44,11 @@
         "intent": "agent.age",
         "utterances": [
             "your age",
-            "how old is your platform",
             "how old are you",
             "what's your age",
             "I'd like to know your age",
-            "tell me your age"
+            "tell me your age",
+            "how many years old are you"
         ],
         "answers": [
             "I'm very young",
@@ -141,7 +141,9 @@
         "intent": "agent.girlfriend",
         "utterances": [
             "Who is your girlfriend?",
-            "do you have a girlfriend"
+            "do you have a girlfriend",
+            "what's your girlfriend's name?",
+            "who are you dating?"
         ],
         "answers": [
             "My girlfriend's name is Scarlett Johansson",
@@ -644,7 +646,11 @@
         "utterances": [
             "are you sure",
             "are you sure right now",
-            "are you sure of this"
+            "are you sure of this",
+            "is that so?",
+            "is that right?",
+            "do you think so?",
+            "you sure about that?"
         ],
         "answers": [
             "Yes",
@@ -889,7 +895,11 @@
             "greetings",
             "what's up",
             "sup",
-            "what's good"
+            "what's good",
+            "are you there",
+            "you still there?",
+            "hey Jarvis",
+            "Jarvis buddy"
         ],
         "answers": [
             "Hey there!",
@@ -934,7 +944,9 @@
             "how's it going",
             "how is it going",
             "howdy",
-            "how are ya bud"
+            "how are ya bud",
+            "how are you today",
+            "how you doing"
         ],
         "answers": [
             "Feeling wonderful!",
@@ -950,7 +962,8 @@
             "pleased to meet you",
             "it was very nice to meet you",
             "glad to meet you",
-            "nice meeting you"
+            "nice meeting you",
+            "great to meet you"
         ],
         "answers": [
             "It's nice meeting you, too",
@@ -967,7 +980,8 @@
             "nice to see you",
             "good to see you",
             "great to see you",
-            "lovely to see you"
+            "lovely to see you",
+            "good seeing you"
         ],
         "answers": [
             "Same here. I was starting to miss you",
@@ -1192,7 +1206,8 @@
             "You are my BFF",
             "I'd love you to be my pal",
             "I'd love to be your BFF",
-            "Are we best friends?"
+            "Are we best friends?",
+            "can we be best friends"
           ],
         "answers": [
             "BFFs for life!",
@@ -1297,7 +1312,7 @@
             "Indeed",
             "Yes indeed",
             "Yes sir",
-            "Yep"
+            "Mhm"
         ]
     },
     {

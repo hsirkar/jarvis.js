@@ -84,29 +84,6 @@
         ]
     },
     {
-        "intent": "system.volumeup",
-        "utterances": [
-            "volume up",
-            "increase the system volume",
-            "turn it up"
-        ]
-    },
-    {
-        "intent": "system.volumedown",
-        "utterances": [
-            "volume down",
-            "decrease the system volume",
-            "turn it down"
-        ]
-    },
-    {
-        "intent": "system.setvolume",
-        "utterances": [
-            "set the volume to %number%",
-            "volume %number%"
-        ]
-    },
-    {
         "intent": "system.freemem",
         "utterances": [
             "how much memory do I have",

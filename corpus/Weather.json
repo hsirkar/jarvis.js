@@ -9,7 +9,9 @@
             "how cold is it",
             "is it raining",
             "is it hot outside",
-            "it is cold outside"
+            "it is cold outside",
+            "how's the weather",
+            "how's the weather like"
         ],
         "answers": [
             "The weather for %city% is %desc% and %temp% degrees, with winds at %wind% MPH. Today, expect a %ddesc% with a high of %high% and low of %low% degrees"

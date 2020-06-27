@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const cheerio = require('cheerio');
-const { log, abbrList } = require('../util');
+const { log, abbrList, clean, firstTwoSentences } = require('../util');
 const similarity = require('string-similarity');
 require('dotenv').config();
 
@@ -21,7 +21,8 @@ const getAnswer = arr => {
 
 const Fallback = {
     name: 'Fallback',
-    init: () => {
+    init: params => {
+        Object.assign(this, params);
         instance = axios.create({
             method: 'get',
             headers: {
@@ -41,8 +42,8 @@ const Fallback = {
         let { utterance } = res;
 
         if(res.intent === 'fallback.force') {
-            if(this.previous) {
-                utterance = this.previous.res.utterance;
+            if(this.state.previous) {
+                utterance = this.state.previous.utterance;
             }else{
                 resolve(`I'm not sure`);
                 return;
@@ -50,19 +51,26 @@ const Fallback = {
         }
 
         (async () => {
+            let answer = "";
+
             // First query DDG
             log(`Searching DuckDuckGo...`);
             
             try {
                 ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
+                const { AbstractText, Answer, Definition, AbstractSource, Image, AbstractURL, DefinitionURL } = ddg.data;
 
-                if (ddg && ddg.status === 200 && ddg.data && ddg.data.AbstractText && ddg.data.AbstractSource) {
-                    answer = cheerio.load(`<div>${ddg.data.AbstractText}</div>`)('div').text();
-                    arr = answer.match(/\(?[^\.\?\!]+[\.!\?]\)?/g);
-                    resolve({ text: `${arr[0]} ${arr[1] || ''}`, fullText: answer, source: ddg.data.AbstractSource, url: encodeURI(ddg.data.AbstractURL) });
-                    
+                if(AbstractText || Answer || Definition) {
+                    resolve({
+                        text: firstTwoSentences(AbstractText || Answer || Definition),
+                        fullText: answer,
+                        source: AbstractSource,
+                        url: AbstractURL || DefinitionURL,
+                        image: Image
+                    });
                     return;
                 }
+
             } catch (err) { log(err, err.stack) }
 
             log(`No results found`);
@@ -74,6 +82,8 @@ const Fallback = {
                 let url = encodeURI(`https://www.google.com/search?q=${utterance}`);
                 google = await instance.get(url);
                 let $ = cheerio.load(google.data);
+
+                await require('fs').writeFileSync('./cache/google-search-result.html', google.data);
 
                 let answer = "";
 
@@ -97,7 +107,7 @@ const Fallback = {
                 }
 
                 if(answer) {
-                    resolve({ text: answer, fullText: lyrics.join('\n'), source: 'Google (LyricFind)', url: url });
+                    resolve({ text: answer, fullText: lyrics.join('\n'), source: 'LyricFind', url });
                     return;
                 }
 

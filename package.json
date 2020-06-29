@@ -27,7 +27,7 @@
     "humanize-duration": "^3.23.0",
     "moment": "^2.26.0",
     "mongoose": "^5.9.19",
-    "node-nlp": "^4.4.0",
+    "node-nlp": "^3.10.2",
     "open": "^7.0.4",
     "ora": "^4.0.4",
     "public-ip": "^4.0.1",

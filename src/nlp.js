@@ -13,6 +13,10 @@ const nlp = {
             modelFileName: './cache/model.nlp'
         });
 
+        for(skill of skills){
+            skill.addEntities && skill.addEntities(nlp.manager);
+        }
+
         // Load previously trained model
         if (fs.existsSync('./cache/model.nlp')) {
             nlp.manager.load('./cache/model.nlp');

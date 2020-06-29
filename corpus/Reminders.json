@@ -9,9 +9,11 @@
     {
         "intent": "reminders.create",
         "utterances": [
-            "create a reminder",
-            "set a reminder",
-            "create new reminder"
+            "remind me to %reminder% at %datetime%",
+            "remind me to %reminder% on %time%",
+            "set a reminder for %reminder% at %datetime",
+            "remind me at %datetime% to %reminder%",
+            "create a new reminder at %time% to %reminder%"
         ]
     }
 ]

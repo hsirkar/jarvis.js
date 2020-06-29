@@ -59,7 +59,7 @@ async function init() {
 
 init();
 
-function onInputReceived(input, onIntentComplete=()=>{}) {
+function onInputReceived(input, onIntentComplete) {
     spinner.start();
 
     // If user's input is reply to a question
@@ -96,30 +96,9 @@ function onInputReceived(input, onIntentComplete=()=>{}) {
             return matched.handleIntent(res);
         })
         .then(res => {
-            spinner.stop();
+            send(res, 'response');
 
-            if(!res)
-                res = '';
-
-            if(Array.isArray(res))
-                res = randomElement(res);
-
-            if(typeof res === 'string')
-                res = { text: res };
-
-            log('Final response: ' + JSON.stringify(res,null,2));
-
-            state.isQuestion = false;
-            const obj = {
-                ...res,
-                type: 'response',
-                current: state.current,
-                previous: state.previous
-            };
-            io.send(obj);
-            tts.speak(res.text);
-
-            onIntentComplete instanceof Function && onIntentComplete(obj);
+            onIntentComplete && onIntentComplete(res);
 
             state.previous = state.current;
             state.current = null;
@@ -127,27 +106,36 @@ function onInputReceived(input, onIntentComplete=()=>{}) {
 }
 
 function ask(question, onUserAnswered) {
-    spinner.stop();
-    state.isQuestion = true;
+    send(question, 'question');
     state.onUserAnswered = onUserAnswered;
-    const obj = {
-        text: Array.isArray(question) ? randomElement(question) : question,
-        type: 'question',
-        current: state.current,
-        previous: state.previous
-    };
-    io.send(obj);
-    tts.speak(obj.text);
 }
 
 function say(message) {
-    state.isQuestion = false;
-    const obj = {
-        text: Array.isArray(message) ? randomElement(message) : message,
-        type: 'message',
-        current: state.current,
-        previous: state.previous
-    };
+    send(message, 'message');
+}
+
+// Shared function for respond, ask, and say
+function send(obj, type) {
+    if(type === 'question' || type === 'response')
+        spinner.stop();
+
+    if(!obj)
+        obj = '';
+
+    if(Array.isArray(obj))
+        obj = randomElement(obj);
+
+    if(typeof obj === 'string')
+        obj = { text: obj };
+
+    state.isQuestion = type === 'question';
+
+    if(type === 'response') {
+        log('Final response: ' + JSON.stringify(obj,null,2));
+    }
+
+    const { current, previous } = state;
+    Object.assign(obj, { current, previous, type });
     io.send(obj);
     tts.speak(obj.text);
 }

@@ -1,0 +1,19 @@
+[
+    {
+        "intent": "calendar.list",
+        "utterances": [
+            "Do I have anything on %date%?",
+            "What's on my calendar %date%?",
+            "What's on my calendar from %daterange%?",
+            "Am I free on %data%?",
+            "How free am I on %data%?",
+            "How free am I on %datarange%?",
+            "List my events for %date%",
+            "What events do I have %date%?",
+            "What do I have on the %date%?",
+            "What do I have %daterange%",
+            "Am I free %daterange%?",
+            "Do I have anything %daterange%"
+        ]
+    }
+]

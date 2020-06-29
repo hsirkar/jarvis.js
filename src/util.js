@@ -117,7 +117,7 @@ let server = {};
 function log(message) {
     let spin = spinner.isSpinning;
     spin && spinner.stop();
-    console.log(chalk.gray(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
+    console.log(chalk.cyan(moment().format('MM/DD/YY HH:mm:ss.SS: ') + message));
     server.io && server.io.emit('log', moment().format('MM/DD/YY HH:mm:ss.SS: ') + message);
     spin && spinner.start();
 }

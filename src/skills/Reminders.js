@@ -1,7 +1,7 @@
 const { Reminder } = require('../db');
 const moment = require('moment');
 const humanize = require('humanize-duration');
-const { abbrList } = require('../util');
+const { abbrList, log } = require('../util');
 
 const Reminders = {
     name: 'Reminders',
@@ -27,8 +27,14 @@ const Reminders = {
             case 'list':
                 Reminder.find({})
                     .then(results => {
-                        const reminders = results.map(r => `"${r.reminder}" (${moment(r.time).calendar()})`);
-                        resolve(`${results.length} upcoming reminders: ${abbrList(reminders, 'and', '', 3)}`)
+                        const reminders = results.map(r => `${r.reminder} (${moment(r.time).calendar()})`);
+                        resolve({
+                            text: `${results.length} upcoming reminders: ${abbrList(reminders, 'and', '', 3)}`,
+                            list: results.map(r => ({
+                                displayText: r.reminder,
+                                subtitle: moment(r.time).calendar()
+                            }))
+                        });
                     })
                     .catch(err => reject(err));
                 break;

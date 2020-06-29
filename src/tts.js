@@ -94,8 +94,10 @@ function speakPolly(text, cb){
     };
 
     polly.synthesizeSpeech(options, (err, data) => {
-        if(err)
-            console.log(err, err.stack);
+        if(err) {
+            log(err, err.stack);
+            speakOffline(text, callback);
+        }
         else if (data){
             if(data.AudioStream instanceof Buffer) {
                 let bufferStream = new Stream.PassThrough();

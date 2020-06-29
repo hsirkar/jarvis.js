@@ -122,7 +122,7 @@ const System = {
                 resolve('About ' + Math.round(os.freemem()/1000000) + ' MB');
                 break;
             case 'restart':
-                setTimeout(() => this.io.close(() => this.restart()), 500);
+                setTimeout(() => this.io.close(() => this.restart()), 1000);
                 resolve('Restarting Jarvis...');
                 break;
             case 'retrain':

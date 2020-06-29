@@ -2,6 +2,7 @@ const axios = require('axios').default;
 const cheerio = require('cheerio');
 const { log, abbrList, clean, firstTwoSentences } = require('../util');
 const similarity = require('string-similarity');
+const scraper = require('se-scraper');
 require('dotenv').config();
 
 let instance;
@@ -63,7 +64,7 @@ const Fallback = {
                 if(AbstractText || Answer || Definition) {
                     resolve({
                         text: firstTwoSentences(AbstractText || Answer || Definition),
-                        fullText: answer,
+                        display: answer,
                         source: AbstractSource,
                         url: AbstractURL || DefinitionURL,
                         image: Image
@@ -107,7 +108,7 @@ const Fallback = {
                 }
 
                 if(answer) {
-                    resolve({ text: answer, fullText: lyrics.join('\n'), source: 'LyricFind', url });
+                    resolve({ text: answer, display: lyrics.join('\n'), source: 'LyricFind', url });
                     return;
                 }
 
@@ -148,32 +149,42 @@ const Fallback = {
                 wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
 
                 if (wolfram && wolfram.status === 200 && wolfram.data) {
-                    resolve({ text: wolfram.data, source: 'Wolfram Alpha' });
+                    resolve({
+                        text: wolfram.data,
+                        source: 'Wolfram Alpha',
+                        url: `https://api.wolframalpha.com/v1/simple?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`
+                    });
                     return;
                 }
             } catch (err) { log(err, err.stack) }
 
             log(`No results found`);
 
-            // Finally query Answers.com
-            log(`Searching Answers.com...`);
-
+            // Return search results from DuckDuckGo
             try {
-                let url = encodeURI(`https://www.answers.com/search?q=${res.utterance}`);
-                const answers = await instance.get(url);
+                const search = await scraper.scrape({ debug_level: 0 }, { block_assets: true, search_engine: 'duckduckgo', keywords: [res.utterance], num_pages: 1 });
+                const results = await search.results[res.utterance]['1'].results;
 
-                if (answers && answers.status === 200 && answers.data) {                    
-                    answer = cheerio.load(answers.data)('head > meta[name=description]').attr('content');
+                console.dir(results);
 
-                    if(answer && answer !== 'Answers is the place to go to get the answers you need and to ask the questions you want') {
-                        resolve({ text: answer.trim(), source: 'Answers.com', url: url });
-                        return;
-                    }
+                if(results) {
+                    resolve({
+                        text: `Here's what I found on the web`,
+                        list: results.slice(0, 4).map(r => ({
+                            displayText: r.title,
+                            subtitle: r.snippet.split(' ').slice(0, 30).join(' '),
+                            subtitle2: r.visible_link,
+                            url: r.link
+                        })),
+                        source: 'DuckDuckGo Web Search',
+                        url: 'https://www.duckduckgo.com/?q=' + encodeURIComponent(res.utterance)
+                    });
+                    return;
                 }
             } catch (err) { log(err, err.stack) }
 
-            log(`No results found`);
-            
+            log(`Admitting defeat`);
+        
             // Admit defeat
             resolve([
                 'Sorry, I don\'t understand',

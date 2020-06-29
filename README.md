@@ -2,8 +2,6 @@ Private AI personal assistant inspired by Mycroft.
 
 to do list:
 - find way to cancel speaker
-- reminder
-- calendar
 - volume
 - lists/notes
 - alarm?
@@ -11,10 +9,14 @@ to do list:
 - smarthome
 - email/sms reader?
 - speaker detection
-- stackexchange / yahoo answers / answers.com / question.com scraping
 - improved timeout (dependent on skill)
 - find my phone
 - cache all requests
+- launch programs
+- record audio
+- set an alarm
+- mute yourself / go to sleep / exit
+- 
 
 done:
 - ~~adobe renew~~
@@ -29,3 +31,6 @@ done:
 - ~~coronavirus~~
 - ~~wakeword detection!~~
 - ~~speedtest?~~
+- ~~stackexchange / yahoo answers / answers.com / question.com scraping~~
+- ~~reminder~~
+- ~~calendar~~

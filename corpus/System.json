@@ -47,7 +47,8 @@
         "utterances": [
             "What time is it?",
             "What is the time?",
-            "Time"
+            "Time",
+            "What's the time"
         ],
         "answers": [
             "It's %time%",

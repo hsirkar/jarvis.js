@@ -174,7 +174,8 @@ const Fallback = {
                             displayText: r.title,
                             subtitle: r.snippet.split(' ').slice(0, 30).join(' '),
                             subtitle2: r.visible_link,
-                            url: r.link
+                            url: r.link,
+                            image: 'https://s2.googleusercontent.com/s2/favicons?domain=' + (new URL(r.link).hostname)
                         })),
                         source: 'DuckDuckGo Web Search',
                         url: 'https://www.duckduckgo.com/?q=' + encodeURIComponent(res.utterance)

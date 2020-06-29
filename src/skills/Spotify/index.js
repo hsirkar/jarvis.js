@@ -4,7 +4,6 @@ const open = require('open');
 const moment = require('moment');
 const { log, list } = require('../../util');
 const cheerio = require('cheerio');
-const lyrics = require('lyric-fetcher');
 
 let spotifyApi;
 let axiosInstance;
@@ -128,7 +127,8 @@ const Spotify = {
                         text: `Now playing ${getDesc(tracks[0])}`,
                         displayText: tracks[0].name,
                         image: tracks[0].album.images[0].url,
-                        subtitle: tracks[0].artists.map(a => a.name).join(', ')+'\n'+tracks[0].album.name
+                        subtitle: tracks[0].artists.map(a => a.name).join(', '),
+                        subtitle2: tracks[0].album.name
                     });
                     return;
                 }
@@ -178,41 +178,16 @@ const Spotify = {
                                 text: getDesc(track),
                                 displayText: track.name,
                                 image: track.album.images[0].url,
-                                subtitle: track.artists.map(a => a.name).join(', ')+'\n'+track.album.name
+                                subtitle: track.artists.map(a => a.name).join(', '),
+                                subtitle2: track.album.name
                             });
                         }
                         else {
-                            lyrics({
-                                artist: track.artists[0].name,
-                                song: track.name
-                            }, (err, data) => {
-                                if(err) {
-                                    log(err);
-                                    resolve('Error');
-                                } else {
-                                    log(data);
-                                    resolve({
-                                        displayText: data.toString(),
-                                        subtitle: getDesc(track)
-                                    });
-                                }
+                            let lyricsRes = await axios.get('https://some-random-api.ml/lyrics/?title=' + encodeURIComponent(track.name+track.artists[0].name));
+                            resolve({
+                                displayText: lyricsRes.data.lyrics,
+                                subtitle: getDesc(track)
                             });
-                            // (async () => {
-                            //     try {
-                            //         let url = `https://www.google.com/search?q=${getDesc(track)} lyrics`;
-                            //         google = await axiosInstance.get(url);
-                            //         const $ = cheerio.load(google.data);
-
-                            //         require('fs').writeFileSync('./cache/google-search-result.html', google.data);
-
-                            //         const spans = $('[data-lyricid]').find('span').toArray();
-                            //         const lyrics = spans.map(span => cheerio.load(span).text()).join('\n');
-                            //         resolve({ displayText: lyrics, source: 'LyricFind', url });
-                            //     } catch (err) {
-                            //         log(err);
-                            //         resolve('Error');
-                            //     }
-                            // })();
                         }
                     else
                         resolve(`I'm not sure`);

@@ -417,7 +417,8 @@
             "you are awesome",
             "you are good",
             "you are so good",
-            "you make my day"
+            "you make my day",
+            "you're the best"
         ],
         "answers": [
             "I'm glad you think so",
@@ -1243,6 +1244,7 @@
             "bruh",
             "cheers",
             "crap",
+            "crazy",
             "dang",
             "darn",
             "damn",
@@ -1306,7 +1308,8 @@
             "yeah",
             "yes",
             "yikes",
-            "yuck"
+            "yuck",
+            "that's crazy"
         ],
         "answers": [
             "Indeed",
@@ -1532,8 +1535,7 @@
         "intent": "agent.height",
         "utterances": [
             "what is your height",
-            "how tall are you",
-            "are you taller than me"
+            "how tall are you"
         ],
         "answers": [
             "I am not a physical being, thus my height cannot be measured",

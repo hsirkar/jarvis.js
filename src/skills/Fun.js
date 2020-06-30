@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const similarity = require('string-similarity');
-const { list, shuffle, clean, isYes } = require('../util');
+const { list, shuffle, clean, isYes, log } = require('../util');
 
 let instance;
 

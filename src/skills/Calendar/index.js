@@ -3,35 +3,55 @@ const { authorize } = require('./authorize');
 const { log, abbrList } = require('../../util');
 const _moment = require('moment');
 
-/*
-
-Do I have anything next Monday?             NLP good
-What's on my calendar tomorrow?             NLP good
-What's on my schedule next week?            NLP good
-What events do I have next month?           NLP good
-Do I have anything today?                   NLP good
-What do I have the following Monday?        NLP bad
-Monday before Christmas                     NLP bad
-Labor day                                   NLP returns 2019 and 2020
-Do I have anythong on my calendar 
-
-*/
-
 // Correct false UTC timezone
 const moment = (date=Date()) => _moment(date.toJSON().replace('T00:00:00.000Z', ''));
+
+
+const getFormattedRange = (start, end, isDateTime, isCalendarEvent) => {
+    start = _moment(start);
+    end = _moment(end);
+
+    let dateFormat = 'ddd[,] MMM D';
+    let dateTimeFormat = 'ddd[,] MMM D h:mm A';
+    let currentYear = _moment().year();
+
+    if(start.year() !== currentYear && end.year() !== currentYear) {
+        dateFormat = 'ddd[,] MMM D[,] YYYY';
+        dateTimeFormat = 'ddd[,] MMM D[,] YYYY h:mm A';
+    }
+
+    if(isDateTime) {
+        if(start.format(dateFormat) === end.format(dateFormat)) {
+            return start.format(dateFormat) + ' ' + start.format('LT') + ' – ' + end.format('LT');    
+        }
+
+        return start.format(dateTimeFormat) + ' – ' + end.format(dateTimeFormat);
+    } else {
+
+        if(isCalendarEvent)
+            end = end.subtract(1, 'day');
+
+        if(start.format(dateFormat) === end.format(dateFormat)) {
+            return start.format(dateFormat);
+        }
+
+        return start.format(dateFormat) + ' – ' + end.format(dateFormat);
+    }
+}
 
 const sanitizeEvent = event => {
     const { summary,htmlLink,king,etag,status,created,updated,creator,recurringEventId,
         originalStartTime,organizer,iCalUID,start,end,sequence,reminders,...rest } = event;
+
+    console.log(event);
+    
     return {
         displayText: summary,
         url: htmlLink,
-        subtitle: 'From ' + [
-            _moment(start.date || start.dateTime).calendar(),
-            _moment(end.date || end.dateTime).calendar()
-        ].join(' to '),
-        // start: start.date || start.dateTime,
-        // end: end.date || end.dateTime,
+        subtitle: getFormattedRange(
+            start.date || start.dateTime,
+            end.date || end.dateTime,
+            start.dateTime, true),
         ...rest
     };
 }
@@ -82,10 +102,20 @@ const Calendar = {
                         if (events.length) {
                             resolve({
                                 text: `${events.length} item${events.length === 1 ? '' : 's'}: ${abbrList(events.map(e => e.summary), 'and', 'None', 4)}`,
-                                list: events.map(event => sanitizeEvent(event))
+                                list: events.map(event => sanitizeEvent(event)),
+                                displayText: 'Overview: ' + getFormattedRange(
+                                    resolvedStart || resolvedDate,
+                                    resolvedEnd || resolvedDate,
+                                    false, false),
                             });
                         } else {
-                            resolve('You do not have anything scheduled');
+                            resolve({
+                                text: 'You do not have anything scheduled',
+                                subtitle: getFormattedRange(
+                                    resolvedStart || resolvedDate,
+                                    resolvedEnd || resolvedDate,
+                                    false, false),
+                            });
                         }
 
                     } else {

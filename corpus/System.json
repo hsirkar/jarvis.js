@@ -56,7 +56,7 @@
         ]
     },
     {
-        "intent": "system.date",
+        "intent": "system.today",
         "utterances": [
             "What is today's date?",
             "Date",
@@ -68,8 +68,21 @@
             "what day is it"
         ],
         "answers": [
-            "Today is %date%",
-            "%date%"
+            "Today is %date%"
+        ]
+    },
+    {
+        "intent": "system.otherdate",
+        "utterances": [
+            "What is %date% date?",
+            "When is %date%?",
+            "What day is %daterange%?",
+            "When is %daterange%?",
+            "On what day does %daterange% fall?",
+            "What day of the week is %daterange%"
+        ],
+        "answers": [
+            "You'll have to rephrase that"
         ]
     },
     {

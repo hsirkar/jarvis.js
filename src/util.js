@@ -133,4 +133,21 @@ function firstTwoSentences(text) {
     return sentences.slice(0, 2).join(' ');
 }
 
-module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, server, log, sanitizeNlpRes, firstTwoSentences };
+function removeStopwords(text, stopwords) {
+    let arr = text.split(' ');
+
+    arr = arr.filter(word => {
+        let keep = true;
+        for(let stopword of stopwords) {
+            if(word.toLowerCase() === stopword.toLowerCase()) {
+                keep = false;
+                break;
+            }
+        }
+        return keep;
+    });
+
+    return arr.join(' ');
+}
+
+module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, server, log, sanitizeNlpRes, firstTwoSentences, removeStopwords };

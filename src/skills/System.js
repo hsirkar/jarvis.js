@@ -98,7 +98,7 @@ const System = {
                 resolve();
                 break;
             case 'time':
-            case 'date':
+            case 'today':
             case 'year':
                 const date = moment();
                 resolve(
@@ -108,6 +108,15 @@ const System = {
                         .replace('%month%', date.format('MMMM'))
                         .replace('%year%', date.format('YYYY'))
                 );
+                break;
+            case 'otherdate':
+                let dateEntity = res.entities.find(e => e.entity === 'date');
+
+                if(!dateEntity)
+                    resolve(`I'm not sure`);
+                else
+                    resolve(moment(dateEntity.resolution.strValue || dateEntity.resolution.strFutureValue).format('dddd, MMMM Do, YYYY'));
+                // resolve(res.answer);
                 break;
             case 'volumeup':
                 break;

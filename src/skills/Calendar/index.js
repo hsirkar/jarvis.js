@@ -103,7 +103,7 @@ const Calendar = {
                             resolve({
                                 text: `${events.length} item${events.length === 1 ? '' : 's'}: ${abbrList(events.map(e => e.summary), 'and', 'None', 4)}`,
                                 list: events.map(event => sanitizeEvent(event)),
-                                displayText: 'Overview: ' + getFormattedRange(
+                                listTitle: 'Overview: ' + getFormattedRange(
                                     resolvedStart || resolvedDate,
                                     resolvedEnd || resolvedDate,
                                     false, false),

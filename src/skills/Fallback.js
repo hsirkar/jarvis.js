@@ -170,6 +170,7 @@ const Fallback = {
                 if(results) {
                     resolve({
                         text: `Here's what I found on the web`,
+                        listTitle: `Web results:`,
                         list: results.slice(0, 4).map(r => ({
                             displayText: r.title,
                             subtitle: r.snippet.split(' ').slice(0, 30).join(' '),

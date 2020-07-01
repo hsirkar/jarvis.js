@@ -50,7 +50,7 @@ const Reminders = {
                         const reminders = res.map(r => `${r.reminder}: ${moment(r.time).calendar()} at ${moment(r.time).format('LT')}`);
                         resolve({
                             text: `${res.length} upcoming reminders: ${abbrList(reminders, 'and', '', 3)}`,
-                            displayText: `${res.length} upcoming reminders`,
+                            listTitle: `${res.length} upcoming reminders`,
                             list: res.map(r => ({
                                 displayText: r.reminder,
                                 subtitle: moment(r.time).format('LLLL')

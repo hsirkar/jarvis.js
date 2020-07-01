@@ -48,14 +48,20 @@ const Reminders = {
                         res = res.filter(r => moment(r.time).isSameOrAfter(moment()));
 
                         const reminders = res.map(r => `${r.reminder}: ${moment(r.time).calendar()} at ${moment(r.time).format('LT')}`);
-                        resolve({
-                            text: `${res.length} upcoming reminders: ${abbrList(reminders, 'and', '', 3)}`,
-                            listTitle: `${res.length} upcoming reminders`,
-                            list: res.map(r => ({
-                                displayText: r.reminder,
-                                subtitle: moment(r.time).format('LLLL')
-                            })),
-                        });
+
+                        if(res.length) {
+                            resolve({
+                                text: `${res.length} upcoming reminders: ${abbrList(reminders, 'and', '', 3)}`,
+                                listTitle: `${res.length} upcoming reminders`,
+                                list: res.map(r => ({
+                                    displayText: r.reminder,
+                                    subtitle: moment(r.time).format('LLLL')
+                                })),
+                            });
+                        } else {
+                            resolve(['No upcoming reminders', 'You do not have any upcoming reminders']);
+                        }
+                        
                     })
                     .catch(err => reject(err));
                 break;

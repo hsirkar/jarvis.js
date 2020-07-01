@@ -13,4 +13,5 @@ module.exports = [
     require('./Database'),
     require('./Reminders'),
     require('./Calendar'),
+    require('./Show'),
 ];

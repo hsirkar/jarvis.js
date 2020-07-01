@@ -1,0 +1,8 @@
+[
+    {
+        "intent": "show.imagesearch",
+        "utterances": [
+            "show %imageQuery%"
+        ]
+    }
+]

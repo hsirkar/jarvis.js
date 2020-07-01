@@ -134,20 +134,12 @@ function firstTwoSentences(text) {
 }
 
 function removeStopwords(text, stopwords) {
-    let arr = text.split(' ');
-
-    arr = arr.filter(word => {
-        let keep = true;
-        for(let stopword of stopwords) {
-            if(word.toLowerCase() === stopword.toLowerCase()) {
-                keep = false;
-                break;
-            }
-        }
-        return keep;
+    stopwords.forEach(stopword => {
+        const regexp = new RegExp('\(\^\|\\\s\)' + stopword + '\(\\\s\|\$\)', 'gi');
+        text = text.replace(regexp, ' ').trim();
     });
 
-    return arr.join(' ');
+    return text;
 }
 
 module.exports = { list, shuffle, clean, isYes, setEnv, abbrList, randomElement, randomElements, spinner, server, log, sanitizeNlpRes, firstTwoSentences, removeStopwords };

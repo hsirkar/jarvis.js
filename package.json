@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon . -i \"*.json\"",
+    "start": "nodemon . -i \"*.json\" -i test",
     "clear": "rm -rf cache/model.nlp && rm -rf cache/corpus.json && rm -rf model.nlp"
   },
   "keywords": [
@@ -39,7 +39,9 @@
     "speaker": "^0.5.1",
     "speedtest-net": "^2.1.1",
     "spotify-web-api-node": "^4.0.0",
-    "string-similarity": "^4.0.1"
+    "string-similarity": "^4.0.1",
+    "torrent-search-api": "^2.1.3",
+    "webtorrent": "^0.108.6"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

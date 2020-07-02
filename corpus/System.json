@@ -153,5 +153,11 @@
             "what internet service provider am I using",
             "whose internet am I using"
         ]
+    },
+    {
+        "intent": "system.newskill",
+        "utterances": [
+            "Create new skill"
+        ]
     }
 ]

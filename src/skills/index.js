@@ -14,4 +14,5 @@ module.exports = [
     require('./Reminders'),
     require('./Calendar'),
     require('./Show'),
+    require('./Movies'), 
 ];

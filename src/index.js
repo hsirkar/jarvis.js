@@ -23,7 +23,7 @@ async function init() {
     server.io = io;
 
     for(skill of skills) {
-        skill.init && skill.init({ ask, say, onInputReceived, state, restart: init, io });
+        skill.init && skill.init({ ask, say, onInputReceived, state, restart: init, io, nlp, update });
     }
     log('Skills loaded');
     
@@ -112,6 +112,10 @@ function ask(question, onUserAnswered) {
 
 function say(message) {
     send(message, 'message');
+}
+
+function update(obj) {
+    io.emit('update', obj);
 }
 
 // Shared function for respond, ask, and say

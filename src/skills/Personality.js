@@ -1,5 +1,5 @@
 const { randomElements, log } = require('../util');
-const corpus = require('../../corpus/Personality.json');
+const corpus = require('../corpus/Personality.json');
 
 const Personality = {
     name: 'Personality',

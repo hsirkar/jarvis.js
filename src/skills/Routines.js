@@ -30,7 +30,7 @@ const Routines = {
     name: 'Routines',
     init: params => {
         Object.assign(this, params);
-        routines = JSON.parse(fs.readFileSync('./corpus/Routines.json'));
+        routines = JSON.parse(fs.readFileSync('./src/corpus/Routines.json'));
         routines = routines.filter(element => element.intent.includes('.routine.'));
     },
     override: res => {

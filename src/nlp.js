@@ -26,10 +26,10 @@ const nlp = {
         // Combine individual corpuses into one large master corpus object
         data = [];
         skills.forEach(skill => {
-            if (!fs.existsSync(`./corpus/${skill.name}.json`))
+            if (!fs.existsSync(`./src/corpus/${skill.name}.json`))
                 return [];
 
-            corpus = fs.readFileSync(`./corpus/${skill.name}.json`);
+            corpus = fs.readFileSync(`./src/corpus/${skill.name}.json`);
             arr = JSON.parse(corpus);
             data = data.concat(arr);
         });

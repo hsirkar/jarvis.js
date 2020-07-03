@@ -1,14 +1,15 @@
 const os = require('os');
 const dns = require('dns');
 const publicIp = require('public-ip');
-const tts = require('../tts');
+const tts = require('../../tts');
 const moment = require('moment');
-const { isYes, setEnv, list, log, server } = require('../util');
+const { isYes, setEnv, list, log } = require('../../util');
 const similarity = require('string-similarity');
 const fs = require('fs');
-const path = require('path');
-const speedtest = require('speedtest-net');
 const axios = require('axios').default;
+const renew = require('./renew');
+const speedtest = require('./speedtest');
+const newskill = require('./newskill');
 
 const System = {
     name: 'System',
@@ -118,12 +119,6 @@ const System = {
                     resolve(moment(dateEntity.resolution.strValue || dateEntity.resolution.strFutureValue).format('dddd, MMMM Do, YYYY'));
                 // resolve(res.answer);
                 break;
-            case 'volumeup':
-                break;
-            case 'volumedown':
-                break;
-            case 'setvolume':
-                break;
             case 'uptime':
                 resolve('The system has been up for ' + moment.duration(os.uptime()*1000).humanize());
                 break;
@@ -185,118 +180,13 @@ const System = {
                 });
                 break;
             case 'renew':
-                const products = ['Photoshop', 'Illustrator', 'Premiere Pro'];
-
-                let target = res.utterance.toLowerCase();
-                ['renew', 'trial', 'reset', 'new', 'the', 'my'].forEach(c => target = target.replace(c, '').trim());
-
-                var matches = similarity.findBestMatch(target, products.map(p => p.toLowerCase()));
-
-                if(matches.bestMatch.rating < 0.7) {
-                    resolve(`No product named ${target} found. You can choose from ${list(products, 'and', '')}`);
-                    return;
-                }
-
-                var index = matches.bestMatchIndex;
-                log(`Target product: ${products[index]} (${matches.bestMatch.rating})`);
-
-                ask(`Should I renew ${products[index]}?`, answer => {
-                    if (isYes(answer)){
-                        const variable = products[index].replace('Pro', '').trim().toUpperCase();
-                        const filePath = process.env[variable];
-                        
-                        if(filePath){
-                            const xml = fs.readFileSync(path.join(filePath, 'application.xml'));
-                            const oldTsn = require('cheerio').load(xml, { xmlMode: true })('Data[key=TrialSerialNumber]').text();
-                            const newTsn = BigInt(oldTsn) + 1n;
-
-                            log(`Changing TSN from ${oldTsn} to ${newTsn}...`);
-
-                            const newXml = xml.toString().replace(oldTsn, newTsn);
-
-                            fs.writeFileSync(path.join(filePath, 'application.xml'), newXml);
-                            resolve('Successfully completed');
-                        }else{
-                            resolve(`Path to ${products[index]} not set`);
-                        }
-                        
-                    } else {
-                        resolve('OK, cancelled');
-                    }
-                });
+                renew(res, resolve, ask);
                 break;
             case 'speedtest':
-                ask(['Are you sure? This will take a minute', 'You sure about this? It will take some time'], answer => {
-                    if (isYes(answer)) {
-                        say('Starting speed test...');
-                        const progress = event => {
-                            if(event.type === 'testStart' && event.server) {
-                                say(`Connected to ${event.server.name} in ${event.server.location}`);
-                            }
-                            if(event.type === 'ping' && event.ping && event.ping.progress === 1) {
-                                const ping = Math.round(event.ping.latency);
-                                setTimeout(() => say(`Ping is ${ping} ms`), 1500);
-                            }
-                            if(event.type === 'download' && event.download && event.download.progress === 1) {
-                                const down = (event.download.bandwidth / 125000).toFixed(1);
-                                say(`Download speed is ${down} Mb/s`);
-                            }
-                            if(event.type === 'upload' && event.upload && event.upload.progress === 1) {
-                                const up = (event.upload.bandwidth / 125000).toFixed(1);
-                                say(`Upload speed is ${up} Mb/s`);
-                            }
-                        }
-                        speedtest({ acceptLicense: true, progress: progress })
-                            .then(res => {
-                                log(JSON.stringify(res, null, 2));
-                                setTimeout(() => resolve(`Speedtest complete`), 500);
-                            });
-                    } else {
-                        resolve('OK, cancelled');
-                    }
-                });
+                speedtest(ask, say, resolve);
                 break;
             case 'newskill':
-                ask('What is the name of the skill?', answer => {
-                    if(answer.match(/\b(cancel|nevermind|stop|quit|exit)\b/i)) {
-                        resolve('OK, cancelled');
-                        return;
-                    }
-
-                    if(answer.match(/[^a-zA-Z]/)) {
-                        resolve('Invalid name');
-                        return;
-                    }
-
-                    const name = answer.charAt(0).toUpperCase() + answer.slice(1).toLowerCase();
-
-                    log('Creating new skill: ' + name + '...');
-
-                    fs.writeFileSync(`./corpus/${name}.json`, JSON.stringify([{
-                        intent: `${name.toLowerCase()}.hello`,
-                        utterances: [`Invoke ${name.toLowerCase()}`],
-                        answers: [`You have reached ${name.toLowerCase()}`]
-                    }], null, 4));
-
-                    log('Corpus created')
-
-                    let template = fs.readFileSync('./src/skills/Template.js', 'utf-8')
-                        .replace(/Template/g, name)
-                        .replace(/template/g, name.toLowerCase());
-
-                    fs.writeFileSync(`./src/skills/${name}.js`, template);
-                    
-                    log('JS file created');
-
-                    let index = fs.readFileSync('./src/skills/index.js', 'utf-8')
-                        .replace(`];`, `    require('./${name}'), \n];`);
-
-                    fs.writeFileSync(`./src/skills/index.js`, index);
-
-                    log('src/index.js updated');
-                    resolve({ text: 'Skill successfully created (make sure to retrain)', subtitle: name });
-                    return;
-                });
+                newskill(ask, resolve)
                 break;
             default:
                 resolve('That feature has not been implemented yet');

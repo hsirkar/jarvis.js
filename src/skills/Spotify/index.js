@@ -42,11 +42,8 @@ const Spotify = {
         Object.assign(Spotify, { spotifyApi, axiosInstance });
     },
     override: res => {
-        if(res.utterance.toLowerCase().startsWith('play') && res.utterance.toLowerCase() !== 'play'){
-            const newRes = { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', score: 1 };
-            Object.assign(res, newRes);
-            log(`Overriden by Spotify: ${JSON.stringify(newRes)}`);
-            return;
+        if(res.utterance.toLowerCase().startsWith('play ')){
+            res.intent = res.utterance.includes('news') ? 'spotify.news' : 'spotify.play';
         }
 
         if (res.intent === 'system.stop') {

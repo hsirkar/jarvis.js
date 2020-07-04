@@ -75,7 +75,16 @@ function onInputReceived(input, onIntentComplete) {
         .then(res => {
             log(JSON.stringify(sanitizeNlpRes(res), null, 2));
 
-            skills.forEach(skill => skill.override && skill.override(res));
+            skills.forEach(skill => {
+                let { intent: before } = res;
+                skill.override && skill.override(res);
+                
+                if(res.intent !== before) {
+                    res.score = 1;
+                    log(`Overriden by ${skill.name}: ${res.intent}`);
+                }
+            });
+
             state.current = sanitizeNlpRes(res);
 
             let matched = skills.find(s => s.doesHandleIntent(res.intent));

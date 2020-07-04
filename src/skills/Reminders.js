@@ -20,21 +20,16 @@ const Reminders = {
         const create = ['new reminder', 'remind me', 'create a reminder', 'set a reminder', 'create reminder'];
         create.forEach(keyword => {
             if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
-                const newRes = { intent: 'reminders.create', score: 1 };
-                Object.assign(res, newRes);
-                log(`Overriden by Reminders: ${JSON.stringify(newRes)}`);
+                res.intent = 'reminders.create';
             }
         });
 
         const remove = ['delete reminder', 'remove my reminder', 'remove reminder', 'delete my reminder', 'cancel reminder', 'cancel my reminder'];
         remove.forEach(keyword => {
             if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
-                const newRes = { intent: 'reminders.remove', score: 1 };
-                Object.assign(res, newRes);
-                log(`Overriden by Reminders: ${JSON.stringify(newRes)}`);
+                res.intent = 'reminders.remove';
             }
         });
-
     },
     doesHandleIntent: intentName => {
         return intentName.startsWith('reminders');

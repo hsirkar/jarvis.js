@@ -17,9 +17,7 @@ const Show = {
         const show = ['show me', 'image', 'picture', 'look like'];
         show.forEach(keyword => {
             if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
-                const newRes = { intent: 'show.imagesearch', score: 1 };
-                Object.assign(res, newRes);
-                log(`Overriden by Show: ${JSON.stringify(newRes)}`);
+                res.intent = 'show.imagesearch';
             }
         });
     },
@@ -71,9 +69,6 @@ const Show = {
                     username = names[name];
                 }
             });
-
-            log(JSON.stringify(names));
-            log(Object.keys(names));
 
             if (selectedName && username) {
                 const list = [];

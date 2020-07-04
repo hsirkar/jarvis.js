@@ -16,24 +16,16 @@ const System = {
     init: params => Object.assign(this, params),
     override: res => {
         if(res.utterance.toLowerCase().startsWith('echo ')){
-            const newRes = { intent: 'system.echo', score: 1 };
-            Object.assign(res, newRes);
-            log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            res.intent = 'system.echo';
         }
         if(res.utterance.toLowerCase().startsWith('set ') && res.utterance.includes(' to ')) {
-            const newRes = { intent: 'system.setenv', score: 1 };
-            Object.assign(res, newRes);
-            log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            res.intent = 'system.setenv';
         }
         if(res.utterance.toLowerCase().startsWith('renew ')) {
-            const newRes = { intent: 'system.renew', score: 1 };
-            Object.assign(res, newRes);
-            log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            res.intent = 'system.renew';
         }
         if(res.utterance.toLowerCase().includes('nevermind') || res.utterance.toLowerCase().includes('never mind')) {
-            const newRes = { intent: 'system.dismiss', score: 1 };
-            Object.assign(res, newRes);
-            log(`Overriden by System: ${JSON.stringify(newRes)}`);
+            res.intent = 'system.dismiss';
         }
     },
     doesHandleIntent: intentName => {

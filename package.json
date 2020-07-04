@@ -24,6 +24,7 @@
     "debug": "^4.1.1",
     "dotenv": "^8.2.0",
     "g-i-s": "^2.1.5",
+    "get-port": "^5.1.1",
     "googleapis": "^52.1.0",
     "humanize-duration": "^3.23.0",
     "moment": "^2.26.0",

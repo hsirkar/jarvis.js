@@ -11,20 +11,19 @@ const Personality = {
 
         return false;
     },
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: async res => {
         if(res.intent.includes('sample')) {
             let answers = corpus.find(elem => elem.intent === res.intent).answers;
             let random = randomElements(answers, 4);
-            resolve({
+            return ({
                 text: `Here are some things you can say: ${random.join('; ')}`,
                 listTitle: 'Here are some things you can say:',
                 list: random.map(r => ({ displayText: r }))
             });
-            return;
         }
 
-        resolve(res.answer.replace('%utterance%', res.utterance));
-    })
+        return res.answer.replace('%utterance%', res.utterance);
+    }
 };
 
 module.exports = Personality;

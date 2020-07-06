@@ -5,23 +5,21 @@ let routines = [];
 
 let stopped = false;
 
-const next = (commands, index, onInputReceived, resolve) => {
+const next = (commands, index, onInputReceived) => {
     if(stopped) {
-        resolve();
         return;
     }
 
     this.onInputReceived(commands[index], () => {
         setTimeout(() => {
             if(stopped) {
-                resolve();
                 return;
             }
 
             if(index === commands.length - 1)
-                resolve();
+                return;
             else
-                next(commands, index+1, onInputReceived, resolve);
+                next(commands, index+1, onInputReceived);
         }, 1000);
     });
 }
@@ -39,7 +37,7 @@ const Routines = {
         }
     },
     doesHandleIntent: intentName => intentName.startsWith('routines'),
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: async res => {
         const { onInputReceived } = this;
 
         stopped = false;
@@ -49,12 +47,12 @@ const Routines = {
             const routine = routines.find(r => r.intent === res.intent);
             log(routine.commands);
 
-            next(routine.commands, 0, onInputReceived, resolve);
+            return await next(routine.commands, 0, onInputReceived);
 
         } else {
-            resolve(res.answer);
+            return res.answer;
         }
-    })
+    }
 };
 
 module.exports = Routines;

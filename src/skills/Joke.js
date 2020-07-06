@@ -4,18 +4,16 @@ const Joke = {
     name: 'Joke',
     init: params => Object.assign(this, params),
     doesHandleIntent: intentName => intentName.startsWith('joke'),
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: async res => {
         if(res.intent.includes('dirty')) {
-            this.ask(['Are you sure?', 'You sure about that?', 'Do you really want me to?'], answer => {
-                if(isYes(answer))
-                    resolve(res.answer);
-                else
-                    resolve(['Alright', 'OK']);
-            });
-            return;
+            let answer = await this.ask(['Are you sure?', 'You sure about that?', 'Do you really want me to?']);
+            if(isYes(answer))
+                return res.answer;
+            else
+                return ['Alright', 'OK'];
         }
-        resolve(res.answer);
-    })
+        return res.answer;
+    },
 };
 
 module.exports = Joke;

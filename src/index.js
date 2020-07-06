@@ -75,15 +75,17 @@ function onInputReceived(input, onIntentComplete) {
         .then(res => {
             log(JSON.stringify(sanitizeNlpRes(res), null, 2));
 
-            skills.forEach(skill => {
-                let { intent: before } = res;
+            for(let skill of skills) {
                 skill.override && skill.override(res);
-                
-                if(res.intent !== before) {
+
+                if(res.overriden) {
                     res.score = 1;
                     log(`Overriden by ${skill.name}: ${res.intent}`);
+                    break;
                 }
-            });
+            }
+
+            log(JSON.stringify(sanitizeNlpRes(res), null, 2));
 
             state.current = sanitizeNlpRes(res);
 
@@ -107,16 +109,19 @@ function onInputReceived(input, onIntentComplete) {
         .then(res => {
             send(res, 'response');
 
-            onIntentComplete && onIntentComplete(res);
+            setTimeout(() => onIntentComplete && onIntentComplete(res), 500);
 
             state.previous = state.current;
             state.current = null;
         });
 }
 
-function ask(question, onUserAnswered) {
+function ask(question) {
     send(question, 'question');
-    state.onUserAnswered = onUserAnswered;
+
+    return new Promise((resolve) => {
+        state.onUserAnswered = resolve;
+    });
 }
 
 function say(message) {

@@ -44,35 +44,36 @@ const COVID = {
         });
     },
     doesHandleIntent: intentName => intentName.startsWith('covid'),
-    handleIntent: nlpRes => new Promise(resolve => {
+    handleIntent: async nlpRes => {
         const secondary = nlpRes.intent.split('.')[1];
         switch (secondary) {
             case 'summary':
-                instance.get('https://api.covid19api.com/summary')
-                    .then(res => {
-                        let finalItem = res.data.Global;
-                        let utterance = nlpRes.utterance.toLowerCase().replace('us', 'united states of america').replace('uk', 'united kingdom');
+                try {
+                    let res = await instance.get('https://api.covid19api.com/summary');
 
-                        for(item of res.data.Countries) {
-                            if(utterance.includes(item.Country.toLowerCase())) {
-                                finalItem = item;
-                                break;
-                            }
-                        }
+                    let finalItem = res.data.Global;
+                    let utterance = nlpRes.utterance.toLowerCase().replace('us', 'united states of america').replace('uk', 'united kingdom');
 
-                        if(utterance.includes('death')) {
-                            resolve(`There are ${finalItem.TotalDeaths} total, and ${finalItem.NewDeaths} new deaths, in ${finalItem.Country ? finalItem.Country : 'the world'}`);
-                        } else {
-                            resolve(`There are ${finalItem.TotalConfirmed} total, and ${finalItem.NewConfirmed} new cases, in ${finalItem.Country ? finalItem.Country : 'the world'}`);
+                    for (item of res.data.Countries) {
+                        if (utterance.includes(item.Country.toLowerCase())) {
+                            finalItem = item;
+                            break;
                         }
-                    })
-                    .catch(() => resolve('Request failed'));
-                break;
+                    }
+
+                    if (utterance.includes('death')) {
+                        return `There are ${finalItem.TotalDeaths} total, and ${finalItem.NewDeaths} new deaths, in ${finalItem.Country ? finalItem.Country : 'the world'}`;
+                    } else {
+                        return `There are ${finalItem.TotalConfirmed} total, and ${finalItem.NewConfirmed} new cases, in ${finalItem.Country ? finalItem.Country : 'the world'}`;
+                    }
+                } catch (err) {
+                    log(err);
+                    return `There was an error`;
+                }
             default:
-                resolve(`I'm not sure`);
-                break;
+                return `I'm not sure`;
         }
-    })
+    }
 };
 
 module.exports = COVID;

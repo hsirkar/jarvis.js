@@ -1,4 +1,4 @@
-const { log, isYes } = require('../../util');
+const { log, isYes, removeStopwords } = require('../../util');
 const similarity = require('string-similarity');
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +7,7 @@ module.exports = (res, resolve, ask) => {
     const products = ['Photoshop', 'Illustrator', 'Premiere Pro'];
 
     let target = res.utterance.toLowerCase();
-    ['renew', 'trial', 'reset', 'new', 'the', 'my'].forEach(c => target = target.replace(c, '').trim());
+    target = removeStopwords(target, ['renew', 'trial', 'reset', 'new', 'the', 'my', 'adobe', 'software', 'free']);
 
     var matches = similarity.findBestMatch(target, products.map(p => p.toLowerCase()));
 
@@ -19,28 +19,29 @@ module.exports = (res, resolve, ask) => {
     var index = matches.bestMatchIndex;
     log(`Target product: ${products[index]} (${matches.bestMatch.rating})`);
 
-    ask(`Should I renew ${products[index]}?`, answer => {
-        if (isYes(answer)) {
-            const variable = products[index].replace('Pro', '').trim().toUpperCase();
-            const filePath = process.env[variable];
+    ask(`Should I renew ${products[index]}?`)
+        .then(answer => {
+            if (isYes(answer)) {
+                const variable = products[index].replace('Pro', '').trim().toUpperCase();
+                const filePath = process.env[variable];
 
-            if (filePath) {
-                const xml = fs.readFileSync(path.join(filePath, 'application.xml'));
-                const oldTsn = require('cheerio').load(xml, { xmlMode: true })('Data[key=TrialSerialNumber]').text();
-                const newTsn = BigInt(oldTsn) + 1n;
+                if (filePath) {
+                    const xml = fs.readFileSync(path.join(filePath, 'application.xml'));
+                    const oldTsn = require('cheerio').load(xml, { xmlMode: true })('Data[key=TrialSerialNumber]').text();
+                    const newTsn = BigInt(oldTsn) + 1n;
 
-                log(`Changing TSN from ${oldTsn} to ${newTsn}...`);
+                    log(`Changing TSN from ${oldTsn} to ${newTsn}...`);
 
-                const newXml = xml.toString().replace(oldTsn, newTsn);
+                    const newXml = xml.toString().replace(oldTsn, newTsn);
 
-                fs.writeFileSync(path.join(filePath, 'application.xml'), newXml);
-                resolve('Successfully completed');
+                    fs.writeFileSync(path.join(filePath, 'application.xml'), newXml);
+                    resolve('Successfully completed');
+                } else {
+                    resolve(`Path to ${products[index]} not set`);
+                }
+
             } else {
-                resolve(`Path to ${products[index]} not set`);
+                resolve('OK, cancelled');
             }
-
-        } else {
-            resolve('OK, cancelled');
-        }
-    });
+        });
 }

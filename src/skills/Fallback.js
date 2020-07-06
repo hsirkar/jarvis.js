@@ -39,162 +39,154 @@ const Fallback = {
     },
     setPrevious: previous => this.previous = previous,
     doesHandleIntent: intentName => intentName === 'None' || intentName.startsWith('fallback'),
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: async res => {
         let { utterance } = res;
 
         if(res.intent === 'fallback.force') {
             if(this.state.previous) {
                 utterance = this.state.previous.utterance;
             }else{
-                resolve(`I'm not sure`);
-                return;
+                return `I'm not sure`;
             }
         }
 
-        (async () => {
+        let answer = "";
+
+        // First query DDG
+        log(`Searching DuckDuckGo...`);
+        
+        try {
+            ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
+            const { AbstractText, Answer, Definition, AbstractSource, Image, AbstractURL, DefinitionURL } = ddg.data;
+
+            if(AbstractText || Answer || Definition) {
+                return ({
+                    text: firstTwoSentences(AbstractText || Answer || Definition),
+                    display: answer,
+                    source: AbstractSource,
+                    url: AbstractURL || DefinitionURL,
+                    image: Image
+                });
+            }
+
+        } catch (err) { log(err, err.stack) }
+
+        log(`No results found`);
+        
+        // Then query Google
+        log(`Searching Google...`);
+
+        try {
+            let url = encodeURI(`https://www.google.com/search?q=${utterance}`);
+            google = await instance.get(url);
+            let $ = cheerio.load(google.data);
+
+            await require('fs').writeFileSync('./cache/google-search-result.html', google.data);
+
             let answer = "";
 
-            // First query DDG
-            log(`Searching DuckDuckGo...`);
-            
-            try {
-                ddg = await instance.get(`https://api.duckduckgo.com/?q=${utterance}&format=json&pretty=1`);
-                const { AbstractText, Answer, Definition, AbstractSource, Image, AbstractURL, DefinitionURL } = ddg.data;
+            // Lyrics
+            const lyrics = $('[data-lyricid]').find('span:not(:has(*))').toArray().map(s => cheerio.load(s).text());
 
-                if(AbstractText || Answer || Definition) {
-                    resolve({
-                        text: firstTwoSentences(AbstractText || Answer || Definition),
-                        display: answer,
-                        source: AbstractSource,
-                        url: AbstractURL || DefinitionURL,
-                        image: Image
-                    });
-                    return;
-                }
+            if(Array.isArray(lyrics) && lyrics.length) {
+                const index = similarity.findBestMatch(utterance, lyrics).bestMatchIndex;
+                if(lyrics[index+1]) {
 
-            } catch (err) { log(err, err.stack) }
+                    answer = lyrics[index+1].trim();
 
-            log(`No results found`);
-            
-            // Then query Google
-            log(`Searching Google...`);
+                    if(answer.length < 32 && lyrics[index+2] && lyrics[index+2].trim() !== '…' && lyrics[index+2].trim() !== '\u2026'){
+                        answer += ' / ' + lyrics[index+2].trim();
+                    }
 
-            try {
-                let url = encodeURI(`https://www.google.com/search?q=${utterance}`);
-                google = await instance.get(url);
-                let $ = cheerio.load(google.data);
-
-                await require('fs').writeFileSync('./cache/google-search-result.html', google.data);
-
-                let answer = "";
-
-                // Lyrics
-                const lyrics = $('[data-lyricid]').find('span:not(:has(*))').toArray().map(s => cheerio.load(s).text());
-
-                if(Array.isArray(lyrics) && lyrics.length) {
-                    const index = similarity.findBestMatch(utterance, lyrics).bestMatchIndex;
-                    if(lyrics[index+1]) {
-
-                        answer = lyrics[index+1].trim();
-
-                        if(answer.length < 32 && lyrics[index+2] && lyrics[index+2].trim() !== '…' && lyrics[index+2].trim() !== '\u2026'){
-                            answer += ' / ' + lyrics[index+2].trim();
-                        }
-
-                        for(swear of ["bitch","shit","fuck","nigger","nigga","shit","dick","cum","pussy","shit","retard","fag","whore","hoe"]) {
-                            answer = answer.replace(new RegExp('\\w*' + swear + '\\w*', 'gi'), '[...]');
-                        }
+                    for(swear of ["bitch","shit","fuck","nigger","nigga","shit","dick","cum","pussy","shit","retard","fag","whore","hoe"]) {
+                        answer = answer.replace(new RegExp('\\w*' + swear + '\\w*', 'gi'), '[...]');
                     }
                 }
+            }
 
-                if(answer) {
-                    resolve({ text: answer, display: lyrics.join('\n'), source: 'LyricFind', url });
-                    return;
-                }
+            if(answer) {
+                return ({ text: answer, display: lyrics.join('\n'), source: 'LyricFind', url });
+            }
 
-                // List (type 1)
-                const arr1 = $('[role=list]').children().toArray();
+            // List (type 1)
+            const arr1 = $('[role=list]').children().toArray();
 
-                if(arr1.length > 0) {
-                    answer = getAnswer(arr1);
-                }
+            if(arr1.length > 0) {
+                answer = getAnswer(arr1);
+            }
 
-                // List (type 2)
-                const arr2 = $('.rl_item').toArray();
+            // List (type 2)
+            const arr2 = $('.rl_item').toArray();
 
-                if(arr2.length > 0) {
-                    answer = getAnswer(arr2);
-                }
-                
-                // Basic info
-                const basic = $('#center_col').find('[role=heading][data-attrid]').children().first().text();
-
-                if(basic) {
-                    answer = basic;
-                }
-
-                if(answer) {
-                    resolve({ text: answer, source: 'Google', url: url });
-                    return;
-                }
-
-            } catch (err) { log(err, err.stack) }
-
-            log(`No results found`);
+            if(arr2.length > 0) {
+                answer = getAnswer(arr2);
+            }
             
-            // Query WolframAlpha
-            log(`Searching WolframAlpha...`);
+            // Basic info
+            const basic = $('#center_col').find('[role=heading][data-attrid]').children().first().text();
 
-            try {
-                wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
+            if(basic) {
+                answer = basic;
+            }
 
-                if (wolfram && wolfram.status === 200 && wolfram.data) {
-                    resolve({
-                        text: wolfram.data,
-                        source: 'Wolfram Alpha',
-                        url: `https://api.wolframalpha.com/v1/simple?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`
-                    });
-                    return;
-                }
-            } catch (err) { log(err, err.stack) }
+            if(answer) {
+                return ({ text: answer, source: 'Google', url: url });
+            }
 
-            log(`No results found`);
+        } catch (err) { log(err, err.stack) }
 
-            // Return search results from DuckDuckGo
-            try {
-                const search = await scraper.scrape({ debug_level: 0 }, { block_assets: true, search_engine: 'duckduckgo', keywords: [res.utterance], num_pages: 1 });
-                const results = await search.results[res.utterance]['1'].results;
-
-                console.dir(results);
-
-                if(results) {
-                    resolve({
-                        text: `Here's what I found on the web`,
-                        listTitle: `Web results:`,
-                        list: results.slice(0, 4).map(r => ({
-                            displayText: r.title,
-                            subtitle: r.snippet.split(' ').slice(0, 30).join(' '),
-                            subtitle2: r.visible_link,
-                            url: r.link,
-                            image: 'https://s2.googleusercontent.com/s2/favicons?domain=' + (new URL(r.link).hostname)
-                        })),
-                        source: 'DuckDuckGo Web Search',
-                        url: 'https://www.duckduckgo.com/?q=' + encodeURIComponent(res.utterance)
-                    });
-                    return;
-                }
-            } catch (err) { log(err, err.stack) }
-
-            log(`Admitting defeat`);
+        log(`No results found`);
         
-            // Admit defeat
-            resolve([
-                'Sorry, I don\'t understand',
-                'You\'ll have to rephrase that',
-                'I do not understand'
-            ]);
-        })();
-    })
+        // Query WolframAlpha
+        log(`Searching WolframAlpha...`);
+
+        try {
+            wolfram = await instance.get(`https://api.wolframalpha.com/v1/spoken?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`);
+
+            if (wolfram && wolfram.status === 200 && wolfram.data) {
+                return ({
+                    text: wolfram.data,
+                    source: 'Wolfram Alpha',
+                    url: `https://api.wolframalpha.com/v1/simple?i=${res.utterance}&appid=${process.env.WOLFRAM_APP_ID}`
+                });
+            }
+        } catch (err) { log(err, err.stack) }
+
+        log(`No results found`);
+
+        // Return search results from DuckDuckGo
+        try {
+            const search = await scraper.scrape({ debug_level: 0 }, { block_assets: true, search_engine: 'duckduckgo', keywords: [res.utterance], num_pages: 1 });
+            const results = await search.results[res.utterance]['1'].results;
+
+            console.dir(results);
+
+            if(results) {
+                return ({
+                    text: `Here's what I found on the web`,
+                    listTitle: `Web results:`,
+                    list: results.slice(0, 4).map(r => ({
+                        displayText: r.title,
+                        subtitle: r.snippet.split(' ').slice(0, 30).join(' '),
+                        subtitle2: r.visible_link,
+                        url: r.link,
+                        image: 'https://s2.googleusercontent.com/s2/favicons?domain=' + (new URL(r.link).hostname)
+                    })),
+                    source: 'DuckDuckGo Web Search',
+                    url: 'https://www.duckduckgo.com/?q=' + encodeURIComponent(res.utterance)
+                });
+            }
+        } catch (err) { log(err, err.stack) }
+
+        log(`Admitting defeat`);
+    
+        // Admit defeat
+        return([
+            'Sorry, I don\'t understand',
+            'You\'ll have to rephrase that',
+            'I do not understand'
+        ]);
+    }
 }
 
 module.exports = Fallback;

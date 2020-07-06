@@ -2,6 +2,7 @@ const { Reminder } = require('../db');
 const moment = require('moment');
 const { abbrList, log, removeStopwords, isYes } = require('../util');
 const similarity = require('string-similarity');
+const plur = require('plur');
 
 const Reminders = {
     name: 'Reminders',
@@ -20,141 +21,103 @@ const Reminders = {
         const create = ['new reminder', 'remind me', 'create a reminder', 'set a reminder', 'create reminder'];
         create.forEach(keyword => {
             if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
-                res.intent = 'reminders.create';
+                Object.assign(res, { intent: 'reminders.create', overriden: true });
             }
         });
 
         const remove = ['delete reminder', 'remove my reminder', 'remove reminder', 'delete my reminder', 'cancel reminder', 'cancel my reminder'];
         remove.forEach(keyword => {
             if(res.utterance.toLowerCase().includes(keyword.toLowerCase())) {
-                res.intent = 'reminders.remove';
+                Object.assign(res, { intent: 'reminders.remove', overriden: true });
             }
         });
     },
     doesHandleIntent: intentName => {
         return intentName.startsWith('reminders');
     },
-    handleIntent: res => new Promise((resolve, reject) => {
+    handleIntent: async res => {
         const secondary = res.intent.split('.')[1];
-        switch (secondary) {
-            case 'list':
-                Reminder.find({})
-                    .then(res => {
-                        res = res.filter(r => moment(r.time).isSameOrAfter(moment()));
 
-                        const reminders = res.map(r => `${r.reminder}: ${moment(r.time).calendar()} at ${moment(r.time).format('LT')}`);
+        if (secondary === 'list') {
+            const reminders = await Reminder.find({}).exec();
+            const formatted = reminders.map(r => `${r.reminder}: ${moment(r.time).calendar()} at ${moment(r.time).format('LT')}`);
 
-                        if(res.length) {
-                            resolve({
-                                text: `${res.length} upcoming reminders: ${abbrList(reminders, 'and', '', 3)}`,
-                                listTitle: `${res.length} upcoming reminders`,
-                                list: res.map(r => ({
-                                    displayText: r.reminder,
-                                    subtitle: moment(r.time).format('LLLL')
-                                })),
-                            });
-                        } else {
-                            resolve(['No upcoming reminders', 'You do not have any upcoming reminders']);
-                        }
-                        
-                    })
-                    .catch(err => reject(err));
-                break;
-            case 'create':
-                let rawDateTime = res.entities.find(e => e.entity === 'datetime') || res.entities.find(e => e.entity === 'time');
-
-                if(!rawDateTime) {
-                    resolve('I could not parse a time for the reminder');
-                    return;
-                }
-
-                let dateTime = moment(
-                    rawDateTime.resolution.values.slice(-1)[0].value,
-                    rawDateTime.entity === 'time' ? 'H:m' : undefined
-                );
-
-                if(dateTime.isSameOrBefore(moment())) {
-                    resolve('You cannot set a reminder in the past');
-                    return;
-                }
-
-                let rawReminder = res.entities.find(e => e.entity === 'reminder');
-
-                if(!rawReminder) {
-                    resolve('I could not parse your reminder');
-                    return;
-                }
-
-                let reminder = rawReminder.sourceText
-                    .replace(rawDateTime.sourceText, '')
-                    .replace(/\bmy\b/gi, 'your')
-                    .replace(/\bmine\b/gi, 'yours')
-                    .replace(/\b(in|on|at|after)\b$/gi, '')
-                    .trim();
-
-                new Reminder({
-                    reminder,
-                    time: dateTime.toISOString(),
-                    completed: false
-                }).save({}, err => {
-                    if(err) {
-                        log(err);
-                        resolve('There was an error');
-                        return;
-                    }
-                    resolve({
-                        text: `Reminder ${reminder} set for ${dateTime.calendar()} at ${dateTime.format('LT')}`,
-                        displayText: `"${reminder}"`,
-                        subtitle: dateTime.format('LLLL')
-                    });
+            if(reminders.length) {
+                return ({
+                    text: `${reminders.length} upcoming ${plur('reminder', reminders.length)}: ${abbrList(formatted, 'and', '', 3)}`,
+                    listTitle: `${reminders.length} upcoming ${plur('reminder', reminders.length)}`,
+                    list: reminders.map(r => ({
+                        displayText: r.reminder,
+                        subtitle: moment(r.time).format('LLLL')
+                    })),
                 });
-                break;
-            case 'remove':
-                let { utterance } = res;
+            }
 
-                let stopwords = [
-                    'delete', 'remove', 'reminder', 'reminders', 'please',
-                    'can', 'you', 'will', 'jarvis', 'my', 'the', 'for'
-                ];
-
-                let cleaned = removeStopwords(utterance, stopwords);
-
-                Reminder.find({})
-                    .then(res => {
-                        res = res.filter(r => moment(r.time).isSameOrAfter(moment()));
-
-                        if(res.length === 0) {
-                            resolve('You do not have any upcoming reminders');
-                            return;
-                        }
-
-                        let { bestMatchIndex } = similarity.findBestMatch(cleaned, res.map(r => r.reminder));
-                        let { reminder, time } = res[bestMatchIndex];
-
-                        this.ask({
-                            text: `Remove reminder ${reminder} for ${moment(time).calendar()} at ${moment(time).format('LT')}?`,
-                            displayText: 'Remove reminder "' + reminder + '"?',
-                            subtitle: moment(time).format('LLLL')
-                        }, answer => {
-                            if(isYes(answer)) {
-                                Reminder.deleteOne({ reminder: reminder, time: time }, err => {
-                                    if(err) {
-                                        log(err);
-                                        resolve('Error');
-                                        return;
-                                    } else {
-                                        resolve('Reminder removed');
-                                    }
-                                });
-                            } else {
-                                resolve('Cancelled');
-                            }
-                        });
-                    });
-            default:
-                break;
+            return ['No upcoming reminders', 'You do not have any upcoming reminders'];
         }
-    })
+
+        if (secondary === 'create') {
+            let rawDateTime = res.entities.find(e => e.entity === 'datetime') || res.entities.find(e => e.entity === 'time');
+
+            if(!rawDateTime)
+                return 'I could not parse a time for the reminder';
+
+            let dateTime = moment(
+                rawDateTime.resolution.values.slice(-1)[0].value,
+                rawDateTime.entity === 'time' ? 'H:m' : undefined
+            );
+
+            if(dateTime.isSameOrBefore(moment()))
+                return 'You cannot set a reminder in the past';
+
+            let rawReminder = res.entities.find(e => e.entity === 'reminder');
+
+            if(!rawReminder)
+                return 'I could not parse your reminder';
+
+            let reminder = rawReminder.sourceText
+                .replace(rawDateTime.sourceText, '')
+                .replace(/\bmy\b/gi, 'your')
+                .replace(/\bmine\b/gi, 'yours')
+                .replace(/\b(in|on|at|after)\b$/gi, '')
+                .trim();
+
+            await new Reminder({ reminder, time: dateTime.toISOString(), completed: false }).save();
+            return ({
+                text: `Reminder ${reminder} set for ${dateTime.calendar()} at ${dateTime.format('LT')}`,
+                displayText: `"${reminder}"`,
+                subtitle: dateTime.format('LLLL')
+            });
+        }
+
+        if (secondary === 'remove') {
+            let cleaned = removeStopwords(res.utterance,
+                ['delete', 'remove', 'reminder', 'reminders', 'please',
+                    'can', 'you', 'will', 'jarvis', 'my', 'the', 'for']);
+
+            let reminders = await Reminder.find({}).exec();
+            reminders = reminders.filter(r => moment(r.time).isSameOrAfter(moment()));
+
+            if(reminders.length === 0)
+                return 'You do not have any upcoming reminders';
+
+            let { bestMatchIndex } = similarity.findBestMatch(cleaned, reminders.map(r => r.reminder));
+            let { reminder, time } = reminders[bestMatchIndex];
+
+            const answer = await this.ask({
+                text: `Remove reminder ${reminder} for ${moment(time).calendar()} at ${moment(time).format('LT')}?`,
+                displayText: 'Remove reminder "' + reminder + '"?',
+                subtitle: moment(time).format('LLLL')
+            });
+            
+            if(isYes(answer)) {
+                await Reminder.deleteOne({ reminder, time });
+                return 'Reminder removed';
+            }
+            
+            return 'Cancelled';
+        }
+    }
 };
 
 module.exports = Reminders;

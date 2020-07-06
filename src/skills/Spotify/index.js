@@ -1,9 +1,7 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const axios = require('axios').default;
-const open = require('open');
 const moment = require('moment');
 const { log, list } = require('../../util');
-const cheerio = require('cheerio');
 
 let spotifyApi;
 let axiosInstance;
@@ -43,7 +41,7 @@ const Spotify = {
     },
     override: res => {
         if(res.utterance.toLowerCase().startsWith('play ')){
-            res.intent = res.utterance.includes('news') ? 'spotify.news' : 'spotify.play';
+            Object.assign(res, { intent: res.utterance.includes('news') ? 'spotify.news' : 'spotify.play', overriden: true });
         }
 
         if (res.intent === 'system.stop') {
@@ -98,133 +96,118 @@ const Spotify = {
             .catch(err => log(err));
     },
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
-    handleIntent: res => new Promise(resolve => {
-        (async() => {
-            try {
-                if(res.intent === 'spotify.play'){
-                    const query = res.utterance.toLowerCase().replace('play ', '').replace(' on spotify', '').replace(' by ', ' ').replace(' and ', ' ');
-                    log(`Searching for "${query}"...`);
+    handleIntent: async res => {
+        try {
+            if(res.intent === 'spotify.play'){
+                const query = res.utterance.toLowerCase().replace('play ', '').replace(' on spotify', '').replace(' by ', ' ').replace(' and ', ' ');
+                log(`Searching for "${query}"...`);
 
-                    let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
-                    let tracks = searchRes.body.tracks.items;
-                    log('Search results: ' + tracks.map(track => getDesc(track)).join('; ') );
+                let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
+                let tracks = searchRes.body.tracks.items;
+                log('Search results: ' + tracks.map(track => getDesc(track)).join('; ') );
 
-                    if(tracks.length === 0){
-                        resolve(`No results found for ${query}`);
-                        return;
-                    }
-
-                    // Add track to queue, skip to next track
-                    await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}&device_id=${deviceId}`);
-                    await axiosInstance.post(`/v1/me/player/next?device_id=${deviceId}`);
-
-                    // new SpotifyWebApi().search().then(res => res.body.tracks.items[0].ur)
-
-                    resolve({
-                        text: `Now playing ${getDesc(tracks[0])}`,
-                        displayText: tracks[0].name,
-                        image: tracks[0].album.images[0].url,
-                        subtitle: tracks[0].artists.map(a => a.name).join(', '),
-                        subtitle2: tracks[0].album.name
-                    });
-                    return;
+                if(tracks.length === 0){
+                    return `No results found for ${query}`;
                 }
 
-                if(res.intent === 'spotify.pause'){
-                    await spotifyApi.pause();
-                    log('Spotify paused');
-                    resolve();
-                    return;
-                }
-        
-                if (res.intent === 'spotify.resume') {
-                    await spotifyApi.play();
-                    log('Spotify resumed');
-                    resolve();
-                    return;
-                }
-                
-                if (res.intent === 'spotify.next') {
-                    await spotifyApi.skipToNext();
-                    log('Spotify skipped to next');
-                    resolve();
-                    return;
-                }
-                
-                if (res.intent === 'spotify.previous') {
-                    await spotifyApi.skipToPrevious();
-                    log('Spotify back to previous');
-                    resolve();
-                    return;
-                }
+                // Add track to queue, skip to next track
+                await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}&device_id=${deviceId}`);
+                await axiosInstance.post(`/v1/me/player/next?device_id=${deviceId}`);
 
-                if (res.intent === 'spotify.replay') {
-                    await spotifyApi.seek(0);
-                    log('Spotify replaying');
-                    resolve();
-                    return;
-                }
-                        
-                if (res.intent === 'spotify.current' || res.intent === 'spotify.lyrics') {
-                    let apiRes = await spotifyApi.getMyCurrentPlayingTrack();
-                    let track = apiRes.body.item;
-
-                    if(apiRes && apiRes.body && track && track.name && track.artists)
-                        if(res.intent.includes('current')) {
-                            resolve({
-                                text: getDesc(track),
-                                displayText: track.name,
-                                image: track.album.images[0].url,
-                                subtitle: track.artists.map(a => a.name).join(', '),
-                                subtitle2: track.album.name
-                            });
-                        }
-                        else {
-                            let lyricsRes = await axios.get('https://some-random-api.ml/lyrics/?title=' + encodeURIComponent(track.name+track.artists[0].name));
-                            resolve({
-                                displayText: lyricsRes.data.lyrics,
-                                subtitle: getDesc(track)
-                            });
-                        }
-                    else
-                        resolve(`I'm not sure`);
-                    return;
-                }
-
-                if(res.intent === 'spotify.news') {
-                    let spotifyRes = await axiosInstance.get(`/v1/shows/2AoYk2xxbBfVjagnt4mwuV`);
-                    let episodes = spotifyRes.data.episodes.items;
-                    
-                    // Add track to queue, skip to next track
-                    await axiosInstance.post(`/v1/me/player/queue?uri=${episodes[0].uri}`);
-                    await axiosInstance.post(`/v1/me/player/next`);
-                    resolve(`Playing ${spotifyRes.data.name}`);
-                    return;
-                }
-
-            } catch (err) {
-                if(res.utterance.includes('stop')) {
-                    resolve();
-                    return;
-                }
-
-                log(err.statusCode);
-                log(err);
-    
-                if(err.statusCode && err.statusCode === 401) {
-                    Spotify.refreshToken(() => Spotify.handleIntent(res).then(res => resolve(res)));
-                    return;
-                }
-            
-                if (err && err.response && err.response.data && err.response.data.error && err.response.data.error.reason && err.response.data.error.reason === 'NO_ACTIVE_DEVICE') {
-                    resolve('There are no active devices to play on');
-                    return;
-                }
-            
-                resolve('Error, I could not process your request');
+                return ({
+                    text: `Now playing ${getDesc(tracks[0])}`,
+                    displayText: tracks[0].name,
+                    image: tracks[0].album.images[0].url,
+                    subtitle: tracks[0].artists.map(a => a.name).join(', '),
+                    subtitle2: tracks[0].album.name
+                });
             }
-        })();
-    }),
+
+            if(res.intent === 'spotify.pause'){
+                await spotifyApi.pause();
+                log('Spotify paused');
+                return;
+            }
+    
+            if (res.intent === 'spotify.resume') {
+                await spotifyApi.play();
+                log('Spotify resumed');
+                return;
+            }
+            
+            if (res.intent === 'spotify.next') {
+                await spotifyApi.skipToNext();
+                log('Spotify skipped to next');
+                return;
+            }
+            
+            if (res.intent === 'spotify.previous') {
+                await spotifyApi.skipToPrevious();
+                log('Spotify back to previous');
+                return;
+            }
+
+            if (res.intent === 'spotify.replay') {
+                await spotifyApi.seek(0);
+                log('Spotify replaying');
+                return;
+            }
+                    
+            if (res.intent === 'spotify.current' || res.intent === 'spotify.lyrics') {
+                let apiRes = await spotifyApi.getMyCurrentPlayingTrack();
+                let track = apiRes.body.item;
+
+                if(apiRes && apiRes.body && track && track.name && track.artists)
+                    if(res.intent.includes('current')) {
+                        return ({
+                            text: getDesc(track),
+                            displayText: track.name,
+                            image: track.album.images[0].url,
+                            subtitle: track.artists.map(a => a.name).join(', '),
+                            subtitle2: track.album.name
+                        });
+                    }
+                    else {
+                        let lyricsRes = await axios.get('https://some-random-api.ml/lyrics/?title=' + encodeURIComponent(track.name+track.artists[0].name));
+                        return ({
+                            displayText: lyricsRes.data.lyrics,
+                            subtitle: getDesc(track)
+                        });
+                    }
+                else
+                    return `I'm not sure`;
+            }
+
+            if(res.intent === 'spotify.news') {
+                let spotifyRes = await axiosInstance.get(`/v1/shows/2AoYk2xxbBfVjagnt4mwuV`);
+                let episodes = spotifyRes.data.episodes.items;
+                
+                // Add track to queue, skip to next track
+                await axiosInstance.post(`/v1/me/player/queue?uri=${episodes[0].uri}`);
+                await axiosInstance.post(`/v1/me/player/next`);
+                return `Playing ${spotifyRes.data.name}`;
+            }
+
+        } catch (err) {
+            if(res.utterance.includes('stop')) {
+                return;
+            }
+
+            log(err.statusCode);
+            log(err);
+
+            if(err.statusCode && err.statusCode === 401) {
+                Spotify.refreshToken(() => Spotify.handleIntent(res).then(res => resolve(res)));
+                return;
+            }
+        
+            if (err && err.response && err.response.data && err.response.data.error && err.response.data.error.reason && err.response.data.error.reason === 'NO_ACTIVE_DEVICE') {
+                return 'There are no active devices to play on';
+            }
+        
+            return 'Error, I could not process your request';
+        }
+    },
     // Use functions from SpotifyWebApi with error handling for expired access token
     api: (functionName, ...args) => new Promise(resolve => {
         spotifyApi[functionName](...args)

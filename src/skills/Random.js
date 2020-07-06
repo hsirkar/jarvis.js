@@ -29,64 +29,60 @@ const Random = {
         });
     },
     doesHandleIntent: intentName => intentName.startsWith('random'),
-    handleIntent: res => new Promise((resolve, reject) => {
+    handleIntent: async res => {
         const secondary = res.intent.split('.')[1];
-        let min, max, numbers, randomNumber;
 
-        switch (secondary) {
-            case 'number':
-                min = 1;
-                max = 100;
-                
-                numbers = res.entities.filter(entity => entity.entity === 'number');
-                if(numbers.length === 2){
-                    min = numbers[0].resolution.value;
-                    max = numbers[1].resolution.value;
-                }
-                
-                resolve(getRandomIntInclusive(min, max).toString());
-                break;
-            case 'coinflip':
-                resolve(Math.random() >= 0.5 ? 'Heads' : 'Tails');
-                break;
-            case 'die':
-                min = 1;
-                max = 6;
-
-                numbers = res.entities.filter(entity => entity.entity === 'number');
-                if (numbers.length === 1) {
-                    max = numbers[0].resolution.value;
-                }
-
-                resolve(getRandomIntInclusive(min, max).toString());
-                break;
-            case 'person':
-                instance.get('https://randomuser.me/api/?nat=us')
-                    .then(res => {
-                        const person = res.data.results[0];
-                        log(JSON.stringify(person, null, 2));
-                        const { name, dob, gender, picture } = person;
-                        resolve({
-                            text: `${name.first} ${name.last}, ${gender}, ${dob.age}`,
-                            image: picture.large,
-                            extras: person });
-                    })
-                    .catch(() => resolve('Failed getting random person'));
-                break;
-            case 'book':
-                Book.countDocuments()
-                    .then(count => {
-                        let random = Math.floor(Math.random() * count);
-                        return Book.findOne().skip(random);
-                    })
-                    .then(book => resolve(book.title))
-                    .catch(err => reject(err));
-                break;
-            default:
-                resolve(`I'm not sure`);
-                break;
+        if (secondary === 'number') {
+            let min = 1;
+            let max = 100;
+            
+            let numbers = res.entities.filter(entity => entity.entity === 'number');
+            if(numbers.length === 2){
+                min = numbers[0].resolution.value;
+                max = numbers[1].resolution.value;
+            }
+            
+            return getRandomIntInclusive(min, max).toString();
         }
-    })
+
+        if (secondary === 'coinflip') {
+            return Math.random() >= 0.5 ? 'Heads' : 'Tails';
+        }
+
+        if (secondary === 'die') {
+            let min = 1;
+            let max = 6;
+
+            let numbers = res.entities.filter(entity => entity.entity === 'number');
+            if (numbers.length === 1) {
+                max = numbers[0].resolution.value;
+            }
+
+            return getRandomIntInclusive(min, max).toString();
+        }
+        
+        if (secondary === 'person') {
+            const res = await instance.get('https://randomuser.me/api/?nat=us');
+            const person = res.data.results[0];
+
+            log(JSON.stringify(person, null, 2));
+            
+            const { name, dob, gender, picture } = person;
+            return ({
+                text: `${name.first} ${name.last}, ${gender}, ${dob.age}`,
+                image: picture.large,
+                extras: person
+            });
+        }
+
+        if (secondary === 'book') {
+            const count = await Book.countDocuments();
+            const random = Math.floor(Math.random() * count);
+            const book = await Book.findOne().skip(random).exec();
+            log(book);
+            return book.title;
+        }
+    }
 };
 
 module.exports = Random;

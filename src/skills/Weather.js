@@ -25,50 +25,47 @@ const Weather = {
         appid = process.env.OWM_APPID;
     },
     doesHandleIntent: intentName => intentName.startsWith('weather'),
-    handleIntent: nlpRes => new Promise(resolve => {
-        (async () => {
-            try {
-                const res = await instance.get('http://ip-api.com/json');
+    handleIntent: async nlpRes => {
+        try {
+            const res = await instance.get('http://ip-api.com/json');
 
-                if (res && res.status === 200 && res.data && res.data.city && res.data.regionName && res.data.countryCode) {
-                    city = `${res.data.city || ''}, ${res.data.regionName || ''}`
-                    lat = res.data.lat;
-                    lon = res.data.lon;
-                    log(`Host city set as ${city} at (${lat}, ${lon})`);
-                } else
-                    log(`Failed getting current host city, using ${city}`);
+            if (res && res.status === 200 && res.data && res.data.city && res.data.regionName && res.data.countryCode) {
+                city = `${res.data.city || ''}, ${res.data.regionName || ''}`
+                lat = res.data.lat;
+                lon = res.data.lon;
+                log(`Host city set as ${city} at (${lat}, ${lon})`);
+            } else
+                log(`Failed getting current host city, using ${city}`);
 
-            } catch (err) { log(`Failed getting current host city ${err}, using ${city}`) }
+        } catch (err) { log(`Failed getting current host city ${err}, using ${city}`) }
 
-            log(`Looking up weather for (${lat}, ${lon})...`);
+        log(`Looking up weather for (${lat}, ${lon})...`);
 
-            try {
-                const res = await instance.get(`http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${appid}&units=imperial&exclude=minutely`);
+        try {
+            const res = await instance.get(`http://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${appid}&units=imperial&exclude=minutely`);
 
-                if(res && res.status === 200 && res.data){
-                    log('Successfully retrieved weather');
-                    const { current, daily } = res.data;
-                    resolve({
-                        text: nlpRes.answer
-                            .replace('%city%', city)
-                            .replace('%desc%', current.weather[0].description)
-                            .replace('%wind%', Math.round(current.wind_speed))
-                            .replace('%temp%', Math.round(current.feels_like))
-                            .replace('%high%', Math.round(daily[0].temp.max))
-                            .replace('%low%', Math.round(daily[0].temp.min))
-                            .replace('%ddesc%', daily[0].weather[0].description),
-                        image: `http://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png` 
-                    } );
-                    return;
-                } else {
-                    log(`Failed getting weather`);
-                }
+            if(res && res.status === 200 && res.data){
+                log('Successfully retrieved weather');
+                const { current, daily } = res.data;
+                return ({
+                    text: nlpRes.answer
+                        .replace('%city%', city)
+                        .replace('%desc%', current.weather[0].description)
+                        .replace('%wind%', Math.round(current.wind_speed))
+                        .replace('%temp%', Math.round(current.feels_like))
+                        .replace('%high%', Math.round(daily[0].temp.max))
+                        .replace('%low%', Math.round(daily[0].temp.min))
+                        .replace('%ddesc%', daily[0].weather[0].description),
+                    image: `http://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png` 
+                });
+            } else {
+                log(`Failed getting weather`);
+            }
 
-            } catch (err) { log(err, err.stack) }
+        } catch (err) { log(err, err.stack) }
 
-            resolve([`I was unable to get the weather`, `I could not get the weather`]);
-        })();
-    })
+        return [`I was unable to get the weather`, `I could not get the weather`];
+    }
 };
 
 module.exports = Weather;

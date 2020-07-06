@@ -75,66 +75,61 @@ const Calendar = {
         });
     },
     doesHandleIntent: intentName => intentName.startsWith('calendar'),
-    handleIntent: nlpRes => new Promise(resolve => {
-        (async()=>{
-            try {
-                let { entities, intent } = nlpRes;
+    handleIntent: async nlpRes => {
+        try {
+            let { entities, intent } = nlpRes;
 
-                let extractedDate = entities.find(e => e.entity === 'date');
-                let extractedRange = entities.find(e => e.entity === 'daterange');
+            let extractedDate = entities.find(e => e.entity === 'date');
+            let extractedRange = entities.find(e => e.entity === 'daterange');
 
-                let resolvedDate = extractedDate && moment(extractedDate.resolution.date || extractedDate.resolution.futureDate);
-                let resolvedStart = extractedRange && moment(extractedRange.resolution.start);
-                let resolvedEnd = extractedRange && moment(extractedRange.resolution.end);
+            let resolvedDate = extractedDate && moment(extractedDate.resolution.date || extractedDate.resolution.futureDate);
+            let resolvedStart = extractedRange && moment(extractedRange.resolution.start);
+            let resolvedEnd = extractedRange && moment(extractedRange.resolution.end);
 
-                if(intent === 'calendar.list') {
-                    if (resolvedDate || (resolvedStart && resolvedEnd)) {
-                        const results = await this.calendar.events.list({
-                            calendarId: 'primary',
-                            timeMin: (resolvedStart || resolvedDate).toISOString(),
-                            timeMax: (resolvedEnd || resolvedDate.endOf('day')).toISOString(),
-                            maxResults: 10,
-                            singleEvents: true,
-                            orderBy: 'startTime',
+            if(intent === 'calendar.list') {
+                if (resolvedDate || (resolvedStart && resolvedEnd)) {
+                    const results = await this.calendar.events.list({
+                        calendarId: 'primary',
+                        timeMin: (resolvedStart || resolvedDate).toISOString(),
+                        timeMax: (resolvedEnd || resolvedDate.endOf('day')).toISOString(),
+                        maxResults: 10,
+                        singleEvents: true,
+                        orderBy: 'startTime',
+                    });
+                    const events = results.data.items;
+                    log(JSON.stringify(events,null,2));
+                    if (events.length) {
+                        return({
+                            text: `${events.length} item${events.length === 1 ? '' : 's'}: ${abbrList(events.map(e => e.summary), 'and', 'None', 4)}`,
+                            list: events.map(event => sanitizeEvent(event)),
+                            listTitle: 'Overview: ' + getFormattedRange(
+                                resolvedStart || resolvedDate,
+                                resolvedEnd || resolvedDate,
+                                false, false),
                         });
-                        const events = results.data.items;
-                        log(JSON.stringify(events,null,2));
-                        if (events.length) {
-                            resolve({
-                                text: `${events.length} item${events.length === 1 ? '' : 's'}: ${abbrList(events.map(e => e.summary), 'and', 'None', 4)}`,
-                                list: events.map(event => sanitizeEvent(event)),
-                                listTitle: 'Overview: ' + getFormattedRange(
-                                    resolvedStart || resolvedDate,
-                                    resolvedEnd || resolvedDate,
-                                    false, false),
-                            });
-                        } else {
-                            resolve({
-                                text: 'You do not have anything scheduled',
-                                subtitle: getFormattedRange(
-                                    resolvedStart || resolvedDate,
-                                    resolvedEnd || resolvedDate,
-                                    false, false),
-                            });
-                        }
-
                     } else {
-                        resolve([
-                            'I was unable to parse the date',
-                            'You did not provide a valid date'
-                        ]);
+                        return({
+                            text: 'You do not have anything scheduled',
+                            subtitle: getFormattedRange(
+                                resolvedStart || resolvedDate,
+                                resolvedEnd || resolvedDate,
+                                false, false),
+                        });
                     }
+
+                } else {
+                    return([
+                        'I was unable to parse the date',
+                        'You did not provide a valid date'
+                    ]);
                 }
-                resolve(`I'm not sure`);
-                return;
-            } catch (e) {
-                log(e);
-                resolve('There was an error');
             }
-
-
-        })();
-    })
+            return(`I'm not sure`);
+        } catch (e) {
+            log(e);
+            return('There was an error');
+        }
+    }
 };
 
 module.exports = Calendar;

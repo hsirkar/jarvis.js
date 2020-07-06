@@ -16,16 +16,16 @@ const System = {
     init: params => Object.assign(this, params),
     override: res => {
         if(res.utterance.toLowerCase().startsWith('echo ')){
-            res.intent = 'system.echo';
+            Object.assign(res, { intent: 'system.echo', overriden: true });
         }
         if(res.utterance.toLowerCase().startsWith('set ') && res.utterance.includes(' to ')) {
-            res.intent = 'system.setenv';
+            Object.assign(res, { intent: 'system.setenv', overriden: true });
         }
         if(res.utterance.toLowerCase().startsWith('renew ')) {
-            res.intent = 'system.renew';
+            Object.assign(res, { intent: 'system.renew', overriden: true });
         }
         if(res.utterance.toLowerCase().includes('nevermind') || res.utterance.toLowerCase().includes('never mind')) {
-            res.intent = 'system.dismiss';
+            Object.assign(res, { intent: 'system.dismiss', overriden: true });
         }
     },
     doesHandleIntent: intentName => {

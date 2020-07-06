@@ -21,123 +21,99 @@ const Fun = {
         });
     },
     doesHandleIntent: intentName => intentName.startsWith('fun'),
-    handleIntent: res => new Promise(resolve => {
-
+    handleIntent: async res => {
         const secondary = res.intent.split('.')[1];
 
-        switch (secondary) {
-            case 'qod':
-                instance.get('https://quotes.rest/qod')
-                    .then(res => {
-                        const quote = res.data.contents.quotes[0];
-                        resolve(`Today's quote is "${quote.quote}" by ${quote.author}`);
-                    })
-                    .catch(() => resolve('Failed to get quote of the day'));
-                break;
-            case 'catfact':
-                instance.get('https://cat-fact.herokuapp.com/facts/random')
-                    .then(res => {
-                        resolve(res.data.text);
-                    })
-                    .catch(() => resolve('Failed to get a random cat fact'));
-                break;
-            case 'fact':
-                instance.get('https://uselessfacts.jsph.pl/random.json?language=en')
-                    .then(res => {
-                        resolve([
-                            `Did you know that ${res.data.text}`, `Fun fact: ${res.data.text}`, res.data.text
-                        ]);
-                    })
-                    .catch(() => resolve(res.answer));
-                break;
-            case 'pickupline':
-                instance.get('http://pebble-pickup.herokuapp.com/tweets/random')
-                    .then(res => {
-                        resolve(res.data.tweet);
-                    })
-                    .catch(() => resolve(res.answer));
-                break;
-            case 'trumpquote':
-                instance.get('https://api.tronalddump.io/random/quote')
-                    .then(res => {
-                        resolve(`"${res.data.value}"`);
-                    })
-                    .catch(() => resolve(`Failed to get Donald Trump quote`));
-                break;
-            case 'corporatebs':
-                instance.get('https://corporatebs-generator.sameerkumar.website/')
-                    .then(res => {
-                        resolve(res.data.phrase);
-                    })
-                    .catch(() => resolve(`Failed to get corporate BS`));
-                break;
-            case 'bored':
-                instance.get('https://www.boredapi.com/api/activity/')
-                    .then(res => {
-                        resolve(res.data.activity);
-                    })
-                    .catch(() => resolve(res.answer));
-                break;
-            case 'advice':
-                instance.get('https://api.adviceslip.com/advice')
-                    .then(res => {
-                        resolve(res.data.slip.advice);
-                    })
-                    .catch(() => resolve(`Failed getting advice`));
-                break;
-            case 'trivia':
-                instance.get('https://opentdb.com/api.php?amount=10')
-                    .then(res => {
-                        const item = res.data.results[0];
-
-                        const correct = clean(item.correct_answer);
-                        const incorrect = item.incorrect_answers.map(a => clean(a));
-                        const all = incorrect.slice(0).concat(correct);
-
-                        let points = 10;
-                        if(item.difficulty === 'easy')
-                            points = 5;
-                        else if(item.difficulty === 'hard')
-                            points = 15;
-
-                        let question = `The category is ${clean(item.category)}. For ${points} points, ${clean(item.question)} `;
-                        
-                        if(item.type === 'multiple')
-                            question += `Is it: ${list(shuffle(all), 'or', 'None')}`;
-                        else
-                            question += `True or False?`;
-
-                        this.ask(question,
-                            answer => {
-                                const score = similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase());
-                                log(`Similarity to answer: ${score}`);
-
-                                if (score > 0.70)
-                                    resolve([`That's right, the answer is ${correct}`, `Correct, it is ${correct}`, `Yep, you got it. The answer is ${correct}`]);
-                                else
-                                    resolve([`That's incorrect, the correct answer is ${correct}`, `0 points. The right answer is ${correct}`]);
-                            });
-                        // resolve(res.results[0].)
-                    })
-                    .catch(() => resolve('Failed getting trivia question'));
-                break;
-            case 'insult':
-                this.ask(['Do you want me to insult you?', 'Are you sure?', 'Should I insult you?', 'Do you want me to roast you?'], answer => {
-                    if(isYes(answer))
-                        instance.get('https://evilinsult.com/generate_insult.php?lang=en&type=json')
-                            .then(res => {
-                                resolve(clean(res.data.insult));
-                            })
-                            .catch(() => resolve(res.answer))
-                    else
-                        resolve(['Okay', 'Alright', 'Fine']);
-                });
-                break;
-            default:
-                resolve(`I'm not sure`);
-                break;
+        if(secondary === 'qod') {
+            const res = await instance.get('https://quotes.rest/qod');
+            const quote = res.data.contents.quotes[0];
+            return `Today's quote is: "${quote.quote}" by ${quote.author}`;
         }
-    })
+        
+        if (secondary === 'catfact') {
+            const res = await instance.get('https://cat-fact.herokuapp.com/facts/random');
+            return res.data.text;
+        }
+    
+        if (secondary === 'fact') {
+            const res = await instance.get('https://uselessfacts.jsph.pl/random.json?language=en');
+            return [`Did you know that ${res.data.text}`, `Fun fact: ${res.data.text}`, res.data.text];
+        }
+        
+        if (secondary === 'pickupline') {
+            try {
+                const res = await instance.get('http://pebble-pickup.herokuapp.com/tweets/random');
+                return res.data.tweet;
+            } catch (e) {
+                return res.answer;
+            }
+        }
+        
+        if (secondary === 'trumpquote') {
+            const res = await instance.get('https://api.tronalddump.io/random/quote');
+            return `"${res.data.value}"`;
+        }
+        
+        if (secondary === 'corporatebs') {
+            const res = await instance.get('https://corporatebs-generator.sameerkumar.website/');
+            return res.data.phrase;
+        }
+        
+        if (secondary === 'bored') {
+            const res = await instance.get('https://www.boredapi.com/api/activity/');
+            return res.data.activity;
+        }
+        
+        if (secondary === 'advice') {
+            const res = await instance.get('https://api.adviceslip.com/advice');
+            return res.data.slip.advice;
+        }
+        
+        if (secondary === 'trivia') {
+            const res = await instance.get('https://opentdb.com/api.php?amount=10');
+            
+            const item = res.data.results[0];
+            const correct = clean(item.correct_answer);
+            const incorrect = item.incorrect_answers.map(a => clean(a));
+            const all = incorrect.slice(0).concat(correct);
+
+            let points = 10;
+            if(item.difficulty === 'easy')
+                points = 5;
+            else if(item.difficulty === 'hard')
+                points = 15;
+
+            let question = `The category is ${clean(item.category)}. For ${points} points, ${clean(item.question)} `;
+            
+            if(item.type === 'multiple')
+                question += `Is it: ${list(shuffle(all), 'or', 'None')}`;
+            else
+                question += `True or False?`;
+
+            const answer = await this.ask(question);
+
+            const score = similarity.compareTwoStrings(answer.toLowerCase(), correct.toLowerCase());
+            log(`Similarity to answer: ${score}`);
+
+            if (score > 0.70)
+                return [`That's right, the answer is ${correct}`, `Correct, it is ${correct}`, `Yep, you got it. The answer is ${correct}`];
+            else
+                return [`That's incorrect, the correct answer is ${correct}`, `0 points. The right answer is ${correct}`];
+        }
+        
+        if (secondary === 'insult') {
+            const answer = await this.ask(['Do you want me to insult you?', 'Are you sure?', 'Should I insult you?', 'Do you want me to roast you?']);
+            if(isYes(answer)) {
+                try {
+                    const res = await instance.get('https://evilinsult.com/generate_insult.php?lang=en&type=json');
+                    return clean(res.data.insult);
+                } catch (e) {
+                    return res.answer;
+                }
+            }
+            return ['Okay', 'Alright', 'Fine'];
+        }
+    }
 };
 
 module.exports = Fun;

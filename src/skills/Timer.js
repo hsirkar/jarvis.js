@@ -47,7 +47,7 @@ const Timer = {
     doesHandleIntent: intentName => {
         return intentName.startsWith('timer');
     },
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: async res => {
         const secondary = res.intent.split('.')[1];
 
         if(secondary === 'create') {
@@ -57,14 +57,12 @@ const Timer = {
             timers.push({ total: seconds, timeLeft: seconds });
             log(JSON.stringify(timers));
         
-            resolve(`Setting a timer for ${humanizeDuration(seconds*1000)}`);
-            return;
+            return `Setting a timer for ${humanizeDuration(seconds*1000)}`;
         }
 
         if(secondary === 'stopall') {
             timers = [];
-            resolve('Deleted all timers');
-            return;
+            return 'Deleted all timers';
         }
 
         if(secondary === 'stop') {
@@ -83,17 +81,15 @@ const Timer = {
                 index = 0;
 
             timers.splice(timers.indexOf(timerToStop), 1);
-            resolve(`Timer for ${humanizeDuration(timerToStop.total*1000)} removed`);
+            return `Timer for ${humanizeDuration(timerToStop.total*1000)} removed`;
         }
         
         if(secondary === 'list') {
             log(JSON.stringify(timers));
             if(timers.length === 0)
-                resolve('You do not have any active timers');
+                return 'You do not have any active timers';
             else
-                resolve(
-                    timers.map((t, i) => `Timer ${i+1}: ${humanizeDuration(t.total*1000)}`).join('; ')
-                );
+                return timers.map((t, i) => `Timer ${i+1}: ${humanizeDuration(t.total*1000)}`).join('; ');
         }
 
         if(secondary === 'timeleft'){
@@ -111,9 +107,9 @@ const Timer = {
             if(index === -1)
                 index = 0;
 
-            resolve(`${humanizeDuration(timers[index].timeLeft*1000)} left on your ${humanizeDuration(timers[index].total*1000).replace(/s$/, '')} timer`);
+            return `${humanizeDuration(timers[index].timeLeft*1000)} left on your ${humanizeDuration(timers[index].total*1000).replace(/s$/, '')} timer`;
         }
-    })
+    }
 };
 
 module.exports = Timer;

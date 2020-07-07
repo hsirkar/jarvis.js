@@ -4,10 +4,10 @@ const Template = {
     name: 'Template',
     init: params => Object.assign(this, params),
     doesHandleIntent: intentName => intentName.startsWith('template'),
-    handleIntent: res => new Promise(resolve => {
+    handleIntent: async res => {
         log('Hello world!');
-        resolve(res.answer);
-    })
+        return res.answer;
+    }
 };
 
 module.exports = Template;

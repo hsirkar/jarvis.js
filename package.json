@@ -17,6 +17,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@vitalets/google-translate-api": "^3.0.0",
     "aws-sdk": "^2.686.0",
     "axios": "^0.19.2",
     "chalk": "^4.0.0",
@@ -27,6 +28,7 @@
     "get-port": "^5.1.1",
     "googleapis": "^52.1.0",
     "humanize-duration": "^3.23.0",
+    "lame": "^1.2.4",
     "moment": "^2.26.0",
     "mongoose": "^5.9.19",
     "node-nlp": "^3.10.2",

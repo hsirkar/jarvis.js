@@ -14,4 +14,5 @@ module.exports = [
     require('./Calendar'),
     require('./Show'),
     require('./Movies'), 
+    require('./Translate'), 
 ];

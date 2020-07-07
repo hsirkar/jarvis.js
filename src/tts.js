@@ -3,8 +3,23 @@ const Speaker = require('speaker');
 const Stream = require('stream');
 const sha1 = require('sha1');
 const fs = require('fs');
-// const Spotify = require('../skills/Spotify');
 const { log } = require('./util');
+const axios = require('axios').default;
+const lame = require('lame');
+
+const instance = axios.create({
+    method: 'get',
+    headers: {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Connection': 'keep-alive',
+        'Dnt': '1',
+        'Referer': 'https://translate.google.com',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Firefox/76.0'
+    },
+    responseType: 'stream'
+});
 
 let ttsEngine;
 let polly;
@@ -29,25 +44,34 @@ function stop() {
         speaker.close();
 }
 
-function speak(text, cb=()=>{}){
+function speak(text, language){
     if(!text)
         return;
 
     text = text.toString();
-    callback = cb;
 
     const { Spotify } = this;
 
     Spotify.api('setVolume', ['30'])
         .then(() => {
-            const old = callback;
             callback = () => {
                 Spotify.api('setVolume', ['60']).catch(() => {});
-                old();
             };
         })
         .catch(() => {})
         .finally(() => {
+            if(language && !language.startsWith('en-')) {
+                instance(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${language}&client=tw-ob&q=${encodeURIComponent(text)}`)
+                    .then(res => {
+                        let decoder = new lame.Decoder();
+                        res.data.pipe(decoder);
+                        speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 24000 });
+                        decoder.pipe(speaker);
+                        speaker.on('close', () => callback());
+                    });
+                return;
+            }
+
             if(ttsEngine === 'polly'){
                 speakPolly(text, callback);
             } else {
@@ -119,50 +143,8 @@ function speakPolly(text, cb){
 
 }
 
-function getAudioBuffer(text, cb=()=>{}){
-    const map = {
-        'rakrish': 'ra-kreesh',
-        'Rakrish': 'Ra-kreesh'
-    }
-
-    for(const elem in map){
-        text = text.replace(elem, map[elem]);
-    }
-
-    // Play from cache
-    if(fs.existsSync('cache/polly/' + sha1(text))){
-        log('Getting from cache...');
-        return fs.readFileSync('cache/polly/' + sha1(text));
-    }
-
-    const options = {
-        OutputFormat: 'pcm',
-        Text: `<speak><prosody rate="110%">${htmlEntities(text)}</prosody></speak>`,
-        TextType: 'ssml',
-        VoiceId: 'Matthew',
-        Engine: 'neural'
-    };
-
-    log('Getting from Polly...');
-    polly.synthesizeSpeech(options, (err, data) => {
-        if(err)
-            console.log(err, err.stack);
-        else if (data){
-            if(data.AudioStream instanceof Buffer) {
-                let fileStream = fs.WriteStream('cache/polly/' + sha1(text));
-                // bufferStream.pipe(fileStream);
-                fileStream.on('close', () => {
-                    let audio = fs.readFileSync('cache/polly/' + sha1(text));
-                    return audio;
-                });
-            }
-        } 
-    });
-
-}
-
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-module.exports = { init, speak, stop, getAudioBuffer };
+module.exports = { init, speak, stop };

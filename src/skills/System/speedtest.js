@@ -2,7 +2,7 @@ const speedtest = require('speedtest-net');
 const { isYes, log } = require('../../util')
 
 module.exports = (ask, say, resolve) => {
-    ask(['Are you sure? This will take a minute', 'You sure about this? It will take some time'], answer => {
+    ask(['Are you sure? This will take a minute', 'You sure about this? It will take some time']).then(answer => {
         if (isYes(answer)) {
             say('Starting speed test...');
             const progress = event => {

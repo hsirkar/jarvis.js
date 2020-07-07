@@ -2,7 +2,7 @@ const { log } = require('../../util');
 const fs = require('fs');
 
 module.exports = (ask, resolve) => {
-    ask('What is the name of the skill?', answer => {
+    ask('What is the name of the skill?').then(answer => {
         if(answer.match(/\b(cancel|nevermind|stop|quit|exit)\b/i)) {
             resolve('OK, cancelled');
             return;

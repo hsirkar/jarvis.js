@@ -131,19 +131,20 @@ const System = {
                 resolve('Restarting Jarvis...');
                 break;
             case 'retrain':
-                ask('Are you sure?', answer => {
-                    if (isYes(answer)) {
-                        require('child_process').execSync('npm run clear');
+                ask('Are you sure?')
+                    .then(answer => {
+                        if (isYes(answer)) {
+                            require('child_process').execSync('npm run clear');
 
-                        setTimeout(() => {
-                            System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
-                        }, 500);
+                            setTimeout(() => {
+                                System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));
+                            }, 500);
 
-                        resolve('Retraining Jarvis...');
-                    } else {
-                        resolve(['Alright, I will not retrain', 'Retrain canceled']);
-                    }
-                });
+                            resolve('Retraining Jarvis...');
+                        } else {
+                            resolve(['Alright, I will not retrain', 'Retrain canceled']);
+                        }
+                    });
                 break;
             case 'setenv':
                 const variables = ['ENABLE_TTS', 'DEBUG', 'TTS_ENGINE', 'OPEN_STT_CLIENT', 'ALERT_ON_BOOT'];
@@ -162,7 +163,7 @@ const System = {
                 log(`Target variable: ${variables[index]} (${matches.bestMatch.rating})`);
                 log(`Target value: ${value}`);
 
-                ask(`Confirming: Set ${variables[index]} to ${value}?`, answer => {
+                ask(`Confirming: Set ${variables[index]} to ${value}?`).then(answer => {
                     if (isYes(answer)) {
                         setEnv(variables[index], value);
                         System.handleIntent({ intent: 'system.restart' }).then(res => resolve(res));

@@ -1,0 +1,11 @@
+[
+    {
+        "intent": "translate.query",
+        "utterances": [
+            "how do you say %translateQuery% in %language%",
+            "what is %translateQuery% in %language%",
+            "translate %translateQuery% to %language%",
+            "say %translateQuery% in %language%"
+        ]
+    }
+]

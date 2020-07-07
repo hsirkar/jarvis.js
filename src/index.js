@@ -85,8 +85,6 @@ function onInputReceived(input, onIntentComplete) {
                 }
             }
 
-            log(JSON.stringify(sanitizeNlpRes(res), null, 2));
-
             state.current = sanitizeNlpRes(res);
 
             let matched = skills.find(s => s.doesHandleIntent(res.intent));
@@ -155,7 +153,7 @@ function send(obj, type) {
     const { current, previous } = state;
     Object.assign(obj, { current, previous, type });
     io.send(obj);
-    tts.speak(obj.text);
+    tts.speak(obj.text, obj.language);
 }
 
 function startListening() {

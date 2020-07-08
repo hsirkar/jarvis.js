@@ -68,6 +68,10 @@ function speak(text, language){
                         speaker = new Speaker({ channels: 1, bitDepth: 16, sampleRate: 24000 });
                         decoder.pipe(speaker);
                         speaker.on('close', () => callback());
+                    })
+                    .catch(err => {
+                        log(err);
+                        callback();
                     });
                 return;
             }
@@ -94,9 +98,10 @@ function speakPolly(text, cb){
         'Rakrish': 'Ra-kreesh'
     }
 
-    for(const elem in map){
+    for(const elem in map)
         text = text.replace(elem, map[elem]);
-    }
+
+    text = text.replace(/(?<=[0-9])'|′|''|′′|″/g, '');
 
     // Play from cache
     if(fs.existsSync('cache/polly/' + sha1(text))){

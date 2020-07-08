@@ -41,7 +41,7 @@ async function init() {
         client.on('message', message => {
             log('Message received: ' + message);
             io.emit('received');
-            onInputReceived(message);
+            setTimeout(() => onInputReceived(message), 200);
         });
 
         client.on('recognitionStart', () => {

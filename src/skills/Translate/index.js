@@ -41,7 +41,7 @@ const Translate = {
 
         if(!query) {
             let answer = await this.ask('What should I translate?');
-            query = answer;
+            query = { sourceText: answer };
 
             if(!query)
                 return `I could not parse a query`;

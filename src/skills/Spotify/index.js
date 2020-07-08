@@ -52,7 +52,7 @@ const Spotify = {
                 .catch(err => log(err));
         }
     },
-    refreshToken: callback => {
+    refreshToken: () => new Promise(resolve => {
         if(lastRefreshed && moment().diff(lastRefreshed, 'minutes') < 30) {
             log('Access token was refreshed less than 30 minutes ago, skipping refresh');
             return;
@@ -91,10 +91,10 @@ const Spotify = {
                 require('fs').writeFileSync('.env', env);
     
                 log('Rehanding the intent');
-                callback();
+                resolve();
             })
             .catch(err => log(err));
-    },
+    }),
     doesHandleIntent: intentName => intentName.startsWith('spotify'),
     handleIntent: async res => {
         try {
@@ -197,7 +197,8 @@ const Spotify = {
             log(err);
 
             if(err.statusCode && err.statusCode === 401) {
-                Spotify.refreshToken(() => Spotify.handleIntent(res).then(res => resolve(res)));
+                await Spotify.refreshToken();
+                await Spotify.handleIntent(res);
                 return;
             }
         
@@ -213,9 +214,10 @@ const Spotify = {
         spotifyApi[functionName](...args)
             .then(() => resolve())
             .catch(err => {
-                if (err.statusCode && err.statusCode === 401)
-                    Spotify.refreshToken(() => Spotify.api(functionName, args).then(() => resolve()));
-                
+                if (err.statusCode && err.statusCode === 401) {
+                    Spotify.refreshToken().then(() => Spotify.api(functionName, args).then(() => resolve()));
+                    return;
+                }
                 resolve();
             })
             .finally(() => resolve());

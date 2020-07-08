@@ -83,10 +83,10 @@ const Fun = {
             else if(item.difficulty === 'hard')
                 points = 15;
 
-            let question = `The category is ${clean(item.category)}. For ${points} points, ${clean(item.question)} `;
+            let question = `${clean(item.category)}. For ${points} points, ${clean(item.question)} `;
             
             if(item.type === 'multiple')
-                question += `Is it: ${list(shuffle(all), 'or', 'None')}`;
+                question += `Is it: ${list(shuffle(all), 'or', 'None')}?`;
             else
                 question += `True or False?`;
 

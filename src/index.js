@@ -7,7 +7,6 @@ const nlp = require('./nlp');
 const tts = require('./tts');
 const db = require('./db');
 const { log, spinner, randomElement, sanitizeNlpRes, server } = require('./util');
-const { reset } = require('nodemon');
 
 // Properties
 const state = {
@@ -116,6 +115,7 @@ function onInputReceived(input, onIntentComplete) {
 
 function ask(question) {
     send(question, 'question');
+    setTimeout(() => startListening(), 500);
 
     return new Promise((resolve) => {
         state.onUserAnswered = resolve;

@@ -99,7 +99,11 @@
             "what is the latest flash episode",
             "latest episode of the flash",
             "is it healthy to take a nap",
-            "how many hours is 90 minutes"
+            "how many hours is 90 minutes",
+            "cat lifespan",
+            "the world's spiciest pepper",
+            "what is the spiciest pepper in the world",
+            "how rich is tony stark"
         ],
         "answers": [
             "Sorry, I don't understand",

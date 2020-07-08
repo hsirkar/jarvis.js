@@ -159,8 +159,6 @@ const Fallback = {
             const search = await scraper.scrape({ debug_level: 0 }, { block_assets: true, search_engine: 'duckduckgo', keywords: [res.utterance], num_pages: 1 });
             const results = await search.results[res.utterance]['1'].results;
 
-            console.dir(results);
-
             if(results) {
                 return ({
                     text: `Here's what I found on the web`,

@@ -1,7 +1,9 @@
 const SpotifyWebApi = require('spotify-web-api-node');
 const axios = require('axios').default;
 const moment = require('moment');
-const { log, list } = require('../../util');
+const { log, list, removeStopwords } = require('../../util');
+const similar = require('string-similarity');
+const { isUndefined } = require('util');
 
 let spotifyApi;
 let axiosInstance;
@@ -99,28 +101,33 @@ const Spotify = {
     handleIntent: async res => {
         try {
             if(res.intent === 'spotify.play'){
-                const query = res.utterance.toLowerCase().replace('play ', '').replace(' on spotify', '').replace(' by ', ' ').replace(' and ', ' ');
-                log(`Searching for "${query}"...`);
+                const query = removeStopwords(res.utterance, ['play', 'on spotify', 'by', 'and', 'playlist', 'my']).toLowerCase();
+                const searchRes = await spotifyApi.search(query, ['playlist', 'track'], { limit: 3, country: 'US' });
 
-                let searchRes = await spotifyApi.searchTracks(query, { limit: 3, country: 'US' });
-                let tracks = searchRes.body.tracks.items;
-                log('Search results: ' + tracks.map(track => getDesc(track)).join('; ') );
+                const tracks = searchRes.body.tracks.items;
+                const playlists = searchRes.body.playlists.items;
 
-                if(tracks.length === 0){
-                    return `No results found for ${query}`;
+                if(playlists.length && (res.utterance.includes('playlist') || !tracks.length)) {
+                    await axiosInstance.put(`/v1/me/player/play?device_id=${deviceId}`, { context_uri: playlists[0].uri });
+                    return `Now playing "${playlists[0].name}" playlist`;
                 }
 
-                // Add track to queue, skip to next track
-                await axiosInstance.post(`/v1/me/player/queue?uri=${tracks[0].uri}&device_id=${deviceId}`);
-                await axiosInstance.post(`/v1/me/player/next?device_id=${deviceId}`);
+                if(tracks.length) {
+                    await axiosInstance.put(`/v1/me/player/play?device_id=${deviceId}`, {
+                        context_uri: tracks[0].album.uri,
+                        offset: { uri: tracks[0].uri }
+                    });
 
-                return ({
-                    text: `Now playing ${getDesc(tracks[0])}`,
-                    displayText: tracks[0].name,
-                    image: tracks[0].album.images[0].url,
-                    subtitle: tracks[0].artists.map(a => a.name).join(', '),
-                    subtitle2: tracks[0].album.name
-                });
+                    return ({
+                        text: `Now playing ${getDesc(tracks[0])}`,
+                        displayText: tracks[0].name,
+                        image: tracks[0].album.images[0].url,
+                        subtitle: tracks[0].artists.map(a => a.name).join(', '),
+                        subtitle2: tracks[0].album.name
+                    });
+                }
+
+                return `No results found for ${query}`;
             }
 
             if(res.intent === 'spotify.pause'){
@@ -219,8 +226,7 @@ const Spotify = {
                     return;
                 }
                 resolve();
-            })
-            .finally(() => resolve());
+            });
     })
 };
 
